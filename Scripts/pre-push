@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# SwiftFormat
+# To install this hook, run the following command in the root of the project folder:
+# ln -s ../../Scripts/pre-push .git/hooks/
+
+# Check if SwiftFormat is installed
+if ! [[ -e "Scripts/swiftformat" ]]; then
+  echo "SwiftFormat not found"
+  exit 1
+fi
+
+# Run `swiftformat` before pushing to a remote
+"Scripts/swiftformat" . 2>&1 | grep "0\/" &> /dev/null
+
+# Check SwiftFormat's output
+if [ $? != 0 ]; then
+  # SwiftFormat found formatting issues
+  echo "Code not properly formatted.\nChanges applied. Please review the diff, commit and push again.\n" 1>&2
+  exit 1
+fi

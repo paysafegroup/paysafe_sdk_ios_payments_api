@@ -1,0 +1,85 @@
+included:
+  - Sources
+
+disabled_rules: # rule identifiers to exclude from running
+  - trailing_whitespace
+  - shorthand_operator
+  - redundant_string_enum_value
+  - unused_optional_binding
+
+opt_in_rules: # some rules are only opt-in
+  - closure_spacing
+  - collection_alignment
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - contains_over_range_nil_comparison
+  - convenience_type
+  - fatal_error_message
+  - first_where
+  - force_unwrapping
+  - identical_operands
+  - implicitly_unwrapped_optional
+  - private_action
+  - private_outlet
+  - unavailable_function
+  - unneeded_parentheses_in_closure_argument
+  - file_header
+  - vertical_parameter_alignment_on_call
+
+cyclomatic_complexity:
+  ignores_case_statements: true
+
+line_length:
+  warning: 160
+  error: 320
+
+function_parameter_count:
+  warning: 8
+  error: 12
+  ignores_default_parameters: false
+
+type_body_length:
+  warning: 200
+
+function_body_length:
+  warning: 80
+
+file_length:
+  warning: 600
+
+nesting:
+  type_level: 2
+
+file_header:
+  required_pattern: Copyright (©|\(c\)) \d{4} Paysafe Group
+
+identifier_name:
+  max_length:
+    warning: 50
+    error: 60
+  excluded:
+    - id
+    - at
+    - to
+    - url
+    - dx
+    - dy
+    - on
+    - x
+    - y
+    - ok
+
+type_name:
+  max_length:
+    warning: 50
+    error: 120
+
+force_unwrapping:
+    severity: error
+
+implicitly_unwrapped_optional:
+    severity: error
+
+deployment_target:
+    iOS_deployment_target: 12.0

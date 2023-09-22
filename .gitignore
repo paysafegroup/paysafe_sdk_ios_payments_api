@@ -1,0 +1,86 @@
+# Compiled source #
+###################
+*.o
+*.so
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Xcode for SDK and Demo Apps #
+###############################
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+
+# Swift Package Manager #
+#########################
+.build/
+Packages/
+Package.pins
+Package.resolved
+#*.xcodeproj
+!*.xcodeproj/project.pbxproj
+
+# CocoaPods #
+#############
+# !Pods/Podfile.lock
+Pods/
+
+# Carthage #
+############
+Carthage/Build
+
+# fastlane #
+###########
+fastlane/**
+
+# AWS #
+######
+.aws/
+.aws-sam/
+
+.gitlab-ci.yml
+bitrise.yml
+Gemfile
+Gemfile.lock
+github_ignore
+sonar-project.properties
+.bundle
+.scannerwork
+.ruby-version
