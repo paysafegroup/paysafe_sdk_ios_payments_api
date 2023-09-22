@@ -1,0 +1,85 @@
+{
+  "configurations" : [
+    {
+      "id" : "FD396D55-EF8E-4956-A12C-564D92C9FC29",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:..\/..",
+          "identifier" : "PaysafeApplePay",
+          "name" : "PaysafeApplePay"
+        },
+        {
+          "containerPath" : "container:..\/..",
+          "identifier" : "Paysafe3DS",
+          "name" : "Paysafe3DS"
+        },
+        {
+          "containerPath" : "container:..\/..",
+          "identifier" : "PaysafeCommon",
+          "name" : "PaysafeCommon"
+        },
+        {
+          "containerPath" : "container:..\/..",
+          "identifier" : "PaysafeCore",
+          "name" : "PaysafeCore"
+        },
+        {
+          "containerPath" : "container:..\/..",
+          "identifier" : "PaysafeNetworking",
+          "name" : "PaysafeNetworking"
+        },
+        {
+          "containerPath" : "container:..\/..",
+          "identifier" : "PaysafePayPal",
+          "name" : "PaysafePayPal"
+        }
+      ]
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:..\/..",
+        "identifier" : "PaysafeApplePayTests",
+        "name" : "PaysafeApplePayTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/..",
+        "identifier" : "PaysafeCommonTests",
+        "name" : "PaysafeCommonTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/..",
+        "identifier" : "PaysafeCoreTests",
+        "name" : "PaysafeCoreTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/..",
+        "identifier" : "PaysafePayPalTests",
+        "name" : "PaysafePayPalTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/..",
+        "identifier" : "PaysafeNetworkingTests",
+        "name" : "PaysafeNetworkingTests"
+      }
+    }
+  ],
+  "version" : 1
+}

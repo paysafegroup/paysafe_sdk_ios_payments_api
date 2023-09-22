@@ -1,0 +1,15 @@
+--swiftversion "5.5"
+--disable \
+	blankLinesBetweenScopes,\
+	strongOutlets,\
+	blankLinesAroundMark,\
+	wrapMultilineStatementBraces,\
+	hoistPatternLet,\
+	redundantType,\
+	initCoderUnavailable,\
+	redundantClosure,\
+	redundantRawValues
+--commas false
+--stripunusedargs closure-only
+--ranges no-space
+--ifdef outdent
