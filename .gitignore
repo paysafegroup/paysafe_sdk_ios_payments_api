@@ -81,3 +81,5 @@ Gemfile
 Gemfile.lock
 github_ignore
 sonar-project.properties
+.bundle
+.scannerwork
