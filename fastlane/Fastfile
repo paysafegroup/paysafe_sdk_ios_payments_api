@@ -105,6 +105,10 @@ lane :push_to_github do
   # Clone the GitHub repo into the new directory
   Dir.chdir(github_clone_dir) do
     sh "git clone #{git_url} ."
+    sh "rm -rf Sources"
+    sh "rm -rf Example"
+    sh "rm -rf .bundle"
+    sh "rm -rf .scannerwork"
   end
 
   # Remove the .git folder from the current directory
