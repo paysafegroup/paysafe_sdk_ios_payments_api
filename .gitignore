@@ -79,3 +79,10 @@ fastlane/sonar-reports/*
 ######
 .aws/
 .aws-sam/
+
+.gitlab-ci.yml
+.bitrise.yml
+Gemfile
+Gemfile.lock
+github_ignore
+sonar-project.properties
