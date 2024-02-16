@@ -1,0 +1,3 @@
+include:
+  - project: 'paysafe/ci-cd/pipeline-templates'
+    file: '/project-pipelines/paysafe-ph-mobile-sdk-ios/ci-cd.yml'
