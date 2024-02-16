@@ -19,9 +19,9 @@ final class CreditCardPaymentMethodViewModel: ObservableObject {
     /// MerchantBackend
     private let merchantBackend: MerchantBackend
     /// API key
-    private let apiKey = "dGVzdF9ob3N0ZWQ6Qi1xYTItMC02MDRiM2RiNS0wLTMwMmMwMjE0N2FkYTNjYTQyMGI0N2Q4ZWI5ODEyMjYzZDQ5NGJhOTU3MTRlMTQ0ZDAyMTQwMzgyMWUzYTMzZWJmMmQwMDYyNjgyZWQwNDk1MGM3ZWJjMzE5ZmFm"
+    private let apiKey = ""
     /// Profile id
-    private let profileId = "284f1502-0cad-4256-b5e5-705ed06cfbbd"
+    private let profileId = ""
 
     init(billingAddress: BillingAddress?, totalPrice: Double) {
         self.billingAddress = billingAddress
