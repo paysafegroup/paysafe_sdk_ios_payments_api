@@ -68,12 +68,7 @@ Carthage/Build
 
 # fastlane #
 ###########
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots/**/*.png
-fastlane/test_output
-fastlane/sonar-reports
-fastlane/sonar-reports/*
+fastlane/**
 
 # AWS #
 ######
@@ -81,7 +76,7 @@ fastlane/sonar-reports/*
 .aws-sam/
 
 .gitlab-ci.yml
-.bitrise.yml
+bitrise.yml
 Gemfile
 Gemfile.lock
 github_ignore
