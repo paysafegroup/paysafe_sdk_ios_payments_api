@@ -100,7 +100,9 @@ lane :push_to_github do
   sh "mkdir #{github_clone_dir}"
 
   git_url = "https://#{github_token}@github.com/#{github_repo}.git"
+  version.strip!
   tag_name = "v#{version}"
+  tag_name.strip!
 
   # Clone the GitHub repo into the new directory
   Dir.chdir(github_clone_dir) do
