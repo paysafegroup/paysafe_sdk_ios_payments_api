@@ -1,7 +1,0 @@
-
-bitrise.yml
-.bitrise.secrets.yml
-sonar-project.properties
-.gitlab-ci.yml
-version.properties
-github_gitignore
