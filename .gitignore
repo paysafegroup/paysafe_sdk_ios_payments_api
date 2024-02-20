@@ -83,3 +83,4 @@ github_ignore
 sonar-project.properties
 .bundle
 .scannerwork
+.ruby-version
