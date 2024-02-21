@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 import Paysafe3DS
-import PaysafeCommon
+@_spi(PS) import PaysafeCommon
 import PaysafeNetworking
 
 // swiftlint:disable file_length

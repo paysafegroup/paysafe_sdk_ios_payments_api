@@ -7,7 +7,7 @@
 
 import CardinalMobile
 import Combine
-import PaysafeCommon
+@_spi(PS) import PaysafeCommon
 import PaysafeNetworking
 
 /// Completion typealias used in the `initiate3DSFlow` method that contains a result of deviceFingerprintingId or a PSError.
