@@ -1,5 +1,5 @@
 //
-//  PSBlocks.swift
+//  PSCoreBlocks.swift
 //
 //
 //  Copyright (c) 2024 Paysafe Group
