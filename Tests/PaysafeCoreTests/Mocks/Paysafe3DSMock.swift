@@ -14,7 +14,11 @@ class Paysafe3DSMock: Paysafe3DS {
     var initiateChallengeWithSuccess: Bool = true
     var challengeAuthenticationId: String = "challengeAuthenticationId"
 
-    override func initiate3DSFlow(using options: Paysafe3DSOptions, completion: @escaping PaysafeInitiate3DSFlowCompletion) {
+    override func initiate3DSFlow(
+        using options: Paysafe3DSOptions,
+        and supportedUI: SupportedUI? = nil,
+        completion: @escaping PaysafeInitiate3DSFlowCompletion
+    ) {
         switch initiate3DSFlowWithSuccess {
         case true:
             return completion(.success(""))
@@ -23,7 +27,10 @@ class Paysafe3DSMock: Paysafe3DS {
         }
     }
 
-    override func initiate3DSFlow(using options: Paysafe3DSOptions) -> AnyPublisher<String, PSError> {
+    override func initiate3DSFlow(
+        using options: Paysafe3DSOptions,
+        and supportedUI: SupportedUI? = nil
+    ) -> AnyPublisher<String, PSError> {
         switch initiate3DSFlowWithSuccess {
         case true:
             return Just("").setFailureType(to: PSError.self).eraseToAnyPublisher()

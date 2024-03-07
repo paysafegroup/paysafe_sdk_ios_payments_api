@@ -53,8 +53,20 @@ extension PaymentResponse {
         """
     }
 
-    static func jsonMockWith3DS(paymentHandleId: String) -> String {
-        """
+    static func jsonMockWith3DS(
+        paymentHandleId: String,
+        networkToken: NetworkToken? = nil
+    ) -> String {
+        var networkTokenString = ""
+        if let token = networkToken {
+            networkTokenString = """
+                ,"networkToken" : {
+                  "bin": "\(token.bin)"
+                }
+            """
+        }
+
+        return """
         {
             "id": "\(paymentHandleId)",
             "paymentType": "CARD",
@@ -68,13 +80,7 @@ extension PaymentResponse {
             "timeToLiveSeconds": 300,
             "transactionType": "PAYMENT",
             "card": {
-                "cardExpiry": {
-                    "month": "10",
-                    "year": "2028"
-                },
-                "holderName": "John Doe",
-                "cardBin": "400000",
-                "lastDigits": "1091"
+                "cardBin": "400000"\(networkTokenString)
             },
             "returnLinks": [
                 {
@@ -95,7 +101,7 @@ extension PaymentResponse {
             ],
             "threeDs": {
                 "merchantUrl": "https://example.com/merchant",
-                "deviceChannel": "BROWSER",
+                "deviceChannel": "SDK",
                 "messageCategory": "PAYMENT_TRANSACTION",
                 "authenticationPurpose": "PAYMENT_TRANSACTION"
             },

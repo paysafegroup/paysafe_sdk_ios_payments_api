@@ -8,7 +8,7 @@
 import PassKit
 
 extension PKPayment {
-    func toApplePayPaymentToken() -> ApplePayPaymentToken {
+    func toApplePayPaymentToken(using billingContact: BillingContact?) -> ApplePayPaymentToken {
         let paymentData = try? JSONDecoder().decode(ApplePaymentData.self, from: token.paymentData)
         return ApplePayPaymentToken(
             token: ApplePayToken(
@@ -19,7 +19,8 @@ extension PKPayment {
                     type: token.paymentMethod.type.toString()
                 ),
                 transactionIdentifier: token.transactionIdentifier
-            )
+            ),
+            billingContact: billingContact
         )
     }
 }

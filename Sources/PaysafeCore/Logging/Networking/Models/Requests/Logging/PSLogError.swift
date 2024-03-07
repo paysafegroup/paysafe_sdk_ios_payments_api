@@ -5,7 +5,9 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
+#if canImport(PaysafeCommon)
 import PaysafeCommon
+#endif
 
 /// PSLogError
 struct PSLogError: Encodable {

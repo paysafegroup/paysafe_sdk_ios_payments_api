@@ -30,13 +30,13 @@ public struct TravelDetails: Encodable {
     ///   - passengerFirstName: Passenger first name
     ///   - passengerLastName: Passenger last name
     public init(
-        isAirTravel: Bool,
-        airlineCarrier: String,
-        departureDate: String,
-        destination: String,
-        origin: String,
-        passengerFirstName: String,
-        passengerLastName: String
+        isAirTravel: Bool? = nil,
+        airlineCarrier: String? = nil,
+        departureDate: String? = nil,
+        destination: String? = nil,
+        origin: String? = nil,
+        passengerFirstName: String? = nil,
+        passengerLastName: String? = nil
     ) {
         self.isAirTravel = isAirTravel
         self.airlineCarrier = airlineCarrier

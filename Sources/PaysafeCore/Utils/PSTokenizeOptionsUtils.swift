@@ -13,8 +13,8 @@ enum PSTokenizeOptionsUtils {
     ///
     /// - Parameters:
     ///   - amount: Payment amount
-    static func isValidAmount(_ amount: Double) -> Bool {
-        amount > 0 && amount < 100_000_000_000
+    static func isValidAmount(_ amount: Int) -> Bool {
+        amount > 0 && amount < 1_000_000_000
     }
 
     /// Check if value is not empty and has no more than 20 characters.

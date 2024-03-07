@@ -18,7 +18,7 @@ final class Paysafe3DSTests: XCTestCase {
     override func setUp() {
         super.setUp()
         sut = Paysafe3DS(
-            apiKey: "apiKey",
+            apiKey: "am9objpkb2UK",
             environment: .staging
         )
         mockSession = URLSessionMock()
@@ -46,7 +46,7 @@ final class Paysafe3DSTests: XCTestCase {
         let expectation = expectation(description: "Initiate 3DS flow expectation.")
         let paysafe3DSOptions = Paysafe3DSOptions(
             accountId: "accountId",
-            cardBin: "cardBin"
+            bin: "cardBin"
         )
         let mockData = try XCTUnwrap(JWTResponse.jsonMock().data(using: .utf8))
         let getJWTUrl = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/threedsecure/v2/jwt"))
@@ -55,7 +55,8 @@ final class Paysafe3DSTests: XCTestCase {
 
         // When
         sut.initiate3DSFlow(
-            using: paysafe3DSOptions
+            using: paysafe3DSOptions,
+            and: .both
         ) { result in
             switch result {
             case let .success(deviceFingerprintingId):
@@ -75,14 +76,15 @@ final class Paysafe3DSTests: XCTestCase {
         let expectation = expectation(description: "Initiate 3DS flow expectation.")
         let paysafe3DSOptions = Paysafe3DSOptions(
             accountId: "accountId",
-            cardBin: "cardBin"
+            bin: "cardBin"
         )
         let mockData = try XCTUnwrap(JWTResponse.jsonMock().data(using: .utf8))
         let getJWTUrl = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/threedsecure/v2/jwt"))
         let mockResponse = try XCTUnwrap(HTTPURLResponse(url: getJWTUrl, statusCode: 400, httpVersion: nil, headerFields: nil))
         let expectedError = URLError(URLError.Code.badServerResponse)
         mockSession.stubRequest(url: getJWTUrl, data: mockData, response: mockResponse, error: expectedError)
-
+        sut.configuration.supportedUI = .html
+        
         // When
         sut.initiate3DSFlow(
             using: paysafe3DSOptions

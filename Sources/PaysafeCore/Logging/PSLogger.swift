@@ -6,8 +6,10 @@
 //
 
 import Combine
+#if canImport(PaysafeCommon)
 @_spi(PS) import PaysafeCommon
 import PaysafeNetworking
+#endif
 
 /// PSLogger
 final class PSLogger {
@@ -93,7 +95,7 @@ extension PSLogger {
     ///
     /// - Parameters:
     ///   - request: Log request
-    private func send(_ request: LogRequest) -> AnyPublisher<EmptyResponse, PSError> {
+    private func send(_ request: LogRequest) -> AnyPublisher<EmptyResponse, APIError> {
         let loggerURL = baseURL + "/mobile/api/v1/log"
         return networkingService.request(
             url: loggerURL,
@@ -144,7 +146,7 @@ extension PSLogger {
     ///
     /// - Parameters:
     ///   - request: Log request
-    private func send(_ request: ThreeDSLogRequest) -> AnyPublisher<EmptyResponse, PSError> {
+    private func send(_ request: ThreeDSLogRequest) -> AnyPublisher<EmptyResponse, APIError> {
         let loggerURL = baseURL + "/threedsecure/v2/log"
         return networkingService.request(
             url: loggerURL,

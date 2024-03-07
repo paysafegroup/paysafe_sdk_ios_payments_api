@@ -8,19 +8,19 @@
 /// Address
 struct Address: Decodable {
     /// Id
-    let id: String
+    let id: String?
     /// Nickname
-    let nickName: String
+    let nickName: String?
     /// City
-    let city: String
+    let city: String?
     /// State
-    let state: String
+    let state: String?
     /// Country
-    let country: String
+    let country: String?
     /// Zip
-    let zip: String
+    let zip: String?
     /// Status
-    let status: String
+    let status: String?
     /// Street
-    let street: String
+    let street: String?
 }

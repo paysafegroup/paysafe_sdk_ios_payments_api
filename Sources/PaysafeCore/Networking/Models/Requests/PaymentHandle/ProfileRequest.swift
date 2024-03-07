@@ -6,6 +6,7 @@
 //
 
 typealias LocaleRequest = InternalLocale
+typealias GenderRequest = Gender
 
 /// ProfileRequest
 struct ProfileRequest: Encodable {
@@ -14,9 +15,9 @@ struct ProfileRequest: Encodable {
     /// Last name
     let lastName: String?
     /// Locale
-    let locale: String?
+    let locale: LocaleRequest?
     /// Merchant customer id
-    let merchantCustomerId: LocaleRequest?
+    let merchantCustomerId: String?
     /// Date of birth
     let dateOfBirth: DateOfBirthRequest?
     /// Email
@@ -26,7 +27,7 @@ struct ProfileRequest: Encodable {
     /// Mobile
     let mobile: String?
     /// Gender
-    let gender: String?
+    let gender: GenderRequest?
     /// Nationality
     let nationality: String?
     /// Identity documents

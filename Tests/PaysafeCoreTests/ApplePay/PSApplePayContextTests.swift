@@ -171,7 +171,7 @@ private extension PSApplePayContext {
         completion: @escaping PSApplePayContextInitializeBlock
     ) {
         let mockAPIClient = PSAPIClientMock(
-            apiKey: "apiKey",
+            apiKey: "am9objpkb2UK",
             environment: .test
         )
         mockAPIClient.getPaymentMethodShouldFail = getPaymentMethodShouldFail
@@ -225,25 +225,26 @@ private extension PSApplePayContext {
 private extension PSApplePayTokenizeOptions {
     static func createMock() -> PSApplePayTokenizeOptions {
         PSApplePayTokenizeOptions(
-            amount: 1000,
-            merchantRefNum: UUID().uuidString,
-            customerDetails: CustomerDetails(
-                billingDetails: BillingDetails(
-                    country: "US",
-                    zip: "33172",
-                    state: "FL",
-                    city: nil,
-                    street: nil,
-                    street1: nil,
-                    street2: nil,
-                    phone: nil,
-                    nickName: nil
-                ),
-                profile: nil
-            ),
-            accountId: "1001456390",
+            amount: 100,
             currencyCode: "USD",
-            psApplePay: PSApplePayItem(label: "Test item")
+            transactionType: .payment,
+            merchantRefNum: "1001456390",
+            billingDetails: BillingDetails(
+                country: "US",
+                zip: "400523",
+                state: nil,
+                city: nil,
+                street: nil,
+                street1: nil,
+                street2: nil,
+                phone: nil,
+                nickName: "John"
+            ),
+            accountId: "testApplePayAccountId",
+            psApplePay: PSApplePayItem(
+                label: "Test item",
+                requestBillingAddress: false
+            )
         )
     }
 }

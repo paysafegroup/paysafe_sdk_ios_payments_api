@@ -73,7 +73,6 @@ final class PSApplePayTests: XCTestCase {
                 capability: .both
             )
         ]
-
         // Then
         XCTAssertEqual(sut.paymentRequest.merchantIdentifier, merchantIdentifier)
         XCTAssertEqual(Set(sut.paymentRequest.supportedNetworks), Set(supportedNetworks.map(\.network)))
@@ -81,16 +80,19 @@ final class PSApplePayTests: XCTestCase {
         XCTAssertEqual(sut.paymentRequest.countryCode, countryCode)
     }
 
-    func test_initiateApplePayFlow() throws {
+    func test_initiateApplePayFlow_requestBillingAddress_false() throws {
         // Given
         let currencyCode = "USD"
         let amount: Double = 10
-        let psApplePay = PSApplePayItem(label: "Test item")
+        let psApplePay = PSApplePayItem(
+            label: "Test item",
+            requestBillingAddress: false
+        )
 
         // When
         sut.initiateApplePayFlow(
             currencyCode: currencyCode,
-            amount: 10,
+            amount: amount,
             psApplePay: psApplePay
         )
         .sink { applePayResult in
@@ -117,6 +119,57 @@ final class PSApplePayTests: XCTestCase {
                         )
                     ]
                 )
+                XCTAssert(paymentRequest.requiredBillingContactFields.isEmpty)
+            }
+        )
+    }
+
+    func test_initiateApplePayFlow_requestBillingAddress_true() throws {
+        // Given
+        let currencyCode = "USD"
+        let amount: Double = 10
+        let psApplePay = PSApplePayItem(
+            label: "Test item",
+            requestBillingAddress: true
+        )
+
+        // When
+        sut.initiateApplePayFlow(
+            currencyCode: currencyCode,
+            amount: amount,
+            psApplePay: psApplePay
+        )
+        .sink { applePayResult in
+            guard case let .success(initializeApplePayResponse) = applePayResult else { return }
+            initializeApplePayResponse.completion?(.success, nil)
+        }
+        .store(in: &cancellables)
+
+        // Then
+        let authorizationController = try XCTUnwrap(sut.authorizationController)
+        let paymentRequest = sut.paymentRequest
+        authorizationController.delegate?.paymentAuthorizationController?(
+            authorizationController,
+            didAuthorizePayment: PKPayment(),
+            handler: { result in
+                XCTAssertEqual(result.status, .success)
+                XCTAssertEqual(paymentRequest.currencyCode, currencyCode)
+                XCTAssertEqual(
+                    paymentRequest.paymentSummaryItems,
+                    [
+                        PKPaymentSummaryItem(
+                            label: psApplePay.label,
+                            amount: NSDecimalNumber(value: amount)
+                        )
+                    ]
+                )
+                XCTAssertEqual(paymentRequest.requiredBillingContactFields,
+                               [
+                                   .name,
+                                   .emailAddress,
+                                   .postalAddress,
+                                   .phoneNumber
+                               ])
             }
         )
     }

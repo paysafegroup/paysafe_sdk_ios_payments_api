@@ -22,6 +22,25 @@ public struct PayPalAdditionalData: Encodable {
     /// Recipient type
     let recipientType: RecipientType?
 
+    /// Public initializer required in order to be used in a different module.
+    public init(
+        consumerId: String,
+        recipientDescription: String?,
+        language: Language?,
+        shippingPreference: ShippingPreference?,
+        consumerMessage: String?,
+        orderDescription: String?,
+        recipientType: RecipientType? = .payPalId
+    ) {
+        self.consumerId = consumerId
+        self.recipientDescription = recipientDescription
+        self.language = language
+        self.shippingPreference = shippingPreference
+        self.consumerMessage = consumerMessage
+        self.orderDescription = orderDescription
+        self.recipientType = recipientType
+    }
+
     /// PayPalRequest
     var request: PayPalRequest {
         PayPalRequest(

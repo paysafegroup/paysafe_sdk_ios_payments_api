@@ -21,13 +21,37 @@ extension FinalizeResponse {
             "eci": 3.0,
             "acsUrl": "acsURL",
             "card": {
-                "cardExpiry": {
-                    "month": "10",
-                    "year": "2025"
-                },
-                "holderName": "john doe",
-                "cardBin": "4000000",
-                "lastDigits": "1091"
+                "cardBin": "4000000"
+            },
+            "merchantUrl": "merch-ref",
+            "cavv": "cavv",
+            "threeDSecureVersion": "1.0.0",
+            "currency": "USD",
+            "status": "COMPLETED"
+        }
+        """
+    }
+
+    static func jsonMock(with networkToken: NetworkToken) -> String {
+        let networkTokenString = """
+            ,"networkToken" : {
+              "bin": "\(networkToken.bin)"
+            }
+        """
+
+        return """
+        {
+            "id": "test_id1234",
+            "deviceFingerprintingId": "fpId",
+            "merchantRefNum": "test1234MerchRefNum",
+            "threeDResult": "Y",
+            "txnTime": "txnTime",
+            "directoryServerTransactionId": "testDirectoryServerTransactionId",
+            "amount": 100.00,
+            "eci": 3.0,
+            "acsUrl": "acsURL",
+            "card": {
+                "cardBin": "4000000"\(networkTokenString)
             },
             "merchantUrl": "merch-ref",
             "cavv": "cavv",

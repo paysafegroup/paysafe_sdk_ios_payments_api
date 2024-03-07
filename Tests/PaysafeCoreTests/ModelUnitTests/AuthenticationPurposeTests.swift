@@ -5,8 +5,6 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-import Foundation
-
 @testable import PaysafeCore
 import XCTest
 

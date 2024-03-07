@@ -14,8 +14,15 @@ public struct PSCardholderNameInputSwiftUIView: UIViewRepresentable, PSCardInput
 
     /// - Parameters:
     ///   - cardholderName: Cardholder name
-    public init(cardholderName: String? = nil) {
-        cardholderNameView = PSCardholderNameInputView(cardholderName: cardholderName)
+    ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    public init(
+        cardholderName: String? = nil,
+        animateTopPlaceholderLabel: Bool = true
+    ) {
+        cardholderNameView = PSCardholderNameInputView(
+            cardholderName: cardholderName,
+            animateTopPlaceholderLabel: animateTopPlaceholderLabel
+        )
     }
 
     /// PSCardFieldInputEventBlock

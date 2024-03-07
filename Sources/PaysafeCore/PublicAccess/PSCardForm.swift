@@ -6,7 +6,9 @@
 //
 
 import Combine
+#if canImport(PaysafeCommon)
 import PaysafeCommon
+#endif
 import SwiftUI
 
 /// PSCardForm. The PSCardForm class is responsable for handling the 3D Secure authentication in a seamless way.
@@ -135,7 +137,6 @@ public class PSCardForm {
     /// * transactionType: Transaction type
     /// * paymentType: Payment type
     /// * merchantRefNum: Merchant reference number
-    /// * customerDetails: Customer details
     /// * merchantDescriptor: Merchant descriptor
     /// * accountId: Account id
     /// * threeDS: ThreeDS
@@ -146,7 +147,7 @@ public class PSCardForm {
     ///   - options: PSTokenizeOptions
     ///   - completion: PSTokenizeBlock
     public func tokenize(
-        using options: PSTokenizeOptions,
+        using options: PSCardTokenizeOptions,
         completion: @escaping PSTokenizeBlock
     ) {
         guard let psAPIClient else {
@@ -173,7 +174,7 @@ public class PSCardForm {
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] publisherCompletion in
-            self?.resetFields()
+            self?.resetCardDetails()
             switch publisherCompletion {
             case .finished:
                 break
@@ -187,7 +188,7 @@ public class PSCardForm {
     }
 
     /// Resets all text fields.
-    public func resetFields() {
+    public func resetCardDetails() {
         cardNumberView?.reset()
         cardholderNameView?.reset()
         cardExpiryView?.reset()
@@ -423,7 +424,7 @@ private extension PSCardForm {
     ///
     /// - Parameters:
     ///   - options: PSTokenizeOptions
-    func validateTokenizeOptions(_ options: PSTokenizeOptions) -> PSError? {
+    func validateTokenizeOptions(_ options: PSCardTokenizeOptions) -> PSError? {
         guard PSCardForm.supportedNetworks.contains(getCardBrand()) else {
             return PSError.unsuportedCardBrand(PaysafeSDK.shared.correlationId)
         }
@@ -433,13 +434,13 @@ private extension PSCardForm {
         guard PSTokenizeOptionsUtils.isValidDynamicDescriptor(options.merchantDescriptor?.dynamicDescriptor) else {
             return PSError.invalidDynamicDescriptor(PaysafeSDK.shared.correlationId)
         }
-        guard PSTokenizeOptionsUtils.isValidEmail(options.customerDetails.profile?.email) else {
+        guard PSTokenizeOptionsUtils.isValidEmail(options.profile?.email) else {
             return PSError.invalidEmail(PaysafeSDK.shared.correlationId)
         }
-        guard PSTokenizeOptionsUtils.isValidFirstName(options.customerDetails.profile?.firstName) else {
+        guard PSTokenizeOptionsUtils.isValidFirstName(options.profile?.firstName) else {
             return PSError.invalidFirstName(PaysafeSDK.shared.correlationId)
         }
-        guard PSTokenizeOptionsUtils.isValidLastName(options.customerDetails.profile?.lastName) else {
+        guard PSTokenizeOptionsUtils.isValidLastName(options.profile?.lastName) else {
             return PSError.invalidLastName(PaysafeSDK.shared.correlationId)
         }
         guard PSTokenizeOptionsUtils.isValidPhone(options.merchantDescriptor?.phone) else {

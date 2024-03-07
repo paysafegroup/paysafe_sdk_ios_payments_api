@@ -12,7 +12,7 @@ public struct ShippingDetailsUsage: Encodable {
     /// Initial usage date
     let initialUsageDate: String?
     /// Initial usage range
-    let initialUsageRange: InitialUsageRange
+    let initialUsageRange: InitialUsageRange?
 
     /// - Parameters:
     ///   - cardHolderNameMatch: Card holder name match
@@ -21,7 +21,7 @@ public struct ShippingDetailsUsage: Encodable {
     public init(
         cardHolderNameMatch: Bool,
         initialUsageDate: String,
-        initialUsageRange: InitialUsageRange
+        initialUsageRange: InitialUsageRange?
     ) {
         self.cardHolderNameMatch = cardHolderNameMatch
         self.initialUsageDate = initialUsageDate
@@ -33,7 +33,7 @@ public struct ShippingDetailsUsage: Encodable {
         ShippingDetailsUsageRequest(
             cardHolderNameMatch: cardHolderNameMatch,
             initialUsageDate: initialUsageDate,
-            initialUsageRange: initialUsageRange.request
+            initialUsageRange: initialUsageRange?.request
         )
     }
 }

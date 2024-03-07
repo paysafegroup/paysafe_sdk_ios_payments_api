@@ -15,13 +15,16 @@ public struct PSCardCVVInputSwiftUIView: UIViewRepresentable, PSCardInputView {
     /// - Parameters:
     ///   - isMasked: Boolean indicating if the text should be of type .isSecureTextEntry
     ///   - cardBrand: PSCardBrand
+    ///   - animateTopPlaceholderLabel: Bool, default as `true`
     public init(
         isMasked: Bool = false,
-        cardBrand: PSCardBrand = .unknown
+        cardBrand: PSCardBrand = .unknown,
+        animateTopPlaceholderLabel: Bool = true
     ) {
         cardCVVView = PSCardCVVInputView(
             isMasked: isMasked,
-            cardBrand: cardBrand
+            cardBrand: cardBrand,
+            animateTopPlaceholderLabel: animateTopPlaceholderLabel
         )
     }
 

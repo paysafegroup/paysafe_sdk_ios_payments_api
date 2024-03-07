@@ -1,5 +1,5 @@
 //
-//  String+Extensions.swift
+//  PaysafeCore+String+Extensions.swift
 //
 //
 //  Copyright (c) 2024 Paysafe Group
@@ -20,6 +20,13 @@ extension String {
 
     var containsOnlyNumbers: Bool {
         PSRegexValidator.evaluate(string: self, pattern: "^[0-9]+$")
+    }
+
+    func fromBase64() -> String? {
+        guard let decodedData = Data(base64Encoded: self) else {
+            return nil
+        }
+        return String(data: decodedData, encoding: .utf8)
     }
 }
 

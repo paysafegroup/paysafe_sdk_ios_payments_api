@@ -11,14 +11,13 @@ public enum PSErrorCode {
     case genericAPIError
     case invalidResponse
     case invalidURL
-    case unsuccessfulResponse
     case encodingError
     case timeoutError
     case noConnectionToServer
-    case invalidCredentials
 
     /// Predefined Core error codes
     case coreInvalidAPIKey
+    case coreInvalidAPIKeyFormat
     case coreUnavailableEnvironment
     case coreSDKInitializeError
     case coreMerchantAccountConfigurationError
@@ -28,6 +27,7 @@ public enum PSErrorCode {
     case coreFailedToFetchAvailablePayments
     case coreThreeDSAuthenticationRejected
     case coreTokenizationAlreadyInProgress
+    case coreAPIInvalidCardDetails
 
     /// Predefined 3DS error codes
     case threeDSFailedValidation
@@ -35,6 +35,13 @@ public enum PSErrorCode {
     case threeDSTimeout
     case threeDSSessionFailure
     case threeDSChallengePayloadError
+    case threeDSInvalidCountry
+    case threeDSInvalidApiKey
+    case threeDSInvalidAmount
+    case threeDSEncodingError
+    case threeDSInvalidURL
+    case threeDSInvalidResponse
+    case threeDSInvalidCurrency
 
     /// Predefined Apple Pay error codes
     case applePayNotSupported
@@ -59,15 +66,16 @@ public enum PSErrorCode {
     /// PSErrorType
     public var type: PSErrorType {
         switch self {
-        case .genericAPIError, .invalidResponse, .invalidURL, .unsuccessfulResponse,
-             .encodingError, .timeoutError, .noConnectionToServer, .invalidCredentials:
+        case .genericAPIError, .invalidResponse, .invalidURL,
+             .encodingError, .timeoutError, .noConnectionToServer:
             return .apiError
-        case .coreInvalidAPIKey, .coreUnavailableEnvironment, .coreSDKInitializeError, .coreMerchantAccountConfigurationError,
+        case .coreInvalidAPIKey, .coreInvalidAPIKeyFormat, .coreUnavailableEnvironment, .coreSDKInitializeError, .coreMerchantAccountConfigurationError,
              .coreInvalidCurrencyCode, .corePaymentHandleCreationFailed, .coreInvalidAccountId,
              .coreFailedToFetchAvailablePayments, .coreThreeDSAuthenticationRejected, .coreTokenizationAlreadyInProgress:
             return .coreError
         case .threeDSFailedValidation, .threeDSUserCancelled, .threeDSTimeout,
-             .threeDSSessionFailure, .threeDSChallengePayloadError:
+             .threeDSSessionFailure, .threeDSChallengePayloadError, .threeDSInvalidCountry, .threeDSInvalidApiKey, .coreAPIInvalidCardDetails, .threeDSInvalidAmount, .threeDSEncodingError, .threeDSInvalidURL,
+             .threeDSInvalidResponse, .threeDSInvalidCurrency:
             return .threeDSError
         case .applePayNotSupported, .applePayUserCancelled:
             return .applePayError

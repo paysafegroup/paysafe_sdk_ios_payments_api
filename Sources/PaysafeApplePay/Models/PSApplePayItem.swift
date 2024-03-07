@@ -6,15 +6,20 @@
 //
 
 /// PSApplePayItem
-public struct PSApplePayItem {
+public struct PSApplePayItem: Encodable {
     /// Payment item label
     let label: String
+    /// Request billing address
+    public let requestBillingAddress: Bool
 
     /// - Parameters:
     ///   - label: Payment item label
+    ///   - requestBillingAddress: Request billing address
     public init(
-        label: String
+        label: String,
+        requestBillingAddress: Bool
     ) {
         self.label = label
+        self.requestBillingAddress = requestBillingAddress
     }
 }

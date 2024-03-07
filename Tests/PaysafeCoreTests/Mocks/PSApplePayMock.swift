@@ -30,6 +30,17 @@ class PSApplePayMock: PSApplePay {
                         type: "type"
                     ),
                     transactionIdentifier: "transactionIdentifier"
+                ),
+                billingContact: BillingContact(
+                    addressLines: ["Cameron Road"],
+                    countryCode: "US",
+                    email: "john.doe@paysafe.com",
+                    locality: "Lexington",
+                    name: "John",
+                    phone: "7164458829",
+                    country: "United States",
+                    postalCode: "14082",
+                    administrativeArea: "Alabama"
                 )
             ),
             completion: nil

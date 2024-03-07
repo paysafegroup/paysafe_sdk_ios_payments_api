@@ -10,20 +10,20 @@
 public struct ThreeDS: Encodable {
     /// Merchant url
     let merchantUrl: String
-    /// Device channel
-    let deviceChannel: DeviceChannel = .sdk
     /// Use 3DS version 2
     var useThreeDSecureVersion2: Bool?
     /// Authentication purpose
     var authenticationPurpose: AuthenticationPurpose
     /// Process
-    let process: Bool
+    let process: Bool?
     /// Max authorizations for instalment payment
     let maxAuthorizationsForInstalmentPayment: Int?
+    /// Billing cycle
+    let billingCycle: BillingCycle?
     /// Electronic delivery
     let electronicDelivery: ElectronicDelivery?
     /// Profile
-    let profile: Profile?
+    let profile: ThreeDSProfile?
     /// Message category
     let messageCategory: MessageCategory
     /// Requestor challenge preference
@@ -57,7 +57,6 @@ public struct ThreeDS: Encodable {
 
     /// - Parameters:
     ///   - merchantUrl: Merchant url
-    ///   - deviceChannel: Device channel
     ///   - useThreeDSecureVersion2: Use 3DS version 2
     ///   - authenticationPurpose: Authentication purpose
     ///   - maxAuthorizationsForInstalmentPayment: Max authorizations for instalment payment
@@ -83,11 +82,11 @@ public struct ThreeDS: Encodable {
         merchantUrl: String,
         useThreeDSecureVersion2: Bool? = nil,
         authenticationPurpose: AuthenticationPurpose = .paymentTransaction,
-        process: Bool = true,
+        process: Bool? = nil,
         maxAuthorizationsForInstalmentPayment: Int? = nil,
         billingCycle: BillingCycle? = nil,
         electronicDelivery: ElectronicDelivery? = nil,
-        profile: Profile? = nil,
+        profile: ThreeDSProfile? = nil,
         messageCategory: MessageCategory = .payment,
         requestorChallengePreference: RequestorChallengePreference? = nil,
         userLogin: UserLogin? = nil,
@@ -109,6 +108,7 @@ public struct ThreeDS: Encodable {
         self.authenticationPurpose = authenticationPurpose
         self.process = process
         self.maxAuthorizationsForInstalmentPayment = maxAuthorizationsForInstalmentPayment
+        self.billingCycle = billingCycle
         self.electronicDelivery = electronicDelivery
         self.profile = profile
         self.messageCategory = messageCategory
@@ -136,9 +136,9 @@ public struct ThreeDS: Encodable {
         ThreeDSRequest(
             merchantRefNum: merchantRefNum,
             merchantUrl: merchantUrl,
-            deviceChannel: deviceChannel.request,
             messageCategory: messageCategory.request,
             transactionIntent: transactionIntent.request,
+            billingCycle: billingCycle?.request,
             authenticationPurpose: authenticationPurpose.request,
             requestorChallengePreference: requestorChallengePreference?.request,
             userLogin: userLogin?.request,

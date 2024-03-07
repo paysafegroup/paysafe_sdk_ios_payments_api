@@ -5,7 +5,9 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
+#if canImport(PaysafePayPal)
 import PaysafePayPal
+#endif
 
 extension PaysafeEnvironment {
     func toPayPalEnvironment() -> PSPayPalEnvironment {

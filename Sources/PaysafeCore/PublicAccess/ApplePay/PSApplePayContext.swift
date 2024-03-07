@@ -7,8 +7,10 @@
 
 import Combine
 import PassKit
+#if canImport(PaysafeCommon)
 import PaysafeApplePay
 import PaysafeCommon
+#endif
 
 /// PSApplePayContext
 public class PSApplePayContext {
@@ -18,6 +20,10 @@ public class PSApplePayContext {
     var psApplePay: PSApplePay
     /// Cancellables set
     private var cancellables = Set<AnyCancellable>()
+    /// Currency converter
+    private let currencyConverter = CurrencyConverter(
+        conversionRules: CurrencyConverter.defaultCurrenciesMap()
+    )
     /// Boolean value indicating if Apple Pay is supported
     static var isApplePaySupported: Bool = false
 
@@ -282,9 +288,16 @@ private extension PSApplePayContext {
     func tokenize(
         using options: PSApplePayTokenizeOptions
     ) -> AnyPublisher<String, PSError> {
-        psApplePay.initiateApplePayFlow(
-            currencyCode: options.currencyCode,
-            amount: options.amount / 100,
+        /// Convert amount based on currency
+        let currencyCode = options.currencyCode
+        let convertedAmount = convertAmount(
+            using: options.amount,
+            and: currencyCode
+        )
+        /// Initiate apple pay flow
+        return psApplePay.initiateApplePayFlow(
+            currencyCode: currencyCode,
+            amount: convertedAmount,
             psApplePay: options.psApplePay
         )
         .setFailureType(to: PSError.self)
@@ -340,23 +353,9 @@ private extension PSApplePayContext {
         guard let psAPIClient else {
             return Fail(error: .coreSDKInitializeError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
         }
-        let tokenizeOptions = PSTokenizeOptions(
-            amount: options.amount,
-            currencyCode: options.currencyCode,
-            transactionType: .payment,
-            merchantRefNum: options.merchantRefNum,
-            customerDetails: CustomerDetails(
-                billingDetails: options.customerDetails.billingDetails,
-                profile: nil
-            ),
-            accountId: options.accountId,
-            applePay: ApplePayAdditionalData(
-                label: "Pay with Apple",
-                requestBillingAddress: false,
-                applePayPaymentToken: applePayTokenRequest(
-                    using: response.applePayPaymentToken.token
-                )
-            )
+        let tokenizeOptions = optionsWithApplePayData(
+            from: options,
+            and: response
         )
         return psAPIClient.tokenize(
             options: tokenizeOptions,
@@ -376,16 +375,17 @@ private extension PSApplePayContext {
         .eraseToAnyPublisher()
     }
 
-    /// Returns Apple Pay token request based on Apple Pay token.
+    /// Returns Apple Pay token request based on the apple payment token..
     ///
     /// - Parameters:
-    ///   - applePayToken: Apple Pay token
+    ///   - paymentToken: ApplePayPaymentToken
     func applePayTokenRequest(
-        using applePayToken: ApplePayToken
+        using paymentToken: ApplePayPaymentToken
     ) -> ApplePayPaymentTokenRequest {
-        ApplePayPaymentTokenRequest(
+        let token = paymentToken.token
+        return ApplePayPaymentTokenRequest(
             token: ApplePayTokenRequest(
-                paymentData: applePayToken.paymentData.map { paymentData in
+                paymentData: token.paymentData.map { paymentData in
                     ApplePaymentDataRequest(
                         signature: paymentData.signature,
                         data: paymentData.data,
@@ -398,12 +398,13 @@ private extension PSApplePayContext {
                     )
                 },
                 paymentMethod: ApplePaymentMethodRequest(
-                    displayName: applePayToken.paymentMethod.displayName,
-                    network: applePayToken.paymentMethod.network,
-                    type: applePayToken.paymentMethod.type
+                    displayName: token.paymentMethod.displayName,
+                    network: token.paymentMethod.network,
+                    type: token.paymentMethod.type
                 ),
-                transactionIdentifier: applePayToken.transactionIdentifier
-            )
+                transactionIdentifier: token.transactionIdentifier
+            ),
+            billingContact: paymentToken.billingContact
         )
     }
 
@@ -415,15 +416,42 @@ private extension PSApplePayContext {
         guard PSTokenizeOptionsUtils.isValidAmount(options.amount) else {
             return PSError.invalidAmount(PaysafeSDK.shared.correlationId)
         }
-        guard PSTokenizeOptionsUtils.isValidEmail(options.customerDetails.profile?.email) else {
+        guard PSTokenizeOptionsUtils.isValidEmail(options.profile?.email) else {
             return PSError.invalidEmail(PaysafeSDK.shared.correlationId)
         }
-        guard PSTokenizeOptionsUtils.isValidFirstName(options.customerDetails.profile?.firstName) else {
+        guard PSTokenizeOptionsUtils.isValidFirstName(options.profile?.firstName) else {
             return PSError.invalidFirstName(PaysafeSDK.shared.correlationId)
         }
-        guard PSTokenizeOptionsUtils.isValidLastName(options.customerDetails.profile?.lastName) else {
+        guard PSTokenizeOptionsUtils.isValidLastName(options.profile?.lastName) else {
             return PSError.invalidLastName(PaysafeSDK.shared.correlationId)
         }
         return nil
+    }
+
+    /// Update options received from merchant to inclue apple pay additional data.
+    private func optionsWithApplePayData(
+        from options: PSApplePayTokenizeOptions,
+        and response: InitializeApplePayResponse
+    ) -> PSApplePayTokenizeOptions {
+        var tokenizeOptions = options
+        tokenizeOptions.applePay = ApplePayAdditionalData(
+            label: "Pay with Apple",
+            requestBillingAddress: options.psApplePay.requestBillingAddress,
+            applePayPaymentToken: applePayTokenRequest(
+                using: response.applePayPaymentToken
+            )
+        )
+        return tokenizeOptions
+    }
+
+    /// Convert amount based on currency.
+    private func convertAmount(
+        using amount: Int,
+        and currency: String
+    ) -> Double {
+        currencyConverter.convert(
+            amount: amount,
+            forCurrency: currency
+        )
     }
 }

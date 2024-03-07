@@ -72,7 +72,8 @@ final class PaymentMethodsViewModel: ObservableObject {
         dispatchGroup.enter()
         PSPayPalContext.initialize(
             currencyCode: "USD",
-            accountId: paymentManager.paypalAccountId
+            accountId: paymentManager.paypalAccountId,
+            renderType: .web
         ) { [weak self] result in
             asyncMain { [weak self] in
                 guard let self else { return }
@@ -99,7 +100,7 @@ final class PaymentMethodsViewModel: ObservableObject {
     }
 
     func presentApplePay(using paymentManager: PaymentManager) {
-        guard let applePayContext, let item, let billingAddress else { return }
+        guard let applePayContext, let item else { return }
         let completion: PSTokenizeBlock = { [weak self] tokenizeResult in
             asyncMainDelayed(with: 2) { [weak self] in
                 guard let self else { return }
@@ -118,17 +119,18 @@ final class PaymentMethodsViewModel: ObservableObject {
             }
         }
         /// Payment amount in minor units
-        let amount = totalPrice * 100
+        let amount = Int(totalPrice * 100)
         let options = PSApplePayTokenizeOptions(
             amount: amount,
-            merchantRefNum: PaysafeSDK.shared.getMerchantReferenceNumber(),
-            customerDetails: CustomerDetails(
-                billingDetails: billingAddress.toBillingDetails(),
-                profile: nil
-            ),
-            accountId: paymentManager.cardAccountId,
             currencyCode: "USD",
-            psApplePay: PSApplePayItem(label: item.title)
+            transactionType: .payment,
+            merchantRefNum: PaysafeSDK.shared.getMerchantReferenceNumber(),
+            billingDetails: billingAddress?.toBillingDetails(),
+            accountId: paymentManager.cardAccountId,
+            psApplePay: PSApplePayItem(
+                label: item.title,
+                requestBillingAddress: true
+            )
         )
         applePayContext.tokenize(
             using: options,
@@ -158,22 +160,23 @@ final class PaymentMethodsViewModel: ObservableObject {
             }
         }
         /// Payment amount in minor units
-        let amount = totalPrice * 100
+        let amount = Int(totalPrice * 100)
         let options = PSPayPalTokenizeOptions(
             amount: amount,
-            merchantRefNum: PaysafeSDK.shared.getMerchantReferenceNumber(),
-            customerDetails: CustomerDetails(
-                billingDetails: billingAddress.toBillingDetails(),
-                profile: nil
-            ),
-            accountId: nil,
             currencyCode: "USD",
-            consumerId: "consumer@gmail.com",
-            recipientDescription: "My store description",
-            language: .US,
-            shippingPreference: .getFromFile,
-            consumerMessage: "My note to payer",
-            orderDescription: "My order description"
+            transactionType: .payment,
+            merchantRefNum: PaysafeSDK.shared.getMerchantReferenceNumber(),
+            billingDetails: billingAddress.toBillingDetails(),
+            accountId: paymentManager.paypalAccountId,
+            paypal: PayPalAdditionalData(
+                consumerId: "consumer@gmail.com",
+                recipientDescription: "Merchant store description",
+                language: .US,
+                shippingPreference: .getFromFile,
+                consumerMessage: "My note to payer",
+                orderDescription: "My order description",
+                recipientType: .payPalId
+            )
         )
         asyncMain { [weak self] in self?.isloading = true }
         payPalContext.tokenize(

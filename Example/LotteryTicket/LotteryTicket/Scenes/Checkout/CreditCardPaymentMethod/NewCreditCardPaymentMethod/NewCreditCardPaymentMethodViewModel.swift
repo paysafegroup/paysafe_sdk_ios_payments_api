@@ -68,20 +68,19 @@ final class NewCreditCardPaymentMethodViewModel: ObservableObject {
     func didTapPlaceOrder(using paymentManager: PaymentManager) {
         guard let cardForm, let billingAddress else { return }
         isloading = true
-
         /// Payment amount in minor units
-        let amount = totalPrice * 100
-        let options = PSTokenizeOptions(
+        let amount = Int(totalPrice * 100)
+        let options = PSCardTokenizeOptions(
             amount: amount,
             currencyCode: "USD",
             transactionType: .payment,
             merchantRefNum: PaysafeSDK.shared.getMerchantReferenceNumber(),
-            customerDetails: CustomerDetails(
-                billingDetails: billingAddress.toBillingDetails(),
-                profile: nil
-            ),
+            billingDetails: billingAddress.toBillingDetails(),
             accountId: paymentManager.cardAccountId,
-            threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop")
+            threeDS: ThreeDS(
+                merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop",
+                process: true
+            )
         )
         let completion: PSTokenizeBlock = { [weak self] tokenizeResult in
             asyncMain { [weak self] in

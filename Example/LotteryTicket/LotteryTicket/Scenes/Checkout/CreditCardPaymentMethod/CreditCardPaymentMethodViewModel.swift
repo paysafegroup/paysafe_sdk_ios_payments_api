@@ -39,7 +39,7 @@ final class CreditCardPaymentMethodViewModel: ObservableObject {
                 isloading = false
                 switch result {
                 case let .success(response):
-                    savedCards = response.paymentHandles.compactMap { $0.toSavedCard(response.singleUseCustomerToken) }
+                    savedCards = response.paymentHandles?.compactMap { $0.toSavedCard(response.singleUseCustomerToken) } ?? []
                 case let .failure(error):
                     print("Error: \(error)")
                 }

@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(PaysafeCommon)
+import PaysafeCommon
+#endif
 
 /// PaysafeSDK
 public class PaysafeSDK {
@@ -31,10 +34,15 @@ public class PaysafeSDK {
         theme: PSTheme = PSTheme(),
         completion: @escaping PSSDKSetupBlock
     ) {
-        guard isValidAPIKey(apiKey) else {
-            !performsUnitTests() ? assertionFailure(.invalidSDKAPIKeyMessage) : nil
-            return completion(.failure(.coreInvalidAPIKey(correlationId)))
+        /// Validate the apiKey
+        do {
+            try validateApiKey(apiKey)
+        } catch let error as PSError {
+            return completion(.failure(error))
+        } catch {
+            completion(.failure(.genericAPIError(correlationId)))
         }
+        /// Validate correct environment
         guard isEnvironmentAvailable(environment) else {
             !performsUnitTests() ? assertionFailure(.unavailableSDKEnvironment) : nil
             return completion(.failure(.coreUnavailableEnvironment(correlationId)))
@@ -61,8 +69,30 @@ public class PaysafeSDK {
     ///
     /// - Parameters:
     ///   - apiKey: Paysafe API key
-    private func isValidAPIKey(_ apiKey: String) -> Bool {
-        !apiKey.isEmpty
+    private func validateApiKey(_ apiKey: String) throws {
+        guard !apiKey.isEmpty else {
+            throw PSError.coreInvalidAPIKey(correlationId)
+        }
+        guard validateBase64EncodedString(apiKey) else {
+            throw PSError.coreInvalidAPIKeyFormat(correlationId)
+        }
+    }
+
+    /// Determines if the Paysafe API key has the valid decoded string format.
+    /// The valid pattern should be: "username:password"
+    ///
+    /// - Parameters:
+    ///   - base64String: Paysafe API key as base64 string
+    private func validateBase64EncodedString(_ base64String: String) -> Bool {
+        guard let decodedString = base64String.fromBase64() else {
+            return false
+        }
+        /// Check if the pattern username:password can be found
+        if let index = decodedString.firstIndex(of: ":") {
+            /// We validate ":" is not only the first or last character
+            return index != decodedString.startIndex && index != decodedString.index(before: decodedString.endIndex)
+        }
+        return false
     }
 
     /// Determines if the Paysafe Environment is available.

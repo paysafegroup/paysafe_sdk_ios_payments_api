@@ -17,6 +17,8 @@ public struct PSError: Error {
     public let detailedMessage: String
     /// Correlation id
     public let correlationId: String
+    /// Common server error message
+    static let serverCommunicationErrorMessage = "Error communicating with server."
 
     /// - Parameters:
     ///   - errorCode: PSErrorCode

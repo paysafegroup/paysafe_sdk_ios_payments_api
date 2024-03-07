@@ -19,8 +19,8 @@ struct PaymentRequest: Encodable {
     let accountId: String?
     /// Payment type
     let paymentType: PaymentType
-    /// Amount
-    let amount: Double
+    /// Amount in minor units
+    let amount: Int
     /// Currency code
     var currencyCode: String
     /// Return links

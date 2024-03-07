@@ -5,43 +5,72 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
+#if canImport(PaysafeApplePay)
 import PaysafeApplePay
+#endif
 
 /// PSApplePayTokenizeOptions
-public struct PSApplePayTokenizeOptions {
+public struct PSApplePayTokenizeOptions: PSTokenizable {
+    /// Internal data updated by apple pay context based on apple pay response
+    var applePay: ApplePayAdditionalData?
     /// Payment amount in minor units
-    let amount: Double
-    /// Merchant reference number
-    let merchantRefNum: String
-    /// Customer details
-    let customerDetails: CustomerDetails
-    /// Account id
-    let accountId: String
+    public var amount: Int
     /// Currency code
-    let currencyCode: String
+    public var currencyCode: String
+    /// Transaction type
+    public var transactionType: TransactionType
+    /// Merchant referrence number
+    public var merchantRefNum: String
+    /// Billing details
+    public var billingDetails: BillingDetails?
+    /// User profile
+    public var profile: Profile?
+    /// Account id
+    public var accountId: String
+    /// Merchant descriptor
+    public var merchantDescriptor: MerchantDescriptor?
+    /// Shipping details
+    public var shippingDetails: ShippingDetails?
     /// PSApplePay payment item
-    var psApplePay: PSApplePayItem
+    public var psApplePay: PSApplePayItem
+    /// Requires billing address from apple pay
+    public var requestBillingAddress: Bool
 
     /// - Parameters:
     ///   - amount: Payment amount in minor units
-    ///   - merchantRefNum: Merchant reference number
-    ///   - customerDetails: Customer details
-    ///   - accountId: Account id
     ///   - currencyCode: Currency code
-    ///   - psApplePay: PSApplePay payment item
+    ///   - transactionType: Transaction type
+    ///   - merchantRefNum: Merchant reference number
+    ///   - billingDetails: Billing details
+    ///   - profile: User profile
+    ///   - accountId: Account id
+    ///   - merchantDescriptor: Merchant descriptor
+    ///   - shippingDetails: Shipping details
+    ///   - psApplePay: Apple pay item
+    ///   - requestBillingAddress: Request billing address from apple pay
     public init(
-        amount: Double,
-        merchantRefNum: String,
-        customerDetails: CustomerDetails,
-        accountId: String,
+        amount: Int,
         currencyCode: String,
-        psApplePay: PSApplePayItem
+        transactionType: TransactionType,
+        merchantRefNum: String,
+        billingDetails: BillingDetails? = nil,
+        profile: Profile? = nil,
+        accountId: String,
+        merchantDescriptor: MerchantDescriptor? = nil,
+        shippingDetails: ShippingDetails? = nil,
+        psApplePay: PSApplePayItem,
+        requestBillingAddress: Bool = false
     ) {
         self.amount = amount
-        self.merchantRefNum = merchantRefNum
-        self.customerDetails = customerDetails
-        self.accountId = accountId
         self.currencyCode = currencyCode
+        self.transactionType = transactionType
+        self.merchantRefNum = merchantRefNum
         self.psApplePay = psApplePay
+        self.billingDetails = billingDetails
+        self.profile = profile
+        self.accountId = accountId
+        self.merchantDescriptor = merchantDescriptor
+        self.shippingDetails = shippingDetails
+        self.requestBillingAddress = requestBillingAddress
     }
 }

@@ -8,6 +8,7 @@
 import Combine
 import CorePayments
 @testable import PayPalNativePayments
+@testable import PayPalWebPayments
 @testable import PaysafePayPal
 import XCTest
 
@@ -25,11 +26,18 @@ final class PSPayPalTests: XCTestCase {
     }
 
     func test_init_nativeRenderType_sandboxEnvironment() {
-        // When
-        let sut = PSPayPal(renderType: .native(clientId: "clientId", environment: .sandbox))
+        // Given
+        let clientId = "clientId"
+        let environment: PSPayPalEnvironment = .sandbox
+        let renderType: PSPayPalRenderType = .native
+        let sut = PSPayPal(
+            clientId: clientId,
+            environment: environment,
+            renderType: renderType
+        )
 
         // Then
-        guard case let .native(clientId, environment) = sut.renderType else {
+        guard sut.renderType == .native else {
             return XCTFail("Expected native render type, received web.")
         }
         XCTAssertNotNil(sut)
@@ -38,11 +46,17 @@ final class PSPayPalTests: XCTestCase {
     }
 
     func test_init_nativeRenderType_liveEnvironment() {
-        // When
-        let sut = PSPayPal(renderType: .native(clientId: "clientId", environment: .live))
-
+        // Given
+        let clientId = "clientId"
+        let environment: PSPayPalEnvironment = .live
+        let renderType: PSPayPalRenderType = .native
+        let sut = PSPayPal(
+            clientId: clientId,
+            environment: environment,
+            renderType: renderType
+        )
         // Then
-        guard case let .native(clientId, environment) = sut.renderType else {
+        guard sut.renderType == .native else {
             return XCTFail("Expected native render type, received web.")
         }
         XCTAssertNotNil(sut)
@@ -50,26 +64,43 @@ final class PSPayPalTests: XCTestCase {
         XCTAssertEqual(environment.toCoreEnvironment, .live)
     }
 
-    func test_init_webRenderType() {
-        // When
-        let sut = PSPayPal(renderType: .web)
+    func test_init_webRenderType_sandboxEnvironment() {
+        // Given
+        let clientId = "clientId"
+        let environment: PSPayPalEnvironment = .sandbox
+        let renderType: PSPayPalRenderType = .web
+        let sut = PSPayPal(
+            clientId: clientId,
+            environment: environment,
+            renderType: renderType
+        )
 
         // Then
+        guard sut.renderType == .web else {
+            return XCTFail("Expected native render type, received web.")
+        }
         XCTAssertNotNil(sut)
+        XCTAssertEqual(clientId, "clientId")
+        XCTAssertEqual(environment.toCoreEnvironment, .sandbox)
     }
 
     func test_initiatePayPalFlow_nativeRenderType_success() throws {
         // Given
         let expectation = expectation(description: "Initiate PayPal flow expectation.")
-        let sut = PSPayPal(renderType: .native(clientId: "clientId", environment: .sandbox))
+        let clientId = "clientId"
+        let environment: PSPayPalEnvironment = .live
+        let renderType: PSPayPalRenderType = .native
+        let sut = PSPayPal(
+            clientId: clientId,
+            environment: environment,
+            renderType: renderType
+        )
         let orderId = "orderId"
         let payerId = "payerId"
-        let payPalLinks = PSPayPalLinks.createMock()
 
         // When
         sut.initiatePayPalFlow(
-            orderId: orderId,
-            payPalLinks: payPalLinks
+            orderId: orderId
         )
         .sink { completion in
             if case .failure = completion {
@@ -82,7 +113,7 @@ final class PSPayPalTests: XCTestCase {
         }
         .store(in: &cancellables)
 
-        let payPalClient = try XCTUnwrap(sut.payPalClient)
+        let payPalClient = try XCTUnwrap(sut.payPalNativeClient)
         let result = PayPalNativeCheckoutResult(orderID: orderId, payerID: payerId)
         sut.paypal(payPalClient, didFinishWithResult: result)
 
@@ -92,14 +123,19 @@ final class PSPayPalTests: XCTestCase {
     func test_initiatePayPalFlow_nativeRenderType_failed() throws {
         // Given
         let expectation = expectation(description: "Initiate PayPal flow expectation.")
-        let sut = PSPayPal(renderType: .native(clientId: "clientId", environment: .sandbox))
+        let clientId = "clientId"
+        let environment: PSPayPalEnvironment = .live
+        let renderType: PSPayPalRenderType = .native
+        let sut = PSPayPal(
+            clientId: clientId,
+            environment: environment,
+            renderType: renderType
+        )
         let orderId = "orderId"
-        let payPalLinks = PSPayPalLinks.createMock()
 
         // When
         sut.initiatePayPalFlow(
-            orderId: orderId,
-            payPalLinks: payPalLinks
+            orderId: orderId
         )
         .sink { completion in
             if case .failure = completion {
@@ -112,7 +148,7 @@ final class PSPayPalTests: XCTestCase {
         }
         .store(in: &cancellables)
 
-        let payPalClient = try XCTUnwrap(sut.payPalClient)
+        let payPalClient = try XCTUnwrap(sut.payPalNativeClient)
         let mockError = CorePayments.CoreSDKError(code: nil, domain: nil, errorDescription: nil)
         sut.paypal(payPalClient, didFinishWithError: mockError)
 
@@ -122,14 +158,19 @@ final class PSPayPalTests: XCTestCase {
     func test_initiatePayPalFlow_nativeRenderType_cancelled() throws {
         // Given
         let expectation = expectation(description: "Initiate PayPal flow expectation.")
-        let sut = PSPayPal(renderType: .native(clientId: "clientId", environment: .sandbox))
+        let clientId = "clientId"
+        let environment: PSPayPalEnvironment = .sandbox
+        let renderType: PSPayPalRenderType = .native
+        let sut = PSPayPal(
+            clientId: clientId,
+            environment: environment,
+            renderType: renderType
+        )
         let orderId = "orderId"
-        let payPalLinks = PSPayPalLinks.createMock()
 
         // When
         sut.initiatePayPalFlow(
-            orderId: orderId,
-            payPalLinks: payPalLinks
+            orderId: orderId
         )
         .sink { completion in
             if case .failure = completion {
@@ -142,22 +183,29 @@ final class PSPayPalTests: XCTestCase {
         }
         .store(in: &cancellables)
 
-        let payPalClient = try XCTUnwrap(sut.payPalClient)
+        let payPalClient = try XCTUnwrap(sut.payPalNativeClient)
         sut.paypalDidCancel(payPalClient)
 
         wait(for: [expectation], timeout: 1.0)
     }
 
-    func test_initiatePayPalFlow_webRenderType_successUrlRedirect() throws {
+    func test_initiatePayPalFlow_webRenderType_success() throws {
         // Given
         let expectation = expectation(description: "Initiate PayPal flow expectation.")
-        let sut = PSPayPal(renderType: .web)
-        let payPalLinks = PSPayPalLinks.createMock()
+        let clientId = "clientId"
+        let environment: PSPayPalEnvironment = .sandbox
+        let renderType: PSPayPalRenderType = .web
+        let sut = PSPayPal(
+            clientId: clientId,
+            environment: environment,
+            renderType: renderType
+        )
+        let orderId = "orderId"
+        let payerId = "payerId"
 
         // When
         sut.initiatePayPalFlow(
-            orderId: "orderId",
-            payPalLinks: payPalLinks
+            orderId: orderId
         )
         .sink { completion in
             if case .failure = completion {
@@ -170,24 +218,32 @@ final class PSPayPalTests: XCTestCase {
         }
         .store(in: &cancellables)
 
-        let safariViewController = try XCTUnwrap(sut.safariViewController)
-        let successUrl = try XCTUnwrap(URL(string: payPalLinks.successUrl))
-        sut.safariViewController(safariViewController, initialLoadDidRedirectTo: successUrl)
+        let payPalWebClient = try XCTUnwrap(sut.payPalWebClient)
+        let result = PayPalWebCheckoutResult(
+            orderID: orderId,
+            payerID: payerId
+        )
+        sut.payPal(payPalWebClient, didFinishWithResult: result)
 
         wait(for: [expectation], timeout: 1.0)
     }
 
-    func test_initiatePayPalFlow_webRenderType_failedUrlRedirect() throws {
+    func test_initiatePayPalFlow_webRenderType_error() throws {
         // Given
         let expectation = expectation(description: "Initiate PayPal flow expectation.")
-        let sut = PSPayPal(renderType: .web)
+        let clientId = "clientId"
+        let environment: PSPayPalEnvironment = .sandbox
+        let renderType: PSPayPalRenderType = .web
+        let sut = PSPayPal(
+            clientId: clientId,
+            environment: environment,
+            renderType: renderType
+        )
         let orderId = "orderId"
-        let payPalLinks = PSPayPalLinks.createMock()
 
         // When
         sut.initiatePayPalFlow(
-            orderId: orderId,
-            payPalLinks: payPalLinks
+            orderId: orderId
         )
         .sink { completion in
             if case .failure = completion {
@@ -200,24 +256,29 @@ final class PSPayPalTests: XCTestCase {
         }
         .store(in: &cancellables)
 
-        let safariViewController = try XCTUnwrap(sut.safariViewController)
-        let failedUrl = try XCTUnwrap(URL(string: payPalLinks.failedUrl))
-        sut.safariViewController(safariViewController, initialLoadDidRedirectTo: failedUrl)
+        let payPalWebClient = try XCTUnwrap(sut.payPalWebClient)
+        let mockError = CorePayments.CoreSDKError(code: nil, domain: nil, errorDescription: nil)
+        sut.payPal(payPalWebClient, didFinishWithError: mockError)
 
         wait(for: [expectation], timeout: 1.0)
     }
 
-    func test_initiatePayPalFlow_webRenderType_cancelledUrlRedirect() throws {
+    func test_initiatePayPalFlow_webRenderType_cancelled() throws {
         // Given
         let expectation = expectation(description: "Initiate PayPal flow expectation.")
-        let sut = PSPayPal(renderType: .web)
+        let clientId = "clientId"
+        let environment: PSPayPalEnvironment = .sandbox
+        let renderType: PSPayPalRenderType = .web
+        let sut = PSPayPal(
+            clientId: clientId,
+            environment: environment,
+            renderType: renderType
+        )
         let orderId = "orderId"
-        let payPalLinks = PSPayPalLinks.createMock()
 
         // When
         sut.initiatePayPalFlow(
-            orderId: orderId,
-            payPalLinks: payPalLinks
+            orderId: orderId
         )
         .sink { completion in
             if case .failure = completion {
@@ -230,81 +291,9 @@ final class PSPayPalTests: XCTestCase {
         }
         .store(in: &cancellables)
 
-        let safariViewController = try XCTUnwrap(sut.safariViewController)
-        let cancelledUrl = try XCTUnwrap(URL(string: payPalLinks.cancelledUrl))
-        sut.safariViewController(safariViewController, initialLoadDidRedirectTo: cancelledUrl)
+        let payPalWebClient = try XCTUnwrap(sut.payPalWebClient)
+        sut.payPalDidCancel(payPalWebClient)
 
         wait(for: [expectation], timeout: 1.0)
-    }
-
-    func test_initiatePayPalFlow_webRenderType_defaultUrlRedirect() throws {
-        // Given
-        let expectation = expectation(description: "Initiate PayPal flow expectation.")
-        let sut = PSPayPal(renderType: .web)
-        let orderId = "orderId"
-        let payPalLinks = PSPayPalLinks.createMock()
-
-        // When
-        sut.initiatePayPalFlow(
-            orderId: orderId,
-            payPalLinks: payPalLinks
-        )
-        .sink { completion in
-            if case .failure = completion {
-                XCTFail("Expected success, received failure.")
-            }
-        } receiveValue: { result in
-            // Then
-            XCTAssertEqual(result, .failed)
-            expectation.fulfill()
-        }
-        .store(in: &cancellables)
-
-        let safariViewController = try XCTUnwrap(sut.safariViewController)
-        let defaultUrl = try XCTUnwrap(URL(string: payPalLinks.defaultUrl))
-        sut.safariViewController(safariViewController, initialLoadDidRedirectTo: defaultUrl)
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-
-    func test_initiatePayPalFlow_webRenderType_userCancelled() throws {
-        // Given
-        let expectation = expectation(description: "Initiate PayPal flow expectation.")
-        let sut = PSPayPal(renderType: .web)
-        let orderId = "orderId"
-        let payPalLinks = PSPayPalLinks.createMock()
-
-        // When
-        sut.initiatePayPalFlow(
-            orderId: orderId,
-            payPalLinks: payPalLinks
-        )
-        .sink { completion in
-            if case .failure = completion {
-                XCTFail("Expected success, received failure.")
-            }
-        } receiveValue: { result in
-            // Then
-            XCTAssertEqual(result, .cancelled)
-            expectation.fulfill()
-        }
-        .store(in: &cancellables)
-
-        let safariViewController = try XCTUnwrap(sut.safariViewController)
-        sut.safariViewControllerDidFinish(safariViewController)
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-}
-
-private extension PSPayPalLinks {
-    static func createMock() -> PSPayPalLinks {
-        PSPayPalLinks(
-            redirectUrl: "https://paysafe.com/redirect",
-            successUrl: "https://paysafe.com/return/success",
-            failedUrl: "https://paysafe.com/return/failed",
-            cancelledUrl: "https://paysafe.com/return/cancelled",
-            defaultUrl: "https://paysafe.com/return"
-        )
     }
 }

@@ -9,6 +9,25 @@
 import XCTest
 
 final class PSErrorTests: XCTestCase {
+    func test_customGenericAPIError() {
+        // Give
+        let error = PSError.genericAPIError(
+            "correlationId",
+            message: "Custom generic api error.",
+            code: 1000
+        )
+        let expectedCode = 1000
+
+        // Then
+        XCTAssertEqual(error.errorCode, .genericAPIError)
+        XCTAssertEqual(error.errorCode.type, .apiError)
+        XCTAssertEqual(error.errorCode.type.rawValue, "APIError")
+        XCTAssertEqual(error.code, expectedCode)
+        XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
+        XCTAssertEqual(error.detailedMessage, "Custom generic api error.")
+        XCTAssertEqual(error.correlationId, "correlationId")
+    }
+
     func test_genericAPIError() {
         // Given
         let error = PSError.genericAPIError("correlationId")
@@ -54,24 +73,6 @@ final class PSErrorTests: XCTestCase {
         XCTAssertEqual(error.correlationId, "correlationId")
     }
 
-    func test_unsuccessfulResponse() {
-        // Given
-        let error = PSError.unsuccessfulResponse(
-            "correlationId",
-            message: "error message"
-        )
-        let expectedCode = 9206
-
-        // Then
-        XCTAssertEqual(error.errorCode, .unsuccessfulResponse)
-        XCTAssertEqual(error.errorCode.type, .apiError)
-        XCTAssertEqual(error.errorCode.type.rawValue, "APIError")
-        XCTAssertEqual(error.code, expectedCode)
-        XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
-        XCTAssertEqual(error.detailedMessage, "error message")
-        XCTAssertEqual(error.correlationId, "correlationId")
-    }
-
     func test_encodingError() {
         // Given
         let error = PSError.encodingError("correlationId")
@@ -114,21 +115,6 @@ final class PSErrorTests: XCTestCase {
         XCTAssertEqual(error.code, expectedCode)
         XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
         XCTAssertEqual(error.detailedMessage, "No connection to server.")
-        XCTAssertEqual(error.correlationId, "correlationId")
-    }
-
-    func test_invalidCredentials() {
-        // Given
-        let error = PSError.invalidCredentials("correlationId")
-        let expectedCode = 9169
-
-        // Then
-        XCTAssertEqual(error.errorCode, .invalidCredentials)
-        XCTAssertEqual(error.errorCode.type, .apiError)
-        XCTAssertEqual(error.errorCode.type.rawValue, "APIError")
-        XCTAssertEqual(error.code, expectedCode)
-        XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
-        XCTAssertEqual(error.detailedMessage, "Invalid credentials (API key).")
         XCTAssertEqual(error.correlationId, "correlationId")
     }
 
@@ -576,6 +562,66 @@ final class PSErrorTests: XCTestCase {
         XCTAssertEqual(error.code, expectedCode)
         XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
         XCTAssertEqual(error.detailedMessage, "Profile email should be valid.")
+        XCTAssertEqual(error.correlationId, "correlationId")
+    }
+
+    func test_invalidAPIKeyFormat() {
+        // Given
+        let error = PSError.coreInvalidAPIKeyFormat("correlationId")
+        let expectedCode = 9013
+
+        // Then
+        XCTAssertEqual(error.errorCode, .coreInvalidAPIKeyFormat)
+        XCTAssertEqual(error.errorCode.type, .coreError)
+        XCTAssertEqual(error.errorCode.type.rawValue, "CoreError")
+        XCTAssertEqual(error.code, expectedCode)
+        XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
+        XCTAssertEqual(error.detailedMessage, "Invalid API key.")
+        XCTAssertEqual(error.correlationId, "correlationId")
+    }
+
+    func test_threeDSInvalidResponse() {
+        // Given
+        let error = PSError.threeDSInvalidResponse("correlationId")
+        let expectedCode = 9002
+
+        // Then
+        XCTAssertEqual(error.errorCode, .threeDSInvalidResponse)
+        XCTAssertEqual(error.errorCode.type, .threeDSError)
+        XCTAssertEqual(error.errorCode.type.rawValue, "3DSError")
+        XCTAssertEqual(error.code, expectedCode)
+        XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
+        XCTAssertEqual(error.detailedMessage, "Error communicating with server.")
+        XCTAssertEqual(error.correlationId, "correlationId")
+    }
+
+    func test_threeDSInvalidURL() {
+        // Given
+        let error = PSError.threeDSInvalidURL("correlationId")
+        let expectedCode = 9168
+
+        // Then
+        XCTAssertEqual(error.errorCode, .threeDSInvalidURL)
+        XCTAssertEqual(error.errorCode.type, .threeDSError)
+        XCTAssertEqual(error.errorCode.type.rawValue, "3DSError")
+        XCTAssertEqual(error.code, expectedCode)
+        XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
+        XCTAssertEqual(error.detailedMessage, "Error communicating with server.")
+        XCTAssertEqual(error.correlationId, "correlationId")
+    }
+
+    func test_threeDSEncodingError() {
+        // Given
+        let error = PSError.threeDSEncodingError("correlationId")
+        let expectedCode = 9205
+
+        // Then
+        XCTAssertEqual(error.errorCode, .threeDSEncodingError)
+        XCTAssertEqual(error.errorCode.type, .threeDSError)
+        XCTAssertEqual(error.errorCode.type.rawValue, "3DSError")
+        XCTAssertEqual(error.code, expectedCode)
+        XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
+        XCTAssertEqual(error.detailedMessage, "Encoding error.")
         XCTAssertEqual(error.correlationId, "correlationId")
     }
 }

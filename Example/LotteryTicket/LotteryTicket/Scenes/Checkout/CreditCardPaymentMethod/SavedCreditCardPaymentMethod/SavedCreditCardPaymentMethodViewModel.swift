@@ -69,18 +69,18 @@ final class SavedCreditCardPaymentMethodViewModel: ObservableObject {
         isloading = true
 
         /// Payment amount in minor units
-        let amount = totalPrice * 100
-        let options = PSTokenizeOptions(
+        let amount = Int(totalPrice * 100)
+        let options = PSCardTokenizeOptions(
             amount: amount,
             currencyCode: "USD",
             transactionType: .payment,
             merchantRefNum: PaysafeSDK.shared.getMerchantReferenceNumber(),
-            customerDetails: CustomerDetails(
-                billingDetails: billingAddress.toBillingDetails(),
-                profile: nil
-            ),
+            billingDetails: billingAddress.toBillingDetails(),
             accountId: paymentManager.cardAccountId,
-            threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop"),
+            threeDS: ThreeDS(
+                merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop",
+                process: true
+            ),
             singleUseCustomerToken: savedCard.singleUseCustomerToken,
             paymentTokenFrom: savedCard.paymentTokenFrom
         )

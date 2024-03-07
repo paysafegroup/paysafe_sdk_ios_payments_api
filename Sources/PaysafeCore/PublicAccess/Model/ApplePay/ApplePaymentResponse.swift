@@ -5,7 +5,9 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
+#if canImport(PaysafeApplePay)
 import PaysafeApplePay
+#endif
 
 /// ApplePaymentResponse
 struct ApplePaymentResponse {

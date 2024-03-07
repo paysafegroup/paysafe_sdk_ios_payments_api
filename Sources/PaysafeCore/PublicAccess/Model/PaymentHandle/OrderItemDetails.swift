@@ -22,10 +22,10 @@ public struct OrderItemDetails: Encodable {
     ///   - reorderItemsIndicator: Reorder items indicator
     ///   - shippingIndicator: Shipping indicator
     public init(
-        preOrderItemAvailabilityDate: String?,
-        preOrderPurchaseIndicator: String?,
-        reorderItemsIndicator: String?,
-        shippingIndicator: String?
+        preOrderItemAvailabilityDate: String? = nil,
+        preOrderPurchaseIndicator: String? = nil,
+        reorderItemsIndicator: String? = nil,
+        shippingIndicator: String? = nil
     ) {
         self.preOrderItemAvailabilityDate = preOrderItemAvailabilityDate
         self.preOrderPurchaseIndicator = preOrderPurchaseIndicator

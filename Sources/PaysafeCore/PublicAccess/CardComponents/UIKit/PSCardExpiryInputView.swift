@@ -19,6 +19,7 @@ public class PSCardExpiryInputView: UIView, PSCardInputView {
     lazy var cardExpiryTextField: PSCardExpiryInputTextField = {
         let textField = PSCardExpiryInputTextField()
         textField.inputType = inputType
+        textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
         textField.psCardExpiryInputTextFieldDelegate = self
         return textField
     }()
@@ -29,6 +30,8 @@ public class PSCardExpiryInputView: UIView, PSCardInputView {
             cardExpiryTextField.inputType = inputType
         }
     }
+    /// Indicates if the textfield should use the top placeholder animation
+    private var animateTopPlaceholderLabel: Bool = true
 
     /// PSCardExpiryInputViewDelegate
     weak var psDelegate: PSCardExpiryInputViewDelegate?
@@ -49,9 +52,13 @@ public class PSCardExpiryInputView: UIView, PSCardInputView {
 
     /// - Parameters:
     ///   - inputType: PSCardExpiryInputType, default as `datePicker`
-    public init(inputType: PSCardExpiryInputType = .datePicker) {
+    public init(
+        inputType: PSCardExpiryInputType = .datePicker,
+        animateTopPlaceholderLabel: Bool = true
+    ) {
         super.init(frame: .zero)
         self.inputType = inputType
+        self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
         configure()
     }
 

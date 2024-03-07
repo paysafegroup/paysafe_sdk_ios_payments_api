@@ -8,7 +8,7 @@
 /// ShippingDetailsRequest
 struct ShippingDetailsRequest: Encodable {
     /// Shipping method
-    let shipMethod: String?
+    let shipMethod: ShipMethodRequest?
     /// Street
     let street: String?
     /// Street 2

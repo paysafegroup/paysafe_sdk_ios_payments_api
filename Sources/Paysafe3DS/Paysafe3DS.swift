@@ -7,8 +7,10 @@
 
 import CardinalMobile
 import Combine
+#if canImport(PaysafeCommon)
 @_spi(PS) import PaysafeCommon
 import PaysafeNetworking
+#endif
 
 /// Completion typealias used in the `initiate3DSFlow` method that contains a result of deviceFingerprintingId or a PSError.
 public typealias PaysafeInitiate3DSFlowCompletion = (Result<String, PSError>) -> Void
@@ -65,15 +67,7 @@ public class Paysafe3DS {
     ///
     /// - Note: Paysafe3DSOptions
     /// * accountId: Merchants account id
-    /// * paymentHandleToken: Payment handle token
-    /// * cardBin: Card bin
-    /// * merchantRefNum: Merchant reference number
-    /// * currencyCode: Currency code
-    /// * amount: Amount
-    /// * deviceChannel: Device channel
-    /// * messageCategory: Message category
-    /// * authenticationPurpose: Authentication purpose
-    /// * merchantUrl: Merchant url
+    /// * bin: Card bin
     /// - Parameters:
     ///   - options: Paysafe3DSOptions
     /// - Returns:Publisher that publishes a String representing the deviceFingerprintingId or a PSError.
@@ -89,15 +83,21 @@ public class Paysafe3DS {
     /// * threeDSFailedValidation
     /// * threeDSUnknown
     public func initiate3DSFlow(
-        using options: Paysafe3DSOptions
+        using options: Paysafe3DSOptions,
+        and supportedUI: SupportedUI? = nil
     ) -> AnyPublisher<String, PSError> {
+        if let supportedUI {
+            configuration.supportedUI = supportedUI
+        }
         session.configure(configuration.cardinalSessionConfiguration)
         return getJWT(
             using: options.accountId,
-            and: options.cardBin
+            and: options.bin
         )
         .flatMap { [weak self] jwtResponse -> AnyPublisher<String, PSError> in
-            guard let self else { return Fail(error: .genericAPIError()).eraseToAnyPublisher() }
+            guard let self else {
+                return Fail(error: .genericAPIError()).eraseToAnyPublisher()
+            }
             return setup3DSSession(
                 using: jwtResponse
             )
@@ -109,15 +109,7 @@ public class Paysafe3DS {
     ///
     /// - Note: Paysafe3DSOptions
     /// * accountId: Merchants account id
-    /// * paymentHandleToken: Payment handle token
-    /// * cardBin: Card bin
-    /// * merchantRefNum: Merchant reference number
-    /// * currencyCode: Currency code
-    /// * amount: Amount
-    /// * deviceChannel: Device channel
-    /// * messageCategory: Message category
-    /// * authenticationPurpose: Authentication purpose
-    /// * merchantUrl: Merchant url
+    /// * bin: Card bin
     /// - Parameters:
     ///   - options: Paysafe3DSOptions
     ///   - completion : PaysafeInitiate3DSFlowCompletion
@@ -135,9 +127,11 @@ public class Paysafe3DS {
     /// * threeDSUnknown
     public func initiate3DSFlow(
         using options: Paysafe3DSOptions,
+        and supportedUI: SupportedUI? = nil,
         completion: @escaping PaysafeInitiate3DSFlowCompletion
     ) {
-        initiate3DSFlow(using: options)
+        initiate3DSFlow(using: options,
+                        and: supportedUI)
             .sink { publisherCompletion in
                 switch publisherCompletion {
                 case .finished:
@@ -162,7 +156,9 @@ public class Paysafe3DS {
             using: payload
         )
         .flatMap { [weak self] finalizeOptions -> AnyPublisher<String, PSError> in
-            guard let self else { return Fail(error: .genericAPIError()).eraseToAnyPublisher() }
+            guard let self else {
+                return Fail(error: .genericAPIError()).eraseToAnyPublisher()
+            }
             return finalizeAuthentication(
                 using: finalizeOptions
             )
@@ -227,6 +223,13 @@ private extension Paysafe3DS {
             httpMethod: .post,
             payload: jwtRequest
         )
+        .mapError { [weak self] error in
+            guard let self else {
+                return PSError.genericAPIError()
+            }
+            return error.from3DStoPSError(correlationId)
+        }
+        .eraseToAnyPublisher()
     }
 
     /// Paysafe3DS method used to setup the 3D Secure session. Expected return `deviceFingerprintingId`.
@@ -305,6 +308,12 @@ private extension Paysafe3DS {
             httpMethod: .post,
             payload: finalizeRequest
         )
+        .mapError { [weak self] apiError in
+            guard let self else {
+                return PSError.genericAPIError()
+            }
+            return apiError.from3DStoPSError(correlationId)
+        }
         .eraseToAnyPublisher()
     }
 }
@@ -321,7 +330,9 @@ extension Paysafe3DS: CardinalValidationDelegate {
                 return startChallengeSubject.send(.failure(.genericAPIError(correlationId)))
             }
         }
-        guard let validateResponse else { return startChallengeSubject.send(.failure(.genericAPIError(correlationId))) }
+        guard let validateResponse else {
+            return startChallengeSubject.send(.failure(.genericAPIError(correlationId)))
+        }
         switch validateResponse.actionCode {
         case .success, .noAction:
             guard validateResponse.isValidated, let serverJWT else { return startChallengeSubject.send(.failure(.threeDSFailedValidation(correlationId))) }

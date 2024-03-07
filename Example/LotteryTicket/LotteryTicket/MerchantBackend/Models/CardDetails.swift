@@ -8,19 +8,19 @@
 /// CardDetails
 struct CardDetails: Decodable {
     /// Last digits
-    let lastDigits: String
+    let lastDigits: String?
     /// Card expiry
-    let cardExpiry: CardExpiry
+    let cardExpiry: CardExpiry?
     /// Card bin
-    let cardBin: String
+    let cardBin: String?
     /// Card type
-    let cardType: CardType
+    let cardType: CardType?
     /// Cardholder name
-    let holderName: String
+    let holderName: String?
     /// Card status
-    let status: String
+    let status: String?
     /// Card category
-    let cardCategory: String
+    let cardCategory: String?
     /// Issuing country
-    let issuingCountry: String
+    let issuingCountry: String?
 }

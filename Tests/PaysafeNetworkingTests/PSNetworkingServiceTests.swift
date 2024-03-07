@@ -113,7 +113,8 @@ final class PSNetworkingServiceTests: XCTestCase {
             switch completion {
             case let .failure(error):
                 // Then
-                XCTAssertEqual(error.errorCode, .genericAPIError)
+                XCTAssertEqual(error.error.message, "Unhandled error occurred.")
+                XCTAssertEqual(error.error.code, "9014")
                 expectation.fulfill()
             case .finished:
                 XCTFail("Request unexpectedly completed successfully.")
@@ -178,7 +179,8 @@ final class PSNetworkingServiceTests: XCTestCase {
             switch completion {
             case let .failure(error):
                 // Then
-                XCTAssertEqual(error.errorCode, .encodingError)
+                XCTAssertEqual(error.error.message, "Encoding error.")
+                XCTAssertEqual(error.error.code, "9205")
                 expectation.fulfill()
             case .finished:
                 XCTFail("Expected request to fail, but it succeeded.")
@@ -212,7 +214,8 @@ final class PSNetworkingServiceTests: XCTestCase {
             switch completion {
             case let .failure(error):
                 // Then
-                XCTAssertEqual(error.errorCode, .unsuccessfulResponse)
+                XCTAssertEqual(error.error.message, "Unhandled error occurred.")
+                XCTAssertEqual(error.error.code, "9014")
                 expectation.fulfill()
             case .finished:
                 XCTFail("Expected request to fail due to 404 error, but it succeeded.")
@@ -321,7 +324,8 @@ final class PSNetworkingServiceTests: XCTestCase {
             switch completion {
             case let .failure(error):
                 // Then
-                XCTAssertEqual(error.errorCode, .unsuccessfulResponse)
+                XCTAssertEqual(error.error.message, "Unhandled error occurred.")
+                XCTAssertEqual(error.error.code, "9014")
                 expectation.fulfill()
             case .finished:
                 XCTFail("Expected request to fail due to 404 error, but it succeeded.")
@@ -358,7 +362,8 @@ final class PSNetworkingServiceTests: XCTestCase {
             switch completion {
             case let .failure(error):
                 // Then
-                XCTAssertEqual(error.errorCode, .invalidResponse)
+                XCTAssertEqual(error.error.message, "Error communicating with server.")
+                XCTAssertEqual(error.error.code, "9002")
                 expectation.fulfill()
             case .finished:
                 XCTFail("Expected request to fail due to parsing error, but it succeeded.")
@@ -396,7 +401,8 @@ final class PSNetworkingServiceTests: XCTestCase {
             switch completion {
             case let .failure(error):
                 // Then
-                XCTAssertEqual(error.errorCode, .invalidResponse)
+                XCTAssertEqual(error.error.message, "Error communicating with server.")
+                XCTAssertEqual(error.error.code, "9002")
                 expectation.fulfill()
             case .finished:
                 XCTFail("Expected request to fail due to parsing error, but it succeeded.")

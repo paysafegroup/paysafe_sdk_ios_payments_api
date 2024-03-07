@@ -11,6 +11,8 @@ struct AccountConfigurationResponse: Decodable {
     let id: String
     /// Is Apple Pay
     let isApplePay: Bool
+    /// Client id
+    let clientId: String?
     /// Card type config
     let cardTypeConfig: CardTypeConfig?
 }

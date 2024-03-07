@@ -6,7 +6,9 @@
 //
 
 import PassKit
+#if canImport(PaysafeCommon)
 import PaysafeCommon
+#endif
 
 /// Paysafe Apple Pay finalize block.
 public typealias PSApplePayFinalizeBlock = (PKPaymentAuthorizationStatus, PSError?) -> Void

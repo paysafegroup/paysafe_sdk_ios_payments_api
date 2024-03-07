@@ -15,4 +15,6 @@ struct AccountConfiguration {
     let isApplePay: Bool
     /// Card type config
     let cardTypeConfig: CardTypeConfig?
+    /// Client id
+    let clientId: String?
 }

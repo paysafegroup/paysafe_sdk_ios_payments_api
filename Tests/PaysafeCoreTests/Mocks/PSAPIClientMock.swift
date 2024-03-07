@@ -12,7 +12,7 @@ import XCTest
 
 class PSAPIClientMock: PSAPIClient {
     var tokenizeShouldFail = false
-    override func tokenize(options: PSTokenizeOptions, paymentType: PaymentType, card: CardRequest?) -> AnyPublisher<PaymentHandle, PSError> {
+    override func tokenize(options: PSTokenizable, paymentType: PaymentType, card: CardRequest?) -> AnyPublisher<PaymentHandle, PSError> {
         switch tokenizeShouldFail {
         case true:
             return Fail(error: .genericAPIError("correlationId")).eraseToAnyPublisher()
@@ -84,7 +84,8 @@ class PSAPIClientMock: PSAPIClient {
                             "MC": "BOTH",
                             "DI": "BOTH",
                             "AM": "BOTH"
-                        ]
+                        ],
+                        clientId: "testClientId"
                     )
                 )
                 completion(.success(paymentMethod))
@@ -102,7 +103,8 @@ class PSAPIClientMock: PSAPIClient {
                             "MC": "BOTH",
                             "DI": "BOTH",
                             "AM": "BOTH"
-                        ]
+                        ],
+                        clientId: "testClientId"
                     )
                 )
                 completion(.success(paymentMethod))
@@ -111,7 +113,12 @@ class PSAPIClientMock: PSAPIClient {
                     paymentMethod: .payPal,
                     currencyCode: currencyCode,
                     accountId: accountId,
-                    accountConfiguration: nil
+                    accountConfiguration: AccountConfiguration(
+                        id: "id",
+                        isApplePay: false,
+                        cardTypeConfig: nil,
+                        clientId: "payPalClientId"
+                    )
                 )
                 completion(.success(paymentMethod))
             default:

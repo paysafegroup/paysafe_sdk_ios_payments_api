@@ -7,7 +7,9 @@
 
 import Combine
 import PassKit
+#if canImport(PaysafeCommon)
 import PaysafeCommon
+#endif
 
 /// PSApplePay
 public class PSApplePay: NSObject {
@@ -64,6 +66,14 @@ public class PSApplePay: NSObject {
                 amount: NSDecimalNumber(value: amount)
             )
         ]
+        if psApplePay.requestBillingAddress {
+            paymentRequest.requiredBillingContactFields = [
+                .name,
+                .emailAddress,
+                .postalAddress,
+                .phoneNumber
+            ]
+        }
         authorizationController = PKPaymentAuthorizationController(paymentRequest: paymentRequest)
         authorizationController?.delegate = self
         authorizationController?.present()
@@ -101,11 +111,65 @@ private extension PSApplePay {
         and completion: PSApplePayFinalizeBlock?
     ) {
         applePayState = .completed
+        let billingContact = mapPKContactToBillingContact(payment.billingContact)
         let initializeApplePayResponse = InitializeApplePayResponse(
-            applePayPaymentToken: payment.toApplePayPaymentToken(),
+            applePayPaymentToken: payment.toApplePayPaymentToken(using: billingContact),
             completion: completion
         )
         initiateApplePayFlowSubject.send(.success(initializeApplePayResponse))
+    }
+
+    /// Map PKConctact to BillingContact
+    ///
+    /// - Parameters:
+    ///   - pkContact: PKContact
+    func mapPKContactToBillingContact(_ pkContact: PKContact?) -> BillingContact? {
+        guard let pkContact else { return nil }
+        let firstName = pkContact.name?.givenName?.nilIfEmpty
+        let lastName = pkContact.name?.familyName?.nilIfEmpty
+        let email = pkContact.emailAddress?.nilIfEmpty
+        let addressLine = pkContact.postalAddress?.street.split(separator: "\n").map(String.init) ?? []
+        let country = pkContact.postalAddress?.country.nilIfEmpty
+        let countryCode = pkContact.postalAddress?.isoCountryCode.nilIfEmpty
+        let postalCode = pkContact.postalAddress?.postalCode.nilIfEmpty
+        let locality = pkContact.postalAddress?.city.nilIfEmpty
+        let administrativeArea = pkContact.postalAddress?.state.nilIfEmpty
+        let phone = pkContact.phoneNumber?.stringValue.nilIfEmpty
+
+        return BillingContact(
+            addressLines: addressLine,
+            countryCode: countryCode,
+            email: email,
+            locality: locality,
+            name: constructName(
+                using: firstName,
+                and: lastName
+            ),
+            phone: phone,
+            country: country,
+            postalCode: postalCode,
+            administrativeArea: administrativeArea
+        )
+    }
+
+    /// Construct name based on firstName and lastName. At least one value is required to exist based on the requiredBillingContactFields setup.
+    ///
+    /// - Parameters:
+    ///   - firstName: User's first name
+    ///   - lastName: User's last name
+    func constructName(
+        using firstName: String?,
+        and lastName: String?
+    ) -> String {
+        if let firstName = firstName, let lastName = lastName {
+            return "\(firstName) \(lastName)"
+        } else if let firstName = firstName {
+            return firstName
+        } else if let lastName = lastName {
+            return lastName
+        } else {
+            fatalError("Both firstName and lastName cannot be nil")
+        }
     }
 }
 

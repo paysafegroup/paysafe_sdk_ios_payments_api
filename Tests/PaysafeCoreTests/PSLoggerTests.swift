@@ -26,7 +26,7 @@ final class PSLoggerTests: XCTestCase {
             sdkVersion: "1.0.0"
         )
         sut = PSLogger(
-            apiKey: "apiKey",
+            apiKey: "am9objpkb2UK",
             correlationId: "correlationId",
             baseURL: "https://test.ps.com",
             integrationType: .paymentsApi

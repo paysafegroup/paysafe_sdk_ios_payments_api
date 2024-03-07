@@ -15,8 +15,16 @@ protocol PSTextFieldDelegate: AnyObject {
 
 /// PSTextField
 class PSTextField: UITextField {
+    /// Check if top place holder label is already configured
+    private var isTopPlaceholderLabelConfigured = false
+    /// Flag that determines if we should display the top placeholder
+    var shouldAnimateTopPlaceholder: Bool = true {
+        didSet {
+            handleTopPlaceholderLabelVisibility()
+        }
+    }
     /// Top placeholder label
-    private var topPlaceholderLabel: UILabel?
+    private var topPlaceholderLabel = UILabel(frame: .zero)
     /// Top placeholder label vertical constraint
     private var topPlaceholderLabelVerticalConstraint: NSLayoutConstraint?
     /// Top placeholder label leading constraint
@@ -26,7 +34,7 @@ class PSTextField: UITextField {
 
     /// PSTextField padding
     private var padding: UIEdgeInsets {
-        let supplementaryTopPadding = frame.height * 0.25
+        let supplementaryTopPadding = shouldAnimateTopPlaceholder ? frame.height * 0.25 : 0.0
         let topPadding = !text.isNilOrEmpty || psState == .selected ? supplementaryTopPadding : 0.0
         let rightViewWidth = rightView?.frame.width ?? 0
         return UIEdgeInsets(
@@ -100,14 +108,14 @@ class PSTextField: UITextField {
         didSet {
             guard let normalPlaceholder = placeholders[.normal] else { return }
             placeholder = normalPlaceholder
-            topPlaceholderLabel?.text = normalPlaceholder
+            topPlaceholderLabel.text = shouldAnimateTopPlaceholder ? normalPlaceholder : nil
         }
     }
 
     /// Text alignment
     override var textAlignment: NSTextAlignment {
         didSet {
-            if textAlignment == .center {
+            if textAlignment == .center, shouldAnimateTopPlaceholder {
                 topPlaceholderLabelLeadingConstraint?.isActive = false
             }
         }
@@ -142,7 +150,7 @@ class PSTextField: UITextField {
 
     func configureRightView(iconName: String?) {
         guard let iconName else { return rightView = nil }
-        rightView = UIImageView(image: UIImage(named: iconName, in: Bundle.module, compatibleWith: nil))
+        rightView = UIImageView(image: UIImage(named: iconName))
         rightViewMode = .always
         layoutIfNeeded()
     }
@@ -151,7 +159,9 @@ class PSTextField: UITextField {
     func textDidChange() {
         guard let text else { return }
         isValid = true
-        animateTopPlaceholderLabel(visible: psState == .selected)
+        if shouldAnimateTopPlaceholder {
+            animateTopPlaceholderLabel(visible: psState == .selected)
+        }
         psDelegate?.textField(self, changed: text, isValid: validator?.validate(field: text) ?? false)
     }
 
@@ -167,8 +177,8 @@ class PSTextField: UITextField {
         font = theme.textInputFont
         textColor = theme.textInputColor
         layer.cornerRadius = theme.borderCornerRadius
-        topPlaceholderLabel?.textColor = theme.placeholderColor
-        topPlaceholderLabel?.font = theme.placeholderFont.withSize(placeholderFont.pointSize - 2)
+        topPlaceholderLabel.textColor = theme.placeholderColor
+        topPlaceholderLabel.font = theme.placeholderFont.withSize(placeholderFont.pointSize - 2)
         updateAppearance()
     }
 }
@@ -176,7 +186,9 @@ class PSTextField: UITextField {
 // MARK: - Private
 private extension PSTextField {
     func configure() {
-        configureTopPlaceholderLabel()
+        if shouldAnimateTopPlaceholder {
+            configureTopPlaceholderLabel()
+        }
         configureTextField()
         configureToolbarButton()
         applyTheme()
@@ -194,18 +206,24 @@ private extension PSTextField {
         switch psState {
         case .normal:
             placeholder = placeholders[.normal]
-            animateTopPlaceholderLabel(visible: !text.isNilOrEmpty)
-            topPlaceholderLabel?.textColor = theme.placeholderColor
+            if shouldAnimateTopPlaceholder {
+                animateTopPlaceholderLabel(visible: !text.isNilOrEmpty)
+                topPlaceholderLabel.textColor = theme.placeholderColor
+            }
             layer.borderColor = theme.borderColor.cgColor
         case .selected:
             placeholder = placeholders[.selected]
-            animateTopPlaceholderLabel(visible: true)
-            topPlaceholderLabel?.textColor = theme.placeholderColor
+            if shouldAnimateTopPlaceholder {
+                animateTopPlaceholderLabel(visible: true)
+                topPlaceholderLabel.textColor = theme.placeholderColor
+            }
             layer.borderColor = theme.focusedBorderColor.cgColor
         case .error:
             placeholder = placeholders[.error]
-            animateTopPlaceholderLabel(visible: !text.isNilOrEmpty)
-            topPlaceholderLabel?.textColor = theme.errorColor
+            if shouldAnimateTopPlaceholder {
+                animateTopPlaceholderLabel(visible: !text.isNilOrEmpty)
+                topPlaceholderLabel.textColor = theme.errorColor
+            }
             layer.borderColor = theme.errorColor.cgColor
         }
         updatePlaceholderAttributes()
@@ -226,9 +244,8 @@ private extension PSTextField {
     }
 
     func configureTopPlaceholderLabel() {
-        let topPlaceholderLabel = UILabel(frame: .zero)
+        guard !isTopPlaceholderLabelConfigured else { return }
         addSubview(topPlaceholderLabel)
-        self.topPlaceholderLabel = topPlaceholderLabel
 
         topPlaceholderLabel.translatesAutoresizingMaskIntoConstraints = false
         let topPlaceholderLabelVerticalConstraint = topPlaceholderLabel.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0)
@@ -247,24 +264,24 @@ private extension PSTextField {
 
     func animateTopPlaceholderLabel(visible: Bool) {
         // Check if it's already in the desired state
-        guard visible == topPlaceholderLabel?.isHidden else { return }
+        guard visible == topPlaceholderLabel.isHidden else { return }
         isEditing ? layoutIfNeeded() : nil
 
-        topPlaceholderLabel?.alpha = visible ? 0 : 1
-        topPlaceholderLabel?.isHidden = false
+        topPlaceholderLabel.alpha = visible ? 0 : 1
+        topPlaceholderLabel.isHidden = false
 
         UIView.animate(
             withDuration: 0.3,
             animations: { [weak self] in
                 guard let self else { return }
-                let supplementaryTopPadding = -frame.height * 0.15
+                let supplementaryTopPadding = shouldAnimateTopPlaceholder ? -frame.height * 0.15 : 0.0
                 self.topPlaceholderLabelVerticalConstraint?.constant = visible ? supplementaryTopPadding : 0.0
-                self.topPlaceholderLabel?.alpha = visible ? 1 : 0
+                self.topPlaceholderLabel.alpha = visible ? 1 : 0
                 self.layoutIfNeeded()
             },
             completion: { [weak self] _ in
                 guard let self else { return }
-                self.topPlaceholderLabel?.isHidden = !visible
+                self.topPlaceholderLabel.isHidden = !visible
             }
         )
     }
@@ -278,6 +295,15 @@ private extension PSTextField {
         ]
         toolbar.sizeToFit()
         inputAccessoryView = toolbar
+    }
+
+    private func handleTopPlaceholderLabelVisibility() {
+        if shouldAnimateTopPlaceholder, !isTopPlaceholderLabelConfigured {
+            configureTopPlaceholderLabel()
+            isTopPlaceholderLabelConfigured = true
+        } else {
+            topPlaceholderLabel.isHidden = true
+        }
     }
 
     @objc

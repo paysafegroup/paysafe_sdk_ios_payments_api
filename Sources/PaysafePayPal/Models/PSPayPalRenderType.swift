@@ -5,10 +5,10 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-/// PayPalRenderType
+/// PSPayPalRenderType
 public enum PSPayPalRenderType {
-    /// PayPal native render type using clientId and environment
-    case native(clientId: String, environment: PSPayPalEnvironment)
+    /// PayPal native render type
+    case native
     /// PayPal web render type
     case web
 }

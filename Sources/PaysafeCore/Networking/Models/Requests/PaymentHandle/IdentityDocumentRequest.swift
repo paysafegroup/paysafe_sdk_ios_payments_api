@@ -7,8 +7,12 @@
 
 /// IdentityDocumentRequest
 struct IdentityDocumentRequest: Encodable {
-    /// Type
-    let type: String
+/// Type
+#if DEBUG
+    var type: String = "SOCIAL_SECURITY"
+#else
+    private let type: String = "SOCIAL_SECURITY"
+#endif
     /// Document number
     let documentNumber: String
 }

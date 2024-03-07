@@ -21,6 +21,7 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
     lazy var cardNumberTextField: PSCardNumberInputTextField = {
         let textField = PSCardNumberInputTextField()
         textField.separatorType = separatorType
+        textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
         textField.psCardNumberInputTextFieldDelegate = self
         return textField
     }()
@@ -31,6 +32,8 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
             cardNumberTextField.separatorType = separatorType
         }
     }
+    /// Indicates if the textfield should use the top placeholder animation
+    private var animateTopPlaceholderLabel: Bool = true
 
     /// PSCardNumberInputViewDelegate
     weak var psDelegate: PSCardNumberInputViewDelegate?
@@ -51,8 +54,13 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
 
     /// - Parameters:
     ///   - separatorType: PSCardNumberInputSeparatorType, default as `whitespace`
-    public init(separatorType: PSCardNumberInputSeparatorType = .whitespace) {
+    ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    public init(
+        separatorType: PSCardNumberInputSeparatorType = .whitespace,
+        animateTopPlaceholderLabel: Bool = true
+    ) {
         super.init(frame: .zero)
+        self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
         self.separatorType = separatorType
         configure()
     }

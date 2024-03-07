@@ -5,9 +5,8 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-/// The two-uppercase-character ISO 3166 country code.
-/// https://developer.paysafe.com/en/support/reference-information/codes/#c319
-public struct ApplePayAdditionalData: Encodable {
+/// Apple pay additional data
+struct ApplePayAdditionalData: Encodable {
     /// Label
     let label: String
     /// Request billing address

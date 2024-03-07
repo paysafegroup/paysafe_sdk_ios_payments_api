@@ -7,9 +7,11 @@
 
 import Combine
 import Foundation
+#if canImport(PaysafeCommon)
 import Paysafe3DS
 @_spi(PS) import PaysafeCommon
 import PaysafeNetworking
+#endif
 
 // swiftlint:disable file_length
 /// PaysafeCore module. The PaysafeCore module is responsable for initialising the PSAPIClient class and handle payment flows.
@@ -31,6 +33,12 @@ public class PSAPIClient {
     private let logger: PSLogger
     /// Tokenize in progress flag
     private var tokenizeInProgress = false
+    /// Render type used for 3ds if merchant sets a value
+    private var renderType: RenderType?
+    /// Account id used for current tokenize flow
+    private var accountId: String?
+    /// Base url for return links
+    private let baseHref = "https://usgaminggamblig.com/payment/return/"
 
     /// - Parameters:
     ///   - apiKey: Paysafe API key
@@ -108,7 +116,7 @@ public class PSAPIClient {
     ///   - options: PSTokenizeOptions
     ///   - card: CardRequest
     func tokenize(
-        options: PSTokenizeOptions,
+        options: PSTokenizable,
         paymentType: PaymentType,
         card: CardRequest? = nil
     ) -> AnyPublisher<PaymentHandle, PSError> {
@@ -117,7 +125,10 @@ public class PSAPIClient {
             logEvent(error)
             return Fail(error: error).eraseToAnyPublisher()
         }
-        updateRenderTypeIfNeeded(options.renderType)
+        accountId = options.accountId
+        if let cardOptions = options as? PSCardTokenizeOptions {
+            renderType = cardOptions.renderType
+        }
         tokenizeInProgress = true
         return getSingleUsePaymentHandle(
             options: options,
@@ -125,10 +136,20 @@ public class PSAPIClient {
             card: card
         )
         .flatMap { [weak self] paymentResponse -> AnyPublisher<PaymentHandle, PSError> in
-            guard let self else { return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher() }
+            guard let self else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
+            let shouldProcessTransaction: Bool? = {
+                switch options {
+                case let cardOptions as PSCardTokenizeOptions:
+                    return cardOptions.threeDS?.process
+                default:
+                    return nil
+                }
+            }()
             return handlePaymentResponse(
                 using: paymentResponse,
-                process: options.threeDS?.process
+                process: shouldProcessTransaction
             )
         }
         .handleEvents(
@@ -161,7 +182,9 @@ public class PSAPIClient {
             using: paymentHandleToken
         )
         .flatMap { [weak self] refreshPaymentHandleTokenResponse -> AnyPublisher<Void, PSError> in
-            guard let self else { return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher() }
+            guard let self else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
             return handleRefreshPaymentHandleTokenResponse(
                 using: refreshPaymentHandleTokenResponse,
                 and: retryCount,
@@ -222,7 +245,7 @@ private extension PSAPIClient {
     ///   - singleUseCustomerToken: String
     ///   - paymentTokenFrom: String
     func getSingleUsePaymentHandle(
-        options: PSTokenizeOptions,
+        options: PSTokenizable,
         paymentType: PaymentType,
         card: CardRequest? = nil,
         singleUseCustomerToken: String? = nil,
@@ -243,6 +266,8 @@ private extension PSAPIClient {
             invocationId: invocationId,
             transactionSource: paymentType == .payPal ? "PaysafeJSV1" : "IosSDKV2"
         )
+        .mapError { $0.toPSError(PaysafeSDK.shared.correlationId) }
+        .eraseToAnyPublisher()
     }
 
     /// Create and prepare payment request for saved card payment or new card payment
@@ -251,57 +276,162 @@ private extension PSAPIClient {
     ///   - options: PSTokenizeOptions
     ///   - card: CardRequest
     func paymentRequest(
-        options: PSTokenizeOptions,
+        options: PSTokenizable,
         paymentType: PaymentType,
         card: CardRequest?
+    ) -> PaymentRequest? {
+        switch options {
+        case let options as PSCardTokenizeOptions:
+            return cardPaymentRequest(
+                from: options,
+                card: card
+            )
+        case let options as PSApplePayTokenizeOptions:
+            return applePaymentRequest(
+                from: options
+            )
+        case let options as PSPayPalTokenizeOptions:
+            return payPalPaymentRequest(from: options)
+        default:
+            return nil
+        }
+    }
+
+    func cardPaymentRequest(
+        from options: PSCardTokenizeOptions,
+        card: CardRequest?
     ) -> PaymentRequest {
-        /// We are using the SavedCardTokens object because it's failable and we can use its values in the request
-        /// If the object init fails the values will both be nil which is a requirement for this task.
         let savedCardTokens = SavedCardTokens(
             singleUseCustomerToken: options.singleUseCustomerToken,
             paymentToken: options.paymentTokenFrom
         )
-        let paymentRequest = PaymentRequest(
+
+        return PaymentRequest(
             merchantRefNum: options.merchantRefNum,
             transactionType: options.transactionType.request,
             card: cardDetails(using: card, isNewCard: savedCardTokens == nil),
             accountId: options.accountId,
-            paymentType: paymentType,
+            paymentType: .card,
             amount: options.amount,
             currencyCode: options.currencyCode,
             returnLinks: [
                 ReturnLink(
                     rel: .defaultAction,
-                    href: "https://usgaminggamblig.com/payment/return/",
+                    href: baseHref,
                     method: "GET"
                 ),
                 ReturnLink(
                     rel: .onCompleted,
-                    href: "https://usgaminggamblig.com/payment/return/success",
+                    href: "\(baseHref)success",
                     method: "GET"
                 ),
                 ReturnLink(
                     rel: .onFailed,
-                    href: "https://usgaminggamblig.com/payment/return/failed",
+                    href: "\(baseHref)failed",
                     method: "GET"
                 ),
                 ReturnLink(
                     rel: .onCancelled,
-                    href: "https://usgaminggamblig.com/payment/return/cancelled",
+                    href: "\(baseHref)cancelled",
                     method: "GET"
                 )
             ],
-            profile: options.customerDetails.profile?.request,
+            profile: options.profile?.request,
             threeDs: options.threeDS?.request(using: options.merchantRefNum),
-            billingDetails: options.customerDetails.billingDetails?.request,
+            billingDetails: options.billingDetails?.request,
             merchantDescriptor: options.merchantDescriptor?.request,
             shippingDetails: options.shippingDetails?.request,
             singleUseCustomerToken: savedCardTokens?.singleUseCustomerToken,
             paymentHandleTokenFrom: savedCardTokens?.paymentToken,
+            applePay: nil,
+            paypal: nil
+        )
+    }
+
+    func applePaymentRequest(from options: PSApplePayTokenizeOptions) -> PaymentRequest {
+        PaymentRequest(
+            merchantRefNum: options.merchantRefNum,
+            transactionType: options.transactionType.request,
+            card: nil,
+            accountId: options.accountId,
+            paymentType: .card,
+            amount: options.amount,
+            currencyCode: options.currencyCode,
+            returnLinks: [
+                ReturnLink(
+                    rel: .defaultAction,
+                    href: baseHref,
+                    method: "GET"
+                ),
+                ReturnLink(
+                    rel: .onCompleted,
+                    href: "\(baseHref)success",
+                    method: "GET"
+                ),
+                ReturnLink(
+                    rel: .onFailed,
+                    href: "\(baseHref)failed",
+                    method: "GET"
+                ),
+                ReturnLink(
+                    rel: .onCancelled,
+                    href: "\(baseHref)cancelled",
+                    method: "GET"
+                )
+            ],
+            profile: options.profile?.request,
+            threeDs: nil,
+            billingDetails: options.billingDetails?.request,
+            merchantDescriptor: options.merchantDescriptor?.request,
+            shippingDetails: options.shippingDetails?.request,
+            singleUseCustomerToken: nil,
+            paymentHandleTokenFrom: nil,
             applePay: options.applePay?.request,
+            paypal: nil
+        )
+    }
+
+    func payPalPaymentRequest(from options: PSPayPalTokenizeOptions) -> PaymentRequest {
+        PaymentRequest(
+            merchantRefNum: options.merchantRefNum,
+            transactionType: options.transactionType.request,
+            card: nil,
+            accountId: options.accountId,
+            paymentType: .payPal,
+            amount: options.amount,
+            currencyCode: options.currencyCode,
+            returnLinks: [
+                ReturnLink(
+                    rel: .defaultAction,
+                    href: baseHref,
+                    method: "GET"
+                ),
+                ReturnLink(
+                    rel: .onCompleted,
+                    href: "\(baseHref)success",
+                    method: "GET"
+                ),
+                ReturnLink(
+                    rel: .onFailed,
+                    href: "\(baseHref)failed",
+                    method: "GET"
+                ),
+                ReturnLink(
+                    rel: .onCancelled,
+                    href: "\(baseHref)cancelled",
+                    method: "GET"
+                )
+            ],
+            profile: options.profile?.request,
+            threeDs: nil,
+            billingDetails: options.billingDetails?.request,
+            merchantDescriptor: options.merchantDescriptor?.request,
+            shippingDetails: options.shippingDetails?.request,
+            singleUseCustomerToken: nil,
+            paymentHandleTokenFrom: nil,
+            applePay: nil,
             paypal: options.paypal?.request
         )
-        return paymentRequest
     }
 
     /// Return card object with details for saved card payment or new card payment.
@@ -358,22 +488,36 @@ private extension PSAPIClient {
         using paymentResponse: PaymentResponse,
         process: Bool?
     ) -> AnyPublisher<Void, PSError> {
-        guard let cardBin = paymentResponse.card?.cardBin,
-              let accountId = paymentResponse.accountId else {
+        guard let cardBin = paymentResponse.card?.networkToken?.bin ?? paymentResponse.card?.cardBin else {
             return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId))
                 .eraseToAnyPublisher()
         }
+        /// We prioritize the accountId received from the response. If the response comes with a nil value we use the
+        /// accountId provided in the Tokenizable object.
+        let availableAccountId = paymentResponse.accountId ?? accountId
+        guard let availableAccountId else {
+            return Fail(error: .coreInvalidAccountId(
+                PaysafeSDK.shared.correlationId,
+                message: "Invalid account id for \(PaymentType.card.rawValue)."
+            ))
+            .eraseToAnyPublisher()
+        }
+
         let threeDSOptions = Paysafe3DSOptions(
-            accountId: accountId,
-            cardBin: cardBin
+            accountId: availableAccountId,
+            bin: cardBin
         )
         return paysafe3DS.initiate3DSFlow(
-            using: threeDSOptions
+            using: threeDSOptions,
+            and: getSupportedUI(from: renderType)
         )
         .flatMap { [weak self] deviceFingerprintingId -> AnyPublisher<AuthenticationResponse, PSError> in
-            guard let self else { return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher() }
+            guard let self,
+                  let id = paymentResponse.id else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
             let challengePayloadOptions = ChallengePayloadOptions(
-                id: paymentResponse.id,
+                id: id,
                 merchantRefNum: paymentResponse.merchantRefNum,
                 process: process
             )
@@ -383,14 +527,19 @@ private extension PSAPIClient {
             )
         }
         .flatMap { [weak self] authenticationResponse -> AnyPublisher<Void, PSError> in
-            guard let self else { return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher() }
+            guard let self,
+                  let id = paymentResponse.id else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
             return handleAuthenticationResponse(
                 using: authenticationResponse,
-                and: paymentResponse.id
+                and: id
             )
         }
         .flatMap { [weak self] _ -> AnyPublisher<Void, PSError> in
-            guard let self else { return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher() }
+            guard let self else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
             return refreshPaymentToken(
                 using: paymentResponse.paymentHandleToken
             )
@@ -418,6 +567,8 @@ private extension PSAPIClient {
             httpMethod: .post,
             payload: authenticationRequest
         )
+        .mapError { $0.toPSError(PaysafeSDK.shared.correlationId) }
+        .eraseToAnyPublisher()
     }
 
     /// Handle authentication response.
@@ -459,14 +610,18 @@ private extension PSAPIClient {
             using: challengePayload
         )
         .flatMap { [weak self] authenticationId -> AnyPublisher<FinalizeResponse, PSError> in
-            guard let self else { return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher() }
+            guard let self else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
             return finalizePaymentHandle(
                 using: paymentHandleId,
                 and: authenticationId
             )
         }
         .flatMap { [weak self] finalizeResponse -> AnyPublisher<Void, PSError> in
-            guard let self else { return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher() }
+            guard let self else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
             return handleFinalizeResponse(
                 using: finalizeResponse
             )
@@ -489,6 +644,8 @@ private extension PSAPIClient {
             httpMethod: .post,
             payload: EmptyRequest()
         )
+        .mapError { $0.toPSError(PaysafeSDK.shared.correlationId) }
+        .eraseToAnyPublisher()
     }
 
     /// Handle finalize response status.
@@ -526,6 +683,8 @@ private extension PSAPIClient {
             httpMethod: .post,
             payload: refreshPaymentHandleTokenRequest
         )
+        .mapError { $0.toPSError(PaysafeSDK.shared.correlationId) }
+        .eraseToAnyPublisher()
     }
 
     /// Handle refresh payment handle token response status.
@@ -585,7 +744,9 @@ private extension PSAPIClient {
             }
         }
         .flatMap { [weak self] _ -> AnyPublisher<Void, PSError> in
-            guard let self else { return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher() }
+            guard let self else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
             return refreshPaymentToken(
                 using: paymentHandleToken,
                 and: retryCount - 1
@@ -594,17 +755,16 @@ private extension PSAPIClient {
         .eraseToAnyPublisher()
     }
 
-    /// Updates the 3ds renderType configuration if the value is not nil.
-    func updateRenderTypeIfNeeded(_ renderType: RenderType?) {
-        if let renderType {
-            switch renderType {
-            case .native:
-                paysafe3DS.updateRenderType(using: .native)
-            case .both:
-                paysafe3DS.updateRenderType(using: .both)
-            case .html:
-                paysafe3DS.updateRenderType(using: .html)
-            }
+    /// Maps the render type chosen by the merchant and returns the ThreeDS supported ui.
+    func getSupportedUI(from renderType: RenderType?) -> Paysafe3DS.SupportedUI? {
+        guard let renderType else { return nil }
+        switch renderType {
+        case .native:
+            return .native
+        case .html:
+            return .html
+        case .both:
+            return .both
         }
     }
 

@@ -29,7 +29,7 @@ final class PaysafeSDKTests: XCTestCase {
 
     func test_setup_success() {
         // Given
-        let apiKey = "apiKey"
+        let apiKey = "am9objpkb2UK"
         let environment: PaysafeEnvironment = .test
 
         XCTAssertNil(sut.psAPIClient)
@@ -69,9 +69,30 @@ final class PaysafeSDKTests: XCTestCase {
         }
     }
 
+    func test_setup_failure_invalidAPIKeyFormat() {
+        // Given
+        let apiKey = "am9obmRvZTo="
+        let environment: PaysafeEnvironment = .test
+
+        XCTAssertNil(sut.psAPIClient)
+
+        // When
+        sut.setup(
+            apiKey: apiKey,
+            environment: environment
+        ) { result in
+            guard case let .failure(error) = result else {
+                return XCTFail("Expected a failed PaysafeSDK setup result.")
+            }
+            // Then
+            XCTAssertEqual(error.errorCode, .coreInvalidAPIKeyFormat)
+            XCTAssertNil(self.sut.psAPIClient)
+        }
+    }
+
     func test_setup_failure_unavailableEnvironment() {
         // Given
-        let apiKey = "apiKey"
+        let apiKey = "am9objpkb2UK"
         let environment: PaysafeEnvironment = .production
 
         XCTAssertNil(sut.psAPIClient)
@@ -92,7 +113,7 @@ final class PaysafeSDKTests: XCTestCase {
 
     func test_getPSAPIClient() {
         // Given
-        let apiKey = "apiKey"
+        let apiKey = "am9objpkb2UK"
         let environment: PaysafeEnvironment = .test
 
         XCTAssertNil(sut.getPSAPIClient())

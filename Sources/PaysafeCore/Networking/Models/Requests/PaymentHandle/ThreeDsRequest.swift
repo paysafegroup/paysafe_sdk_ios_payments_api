@@ -7,16 +7,22 @@
 
 /// ThreeDSRequest
 struct ThreeDSRequest: Encodable {
+#if DEBUG
+    var deviceChannel: DeviceChannelRequest = .sdk
+#else
+    /// Device channel
+    private let deviceChannel: DeviceChannelRequest = .sdk
+#endif
     /// Merchant reference number
     let merchantRefNum: String?
     /// Merchant url
     let merchantUrl: String
-    /// Device channel
-    let deviceChannel: DeviceChannelRequest
     /// Message category
     let messageCategory: MessageCategoryRequest
     /// Transaction intent
     let transactionIntent: TransactionIntentRequest?
+    /// Billing cycle
+    let billingCycle: BillingCycleRequest?
     /// Authentication purpose
     let authenticationPurpose: AuthenticationPurposeRequest
     /// Requestor challenge preference

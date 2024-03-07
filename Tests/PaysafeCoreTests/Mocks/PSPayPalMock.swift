@@ -11,7 +11,7 @@ import PaysafeCommon
 @testable import PaysafePayPal
 
 class PSPayPalMock: PSPayPal {
-    override func initiatePayPalFlow(orderId: String, payPalLinks: PSPayPalLinks) -> AnyPublisher<PSPayPalResult, PSError> {
+    override func initiatePayPalFlow(orderId: String) -> AnyPublisher<PSPayPalResult, PSError> {
         Just(.success).setFailureType(to: PSError.self).eraseToAnyPublisher()
     }
 }

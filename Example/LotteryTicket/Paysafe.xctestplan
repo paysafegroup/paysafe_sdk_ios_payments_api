@@ -1,83 +1,57 @@
 {
   "configurations" : [
     {
-      "id" : "FD396D55-EF8E-4956-A12C-564D92C9FC29",
-      "name" : "Test Scheme Action",
+      "id" : "A52EB0CB-DC00-42C5-8DED-436AD1D93FDA",
+      "name" : "Configuration",
       "options" : {
 
       }
     }
   ],
   "defaultOptions" : {
-    "codeCoverage" : {
-      "targets" : [
-        {
-          "containerPath" : "container:..\/..",
-          "identifier" : "PaysafeApplePay",
-          "name" : "PaysafeApplePay"
-        },
-        {
-          "containerPath" : "container:..\/..",
-          "identifier" : "Paysafe3DS",
-          "name" : "Paysafe3DS"
-        },
-        {
-          "containerPath" : "container:..\/..",
-          "identifier" : "PaysafeCommon",
-          "name" : "PaysafeCommon"
-        },
-        {
-          "containerPath" : "container:..\/..",
-          "identifier" : "PaysafeCore",
-          "name" : "PaysafeCore"
-        },
-        {
-          "containerPath" : "container:..\/..",
-          "identifier" : "PaysafeNetworking",
-          "name" : "PaysafeNetworking"
-        },
-        {
-          "containerPath" : "container:..\/..",
-          "identifier" : "PaysafePayPal",
-          "name" : "PaysafePayPal"
-        }
-      ]
-    }
+    "testTimeoutsEnabled" : true
   },
   "testTargets" : [
     {
       "target" : {
-        "containerPath" : "container:..\/..",
+        "containerPath" : "container:",
+        "identifier" : "Paysafe3DSTests",
+        "name" : "Paysafe3DSTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
         "identifier" : "PaysafeApplePayTests",
         "name" : "PaysafeApplePayTests"
       }
     },
     {
       "target" : {
-        "containerPath" : "container:..\/..",
+        "containerPath" : "container:",
         "identifier" : "PaysafeCommonTests",
         "name" : "PaysafeCommonTests"
       }
     },
     {
       "target" : {
-        "containerPath" : "container:..\/..",
+        "containerPath" : "container:",
         "identifier" : "PaysafeCoreTests",
         "name" : "PaysafeCoreTests"
       }
     },
     {
       "target" : {
-        "containerPath" : "container:..\/..",
-        "identifier" : "PaysafePayPalTests",
-        "name" : "PaysafePayPalTests"
+        "containerPath" : "container:",
+        "identifier" : "PaysafeNetworkingTests",
+        "name" : "PaysafeNetworkingTests"
       }
     },
     {
       "target" : {
-        "containerPath" : "container:..\/..",
-        "identifier" : "PaysafeNetworkingTests",
-        "name" : "PaysafeNetworkingTests"
+        "containerPath" : "container:",
+        "identifier" : "PaysafePayPalTests",
+        "name" : "PaysafePayPalTests"
       }
     }
   ],

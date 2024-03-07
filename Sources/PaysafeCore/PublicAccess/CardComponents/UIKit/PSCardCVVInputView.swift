@@ -20,6 +20,7 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
         let textField = PSCardCVVInputTextField()
         textField.isSecureTextEntry = isMasked
         textField.cardBrand = cardBrand
+        textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
         textField.psCardCVVInputTextFieldDelegate = self
         return textField
     }()
@@ -30,6 +31,9 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
             cardCVVTextField.isSecureTextEntry = isMasked
         }
     }
+
+    /// Indicates if the textfield should use the top placeholder animation
+    private var animateTopPlaceholderLabel: Bool = true
 
     /// PSCardBrand
     public var cardBrand: PSCardBrand = .unknown {
@@ -58,13 +62,16 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
     /// - Parameters:
     ///   - isMasked: Boolean indicating if the text should be of type .isSecureTextEntry, default as `false`
     ///   - cardBrand: PSCardBrand, default as `unknown`
+    ///   - animateTopPlaceholderLabel: Bool, default as `true`
     public init(
         isMasked: Bool = false,
-        cardBrand: PSCardBrand = .unknown
+        cardBrand: PSCardBrand = .unknown,
+        animateTopPlaceholderLabel: Bool = true
     ) {
         super.init(frame: .zero)
         self.isMasked = isMasked
         self.cardBrand = cardBrand
+        self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
         configure()
     }
 

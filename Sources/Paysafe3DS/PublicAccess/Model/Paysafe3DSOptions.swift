@@ -7,20 +7,21 @@
 
 import Foundation
 
+/// Paysafe3DS options
 public struct Paysafe3DSOptions {
     /// Account id
     let accountId: String
     /// Card bin
-    let cardBin: String
+    let bin: String
 
     /// - Parameters:
     ///   - accountId: Account id
-    ///   - cardBin: Card bin
+    ///   - bin: Card bin
     public init(
         accountId: String,
-        cardBin: String
+        bin: String
     ) {
         self.accountId = accountId
-        self.cardBin = cardBin
+        self.bin = bin
     }
 }

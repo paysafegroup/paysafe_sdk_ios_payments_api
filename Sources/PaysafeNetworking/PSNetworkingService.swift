@@ -7,7 +7,9 @@
 
 import Combine
 import Foundation
+#if canImport(PaysafeCommon)
 import PaysafeCommon
+#endif
 
 public protocol RequestPerforming {
     func request<RequestType: Encodable, ResponseType: Decodable>(
@@ -16,7 +18,7 @@ public protocol RequestPerforming {
         payload: RequestType,
         invocationId: String?,
         transactionSource: String
-    ) -> AnyPublisher<ResponseType, PSError>
+    ) -> AnyPublisher<ResponseType, APIError>
 }
 
 public protocol URLSessionProtocol {
@@ -72,9 +74,9 @@ public class PSNetworkingService: RequestPerforming {
         payload: RequestType,
         invocationId: String? = nil,
         transactionSource: String = "IosSDKV2"
-    ) -> AnyPublisher<ResponseType, PSError> {
+    ) -> AnyPublisher<ResponseType, APIError> {
         guard let requestURL = URL(string: url) else {
-            return Fail(error: .invalidURL(correlationId)).eraseToAnyPublisher()
+            return Fail(error: .invalidURL).eraseToAnyPublisher()
         }
         var request = URLRequest(url: requestURL, timeoutInterval: timeoutInterval)
         request.httpMethod = httpMethod.rawValue
@@ -97,48 +99,46 @@ public class PSNetworkingService: RequestPerforming {
                 logData(title: "REQUEST", data: data)
                 request.httpBody = data
             } catch {
-                return Fail(error: .encodingError(correlationId)).eraseToAnyPublisher()
+                return Fail(error: .encodingError).eraseToAnyPublisher()
             }
         }
 
         return session.psDataTaskPublisher(for: request)
             .tryMap { [weak self] data, response in
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    throw PSError.invalidResponse(self?.correlationId)
+                    throw APIError.invalidResponse
                 }
                 self?.logData(title: "RESPONSE", data: data)
                 return (data, httpResponse)
             }
-            .tryMap { [weak self] data, httpResponse in
+            .tryMap { data, httpResponse in
                 switch httpResponse.statusCode {
                 case 200...299:
                     guard !data.isEmpty else {
                         guard let emptyObject = EmptyResponse() as? ResponseType else {
-                            throw PSError.invalidResponse(self?.correlationId)
+                            throw APIError.invalidResponse
                         }
                         return emptyObject
                     }
                     do {
                         return try JSONDecoder().decode(ResponseType.self, from: data)
                     } catch {
-                        throw PSError.invalidResponse(self?.correlationId)
+                        throw APIError.invalidResponse
                     }
-                case 401 where httpResponse.allHeaderFields["X-Application-Error-Code"] as? String == "5279":
-                    throw PSError.invalidCredentials(self?.correlationId)
                 default:
-                    throw PSError.unsuccessfulResponse(self?.correlationId, message: "Error: Http Error \(httpResponse.statusCode)")
+                    throw (try? JSONDecoder().decode(APIError.self, from: data)) ?? APIError.genericAPIError
                 }
             }
-            .mapError { [weak self] error in
+            .mapError { error in
                 switch error {
-                case let psError as PSError:
-                    return psError
+                case let apiError as APIError:
+                    return apiError
                 case let urlError as NSError where urlError.code == NSURLErrorTimedOut:
-                    return .timeoutError(self?.correlationId)
+                    return .timeoutError
                 case let urlError as NSError where urlError.code == NSURLErrorNotConnectedToInternet:
-                    return .noConnectionToServer(self?.correlationId)
+                    return .noConnectionToServer
                 default:
-                    return .genericAPIError(self?.correlationId)
+                    return .genericAPIError
                 }
             }
             .eraseToAnyPublisher()

@@ -14,13 +14,17 @@ class ThreeDSRequestTests: XCTestCase {
         let merchantUrl = "http://paysafe.com"
         let messageCategory = MessageCategoryRequest.payment
         let authenticationPurpose = AuthenticationPurposeRequest.paymentTransaction
+        let billingCycleRequest = BillingCycleRequest(
+            endDate: "12-03-2025",
+            frequency: 2
+        )
 
-        let request = ThreeDSRequest(
+        var request = ThreeDSRequest(
             merchantRefNum: nil,
             merchantUrl: merchantUrl,
             messageCategory: messageCategory,
             transactionIntent: nil,
-            billingCycle: nil,
+            billingCycle: billingCycleRequest,
             authenticationPurpose: authenticationPurpose,
             requestorChallengePreference: nil,
             userLogin: nil,
@@ -38,6 +42,7 @@ class ThreeDSRequestTests: XCTestCase {
             electronicDelivery: nil,
             initialPurchaseTime: nil
         )
+        request.deviceChannel = .sdk
 
         // When
         let encoder = JSONEncoder()
@@ -45,9 +50,21 @@ class ThreeDSRequestTests: XCTestCase {
         let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
 
         // Then
+        XCTAssertEqual(request.deviceChannel, .sdk)
         XCTAssertNotNil(json, "Encoded object should be convertible to JSON dictionary.")
         XCTAssertEqual(json?["merchantUrl"] as? String, merchantUrl, "merchantUrl should be correctly encoded")
         XCTAssertEqual(json?["messageCategory"] as? String, messageCategory.rawValue, "messageCategory should be correctly encoded")
         XCTAssertEqual(json?["authenticationPurpose"] as? String, authenticationPurpose.rawValue, "authenticationPurpose should be correctly encoded")
+
+        XCTAssertEqual(request.billingCycle?.endDate, billingCycleRequest.endDate)
+        XCTAssertEqual(request.billingCycle?.frequency, billingCycleRequest.frequency)
+        XCTAssertNotNil(request.billingCycle)
+
+        if let billingCycleJSON = json?["billingCycle"] as? [String: Any] {
+            XCTAssertEqual(billingCycleJSON["endDate"] as? String, billingCycleRequest.endDate, "endDate should be correctly encoded")
+            XCTAssertEqual(billingCycleJSON["frequency"] as? Int, billingCycleRequest.frequency, "frequency should be correctly encoded")
+        } else {
+            XCTFail("billingCycle was not found or is not a dictionary")
+        }
     }
 }

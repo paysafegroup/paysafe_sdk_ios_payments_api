@@ -7,6 +7,7 @@
 
 import PaysafeCommon
 @testable import PaysafeCore
+import PaysafePayPal
 import XCTest
 
 final class PSPayPalContextTests: XCTestCase {
@@ -111,6 +112,7 @@ final class PSPayPalContextTests: XCTestCase {
 
 private extension PSPayPalContext {
     static func createSUT(
+        renderType: PSPayPalRenderType? = .native,
         currencyCodeValidationShouldFail: Bool = false,
         getPaymentMethodShouldFail: Bool = false,
         getPaymentMethodShouldSucceedPayPalValidation: Bool = true,
@@ -118,7 +120,7 @@ private extension PSPayPalContext {
         completion: @escaping PSPayPalContextInitializeBlock
     ) {
         let mockAPIClient = PSAPIClientMock(
-            apiKey: "apiKey",
+            apiKey: "am9objpkb2UK",
             environment: .test
         )
         mockAPIClient.getPaymentMethodShouldFail = getPaymentMethodShouldFail
@@ -131,11 +133,16 @@ private extension PSPayPalContext {
 
         PSPayPalContext.initialize(
             currencyCode: currencyCode,
-            accountId: accountId
+            accountId: accountId,
+            renderType: .native
         ) { result in
             switch result {
             case let .success(payPalContext):
-                payPalContext.psPayPal = PSPayPalMock(renderType: .web)
+                payPalContext.psPayPal = PSPayPalMock(
+                    clientId: "clientId",
+                    environment: .sandbox,
+                    renderType: renderType ?? .web
+                )
                 completion(.success(payPalContext))
             case let .failure(error):
                 completion(.failure(error))
@@ -148,29 +155,30 @@ private extension PSPayPalTokenizeOptions {
     static func createMock() -> PSPayPalTokenizeOptions {
         PSPayPalTokenizeOptions(
             amount: 1000,
-            merchantRefNum: UUID().uuidString,
-            customerDetails: CustomerDetails(
-                billingDetails: BillingDetails(
-                    country: "US",
-                    zip: "33172",
-                    state: "FL",
-                    city: nil,
-                    street: nil,
-                    street1: nil,
-                    street2: nil,
-                    phone: nil,
-                    nickName: nil
-                ),
-                profile: nil
-            ),
-            accountId: "1001693410",
             currencyCode: "USD",
-            consumerId: "consumerId",
-            recipientDescription: "recipientDescription",
-            language: .US,
-            shippingPreference: .getFromFile,
-            consumerMessage: "consumerMessage",
-            orderDescription: "orderDescription"
+            transactionType: .payment,
+            merchantRefNum: UUID().uuidString,
+            billingDetails: BillingDetails(
+                country: "US",
+                zip: "33172",
+                state: "FL",
+                city: nil,
+                street: nil,
+                street1: nil,
+                street2: nil,
+                phone: nil,
+                nickName: nil
+            ),
+            accountId: "test_accountID",
+            paypal: PayPalAdditionalData(
+                consumerId: "test_paypalConsumerId",
+                recipientDescription: "test_recipientDescription",
+                language: .US,
+                shippingPreference: .getFromFile,
+                consumerMessage: "test_consumerMessage",
+                orderDescription: "test_orderDescription",
+                recipientType: .payPalId
+            )
         )
     }
 }

@@ -8,18 +8,26 @@
 /// Billing cycle information for recurring payments.
 public struct BillingCycle: Encodable {
     /// End date
-    let endDate: String
+    let endDate: String?
     /// Frequency
-    let frequency: Int
+    let frequency: Int?
 
     /// - Parameters:
     ///   - endDate: End date
-    ///   - phone: Phone
+    ///   - frequency: Phone
     public init(
-        endDate: String,
-        frequency: Int
+        endDate: String? = nil,
+        frequency: Int? = nil
     ) {
         self.endDate = endDate
         self.frequency = frequency
+    }
+
+    /// BillingCycleRequest
+    var request: BillingCycleRequest {
+        BillingCycleRequest(
+            endDate: endDate,
+            frequency: frequency
+        )
     }
 }

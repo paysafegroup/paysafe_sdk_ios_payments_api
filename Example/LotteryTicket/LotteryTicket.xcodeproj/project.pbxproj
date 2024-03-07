@@ -100,10 +100,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		7C15684C2B062AB8001717EC /* Paysafe.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Paysafe.xctestplan; sourceTree = "<group>"; };
 		7C8FA1322B330C490027FF81 /* LotteryTicket.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LotteryTicket.entitlements; sourceTree = "<group>"; };
 		7C9FCBDE2AC2F09A0042C471 /* CardinalMobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = CardinalMobile.xcframework; path = ../../../CardinalMobile.xcframework; sourceTree = "<group>"; };
 		7CCB43212B6394A400F1A7EC /* MerchantBackend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerchantBackend.swift; sourceTree = "<group>"; };
+		7CF3DDAB2B74C6B60029B1A8 /* Paysafe.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Paysafe.xctestplan; sourceTree = "<group>"; };
 		D32C5A682B01253B005C7940 /* OrderConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderConfirmationView.swift; sourceTree = "<group>"; };
 		D32C5A6A2B012547005C7940 /* OrderConfirmationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderConfirmationViewModel.swift; sourceTree = "<group>"; };
 		D33B9D242AA75DAC00A8853F /* UINavigationController+PopGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+PopGesture.swift"; sourceTree = "<group>"; };
@@ -466,7 +466,7 @@
 		D3EA1F5B2A97AEF100012F38 = {
 			isa = PBXGroup;
 			children = (
-				7C15684C2B062AB8001717EC /* Paysafe.xctestplan */,
+				7CF3DDAB2B74C6B60029B1A8 /* Paysafe.xctestplan */,
 				D393BC682ABDD66B009264BD /* Packages */,
 				D3EA1F662A97AEF100012F38 /* LotteryTicket */,
 				D3EA1F652A97AEF100012F38 /* Products */,

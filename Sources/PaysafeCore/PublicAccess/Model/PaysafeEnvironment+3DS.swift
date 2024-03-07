@@ -5,7 +5,9 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
+#if canImport(Paysafe3DS)
 import Paysafe3DS
+#endif
 
 extension PaysafeEnvironment {
     func to3DSEnvironment() -> Paysafe3DS.APIEnvironment {

@@ -8,6 +8,19 @@
 // swiftlint:disable line_length
 // MARK: - API errors
 public extension PSError {
+    static func genericAPIError(
+        _ correlationId: String,
+        message: String,
+        code: Int
+    ) -> PSError {
+        PSError(
+            errorCode: .genericAPIError,
+            correlationId: correlationId,
+            code: code,
+            detailedMessage: message
+        )
+    }
+
     static func genericAPIError(_ correlationId: String? = nil) -> PSError {
         PSError(
             errorCode: .genericAPIError,
@@ -22,7 +35,16 @@ public extension PSError {
             errorCode: .invalidResponse,
             correlationId: correlationId ?? "N/A",
             code: 9002,
-            detailedMessage: "Error communicating with server."
+            detailedMessage: serverCommunicationErrorMessage
+        )
+    }
+
+    static func threeDSInvalidResponse(_ correlationId: String) -> PSError {
+        PSError(
+            errorCode: .threeDSInvalidResponse,
+            correlationId: correlationId,
+            code: 9002,
+            detailedMessage: serverCommunicationErrorMessage
         )
     }
 
@@ -31,16 +53,16 @@ public extension PSError {
             errorCode: .invalidURL,
             correlationId: correlationId ?? "N/A",
             code: 9168,
-            detailedMessage: "Error communicating with server."
+            detailedMessage: serverCommunicationErrorMessage
         )
     }
 
-    static func unsuccessfulResponse(_ correlationId: String?, message: String) -> PSError {
+    static func threeDSInvalidURL(_ correlationId: String) -> PSError {
         PSError(
-            errorCode: .unsuccessfulResponse,
-            correlationId: correlationId ?? "N/A",
-            code: 9206,
-            detailedMessage: message
+            errorCode: .threeDSInvalidURL,
+            correlationId: correlationId,
+            code: 9168,
+            detailedMessage: serverCommunicationErrorMessage
         )
     }
 
@@ -48,6 +70,15 @@ public extension PSError {
         PSError(
             errorCode: .encodingError,
             correlationId: correlationId ?? "N/A",
+            code: 9205,
+            detailedMessage: "Encoding error."
+        )
+    }
+
+    static func threeDSEncodingError(_ correlationId: String) -> PSError {
+        PSError(
+            errorCode: .threeDSEncodingError,
+            correlationId: correlationId,
             code: 9205,
             detailedMessage: "Encoding error."
         )
@@ -74,21 +105,21 @@ public extension PSError {
 
 // MARK: - Core errors
 public extension PSError {
-    static func invalidCredentials(_ correlationId: String?) -> PSError {
-        PSError(
-            errorCode: .invalidCredentials,
-            correlationId: correlationId ?? "N/A",
-            code: 9169,
-            detailedMessage: "Invalid credentials (API key)."
-        )
-    }
-
     static func coreInvalidAPIKey(_ correlationId: String) -> PSError {
         PSError(
             errorCode: .coreInvalidAPIKey,
             correlationId: correlationId,
             code: 9167,
             detailedMessage: "The API key should not be empty."
+        )
+    }
+
+    static func coreInvalidAPIKeyFormat(_ correlationId: String) -> PSError {
+        PSError(
+            errorCode: .coreInvalidAPIKeyFormat,
+            correlationId: correlationId,
+            code: 9013,
+            detailedMessage: "Invalid API key."
         )
     }
 
@@ -172,6 +203,15 @@ public extension PSError {
             detailedMessage: "Tokenization is already in progress."
         )
     }
+
+    static func coreAPIInvalidCardDetails(_ correlationId: String) -> PSError {
+        PSError(
+            errorCode: .coreAPIInvalidCardDetails,
+            correlationId: correlationId,
+            code: 9003,
+            detailedMessage: "You submitted an invalid card number or brand or combination of card number and brand with your request."
+        )
+    }
 }
 
 // MARK: - 3DS errors
@@ -218,6 +258,25 @@ public extension PSError {
             correlationId: correlationId,
             code: 9197,
             detailedMessage: "Unable to process challenge payload."
+        )
+    }
+
+    static func threeDSInvalidCurrencyCode(_ correlationId: String) -> PSError {
+        PSError(
+            errorCode: .threeDSInvalidCurrency,
+            correlationId: correlationId,
+            code: 9055,
+            detailedMessage: "Invalid currency parameter."
+        )
+    }
+
+    static func threeDSInvalidApiKeyParameter(_ correlationId: String
+    ) -> PSError {
+        PSError(
+            errorCode: .threeDSInvalidApiKey,
+            correlationId: correlationId,
+            code: 9013,
+            detailedMessage: "Invalid apiKey parameter."
         )
     }
 }
@@ -311,6 +370,15 @@ public extension PSError {
         )
     }
 
+    static func threeDSInvalidAmount(_ correlationId: String) -> PSError {
+        PSError(
+            errorCode: .threeDSInvalidAmount,
+            correlationId: correlationId,
+            code: 9054,
+            detailedMessage: "Amount should be a number greater than 0 no longer than 11 characters."
+        )
+    }
+
     static func invalidDynamicDescriptor(_ correlationId: String) -> PSError {
         PSError(
             errorCode: .invalidDynamicDescriptor,
@@ -353,6 +421,15 @@ public extension PSError {
             correlationId: correlationId,
             code: 9119,
             detailedMessage: "Profile email should be valid."
+        )
+    }
+
+    static func threeDSInvalidCountryParameter(_ correlationId: String) -> PSError {
+        PSError(
+            errorCode: .threeDSInvalidCountry,
+            correlationId: correlationId,
+            code: 9068,
+            detailedMessage: "Invalid country parameter."
         )
     }
 }

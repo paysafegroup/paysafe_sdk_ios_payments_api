@@ -8,19 +8,19 @@
 /// PaymentHandle
 struct PaymentHandle: Decodable {
     /// Id
-    let id: String
+    let id: String?
     /// Status
-    let status: String
+    let status: String?
     /// Usage
-    let usage: String
+    let usage: String?
     /// Payment type
-    let paymentType: String
+    let paymentType: String?
     /// Payment handle token
-    let paymentHandleToken: String
+    let paymentHandleToken: String?
     /// Card details
-    let card: CardDetails
+    let card: CardDetails?
     /// Billing details id
-    let billingDetailsId: String
+    let billingDetailsId: String?
     /// Multi use payment handle id
-    let multiUsePaymentHandleId: String
+    let multiUsePaymentHandleId: String?
 }

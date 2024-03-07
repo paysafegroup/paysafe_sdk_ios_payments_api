@@ -16,9 +16,7 @@ extension CardRequest {
                 year: 28
             ),
             cvv: "111",
-            holderName: "John Doe",
-            cardType: nil,
-            nickName: nil
+            holderName: "John Doe"
         )
     }
 

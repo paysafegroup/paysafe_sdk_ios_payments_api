@@ -27,7 +27,8 @@ extension PaymentMethodResponse {
                 AccountConfiguration(
                     id: configuration.id,
                     isApplePay: configuration.isApplePay,
-                    cardTypeConfig: configuration.cardTypeConfig
+                    cardTypeConfig: configuration.cardTypeConfig,
+                    clientId: configuration.clientId
                 )
             }
         )

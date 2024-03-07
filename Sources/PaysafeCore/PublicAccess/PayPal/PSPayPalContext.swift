@@ -7,8 +7,10 @@
 
 import Combine
 import Foundation
+#if canImport(PaysafeCommon)
 import PaysafeCommon
 import PaysafePayPal
+#endif
 
 /// PSPayPalContext
 public class PSPayPalContext {
@@ -23,14 +25,15 @@ public class PSPayPalContext {
     ///
     /// - Parameters:
     ///   - clientId: PayPal client id
+    ///   - renderType: Render type
     private init(
-        clientId: String
+        clientId: String,
+        renderType: PSPayPalRenderType
     ) {
         psPayPal = PSPayPal(
-            renderType: .native(
-                clientId: clientId,
-                environment: psAPIClient?.environment.toPayPalEnvironment() ?? .sandbox
-            )
+            clientId: clientId,
+            environment: psAPIClient?.environment.toPayPalEnvironment() ?? .sandbox,
+            renderType: renderType
         )
     }
 
@@ -43,11 +46,13 @@ public class PSPayPalContext {
     public static func initialize(
         currencyCode: String,
         accountId: String,
+        renderType: PSPayPalRenderType,
         completion: @escaping PSPayPalContextInitializeBlock
     ) {
         validatePaymentMethod(
             currencyCode: currencyCode,
             accountId: accountId,
+            renderType: renderType,
             completion: completion
         )
     }
@@ -98,6 +103,7 @@ private extension PSPayPalContext {
     static func validatePaymentMethod(
         currencyCode: String,
         accountId: String,
+        renderType: PSPayPalRenderType,
         completion: @escaping PSPayPalContextInitializeBlock
     ) {
         guard let psAPIClient = PaysafeSDK.shared.psAPIClient else {
@@ -119,6 +125,7 @@ private extension PSPayPalContext {
                     paymentMethod: paymentMethod,
                     currencyCode: currencyCode,
                     accountId: accountId,
+                    renderType: renderType,
                     completion: completion
                 )
             case let .failure(error):
@@ -138,6 +145,7 @@ private extension PSPayPalContext {
         paymentMethod: PaymentMethod,
         currencyCode: String,
         accountId: String,
+        renderType: PSPayPalRenderType,
         completion: @escaping PSPayPalContextInitializeBlock
     ) {
         guard let psAPIClient = PaysafeSDK.shared.psAPIClient else {
@@ -147,11 +155,15 @@ private extension PSPayPalContext {
         switch isPaymentMethodSupported {
         case true:
             psAPIClient.logEvent(
-                "Options passed on PSPayPalContext initialize: countryCode: \(currencyCode), accountId: \(accountId)"
+                "Options passed on PSPayPalContext initialize: currency code: \(currencyCode), accountId: \(accountId)"
             )
-            #warning("Retrieve clientId from account configuration when available")
-            let clientId = "AYl_LoVRWK8Pm3JnCBG1IO1iNc0cG86KFARp5c6XFneeeTocdBWdmG0sCOFdshVms-ptnoK_ChfmCeCJ"
-            let payPalContext = PSPayPalContext(clientId: clientId)
+            guard let clientId = paymentMethod.accountConfiguration?.clientId else {
+                return completion(.failure(.coreMerchantAccountConfigurationError(PaysafeSDK.shared.correlationId)))
+            }
+            let payPalContext = PSPayPalContext(
+                clientId: clientId,
+                renderType: renderType
+            )
             completion(.success(payPalContext))
         case false:
             let error = PSError.coreInvalidAccountId(
@@ -174,32 +186,14 @@ private extension PSPayPalContext {
             assertionFailure(.uninitializedSDKMessage)
             return Fail(error: .coreSDKInitializeError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
         }
-        let tokenizeOptions = PSTokenizeOptions(
-            amount: options.amount,
-            currencyCode: options.currencyCode,
-            transactionType: .payment,
-            merchantRefNum: options.merchantRefNum,
-            customerDetails: CustomerDetails(
-                billingDetails: options.customerDetails.billingDetails,
-                profile: nil
-            ),
-            accountId: options.accountId,
-            paypal: PayPalAdditionalData(
-                consumerId: options.consumerId,
-                recipientDescription: options.recipientDescription,
-                language: options.language,
-                shippingPreference: options.shippingPreference,
-                consumerMessage: options.consumerMessage,
-                orderDescription: options.orderDescription,
-                recipientType: .payPalId
-            )
-        )
         return psAPIClient.tokenize(
-            options: tokenizeOptions,
+            options: options,
             paymentType: .payPal
         )
         .flatMap { [weak self] paymentHandle -> AnyPublisher<(PaymentHandle, PSPayPalResult), PSError> in
-            guard let self else { return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher() }
+            guard let self else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
             return handleTokenizeResponse(
                 using: paymentHandle
             )
@@ -233,24 +227,11 @@ private extension PSPayPalContext {
     func handleTokenizeResponse(
         using paymentHandle: PaymentHandle
     ) -> AnyPublisher<(PaymentHandle, PSPayPalResult), PSError> {
-        guard let orderId = paymentHandle.orderId,
-              let redirectUrl = paymentHandle.redirectPaymentLink?.href,
-              let successUrl = paymentHandle.returnLinks.first(where: { $0.rel == .onCompleted })?.href,
-              let failedUrl = paymentHandle.returnLinks.first(where: { $0.rel == .onFailed })?.href,
-              let cancelledUrl = paymentHandle.returnLinks.first(where: { $0.rel == .onCancelled })?.href,
-              let defaultUrl = paymentHandle.returnLinks.first(where: { $0.rel == .defaultAction })?.href else {
+        guard let orderId = paymentHandle.orderId else {
             return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
         }
-        let payPalLinks = PSPayPalLinks(
-            redirectUrl: redirectUrl,
-            successUrl: successUrl,
-            failedUrl: failedUrl,
-            cancelledUrl: cancelledUrl,
-            defaultUrl: defaultUrl
-        )
         return psPayPal.initiatePayPalFlow(
-            orderId: orderId,
-            payPalLinks: payPalLinks
+            orderId: orderId
         )
         .map { payPalResult in (paymentHandle, payPalResult) }
         .eraseToAnyPublisher()
@@ -264,13 +245,13 @@ private extension PSPayPalContext {
         guard PSTokenizeOptionsUtils.isValidAmount(options.amount) else {
             return PSError.invalidAmount(PaysafeSDK.shared.correlationId)
         }
-        guard PSTokenizeOptionsUtils.isValidEmail(options.customerDetails.profile?.email) else {
+        guard PSTokenizeOptionsUtils.isValidEmail(options.profile?.email) else {
             return PSError.invalidEmail(PaysafeSDK.shared.correlationId)
         }
-        guard PSTokenizeOptionsUtils.isValidFirstName(options.customerDetails.profile?.firstName) else {
+        guard PSTokenizeOptionsUtils.isValidFirstName(options.profile?.firstName) else {
             return PSError.invalidFirstName(PaysafeSDK.shared.correlationId)
         }
-        guard PSTokenizeOptionsUtils.isValidLastName(options.customerDetails.profile?.lastName) else {
+        guard PSTokenizeOptionsUtils.isValidLastName(options.profile?.lastName) else {
             return PSError.invalidLastName(PaysafeSDK.shared.correlationId)
         }
         return nil

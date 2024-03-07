@@ -11,7 +11,7 @@ import XCTest
 final class PSTokenizeOptionsUtilsTests: XCTestCase {
     func test_isValidAmount_valid() {
         // Given
-        let amount: Double = 100
+        let amount: Int = 100
 
         // When
         let isValid = PSTokenizeOptionsUtils.isValidAmount(amount)
@@ -22,7 +22,7 @@ final class PSTokenizeOptionsUtilsTests: XCTestCase {
 
     func test_isValidAmount_tooLow() {
         // Given
-        let amount: Double = 0
+        let amount: Int = 0
 
         // When
         let isValid = PSTokenizeOptionsUtils.isValidAmount(amount)
@@ -33,7 +33,7 @@ final class PSTokenizeOptionsUtilsTests: XCTestCase {
 
     func test_isValidAmount_tooHigh() {
         // Given
-        let amount: Double = 100_000_000_000
+        let amount: Int = 1_000_000_000
 
         // When
         let isValid = PSTokenizeOptionsUtils.isValidAmount(amount)

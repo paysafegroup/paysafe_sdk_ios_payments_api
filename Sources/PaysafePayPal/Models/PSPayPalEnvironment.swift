@@ -5,7 +5,11 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
+#if canImport(CorePayments)
 import CorePayments
+#else
+import PayPal
+#endif
 
 /// PayPalEnvironment
 public enum PSPayPalEnvironment {
@@ -15,7 +19,7 @@ public enum PSPayPalEnvironment {
     case live
 
     /// CorePayments.Environment
-    var toCoreEnvironment: CorePayments.Environment {
+    var toCoreEnvironment: Environment {
         switch self {
         case .sandbox:
             return .sandbox

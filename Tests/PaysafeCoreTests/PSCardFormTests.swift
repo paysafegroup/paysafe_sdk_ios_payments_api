@@ -177,7 +177,7 @@ final class PSCardFormTests: XCTestCase {
                 return XCTFail("PSAPIClient couldn't be casted to PSAPIClientMock.")
             }
             mockAPIClient.tokenizeShouldFail = true
-            let options = PSTokenizeOptions.createMock()
+            let options = PSCardTokenizeOptions.createMock()
             self.sut = sut
 
             // When
@@ -201,7 +201,7 @@ final class PSCardFormTests: XCTestCase {
             guard case let .success(sut) = result else {
                 return XCTFail("Expected a success cardForm result.")
             }
-            let options = PSTokenizeOptions.createMock()
+            let options = PSCardTokenizeOptions.createMock()
             sut.populateFields()
             sut.cardNumberView?.cardNumberTextField.cardBrand = .visa
             self.sut = sut
@@ -228,7 +228,7 @@ final class PSCardFormTests: XCTestCase {
             guard case let .success(sut) = result else {
                 return XCTFail("Expected a success cardForm result.")
             }
-            let options = PSTokenizeOptions.createMock()
+            let options = PSCardTokenizeOptions.createMock()
             sut.populateFields()
             sut.cardNumberView?.cardNumberTextField.cardBrand = .unknown
             self.sut = sut
@@ -258,7 +258,7 @@ final class PSCardFormTests: XCTestCase {
                 return XCTFail("PSAPIClient couln't be casted to PSAPIClientMock.")
             }
             mockAPIClient.tokenizeShouldFail = true
-            let options = PSTokenizeOptions.createMock()
+            let options = PSCardTokenizeOptions.createMock()
             sut.populateFields()
             self.sut = sut
 
@@ -291,7 +291,7 @@ final class PSCardFormTests: XCTestCase {
             XCTAssertEqual(sut.cardCVVView?.isEmpty(), false)
 
             // When
-            sut.resetFields()
+            sut.resetCardDetails()
 
             // Then
             XCTAssertEqual(sut.cardNumberView?.isEmpty(), true)
@@ -368,7 +368,7 @@ private extension PSCardForm {
         completion: @escaping PSCardFormInitializeBlock
     ) {
         let mockAPIClient = PSAPIClientMock(
-            apiKey: "apiKey",
+            apiKey: "am9objpkb2UK",
             environment: .test
         )
         mockAPIClient.getPaymentMethodShouldFail = getPaymentMethodShouldFail
@@ -408,7 +408,7 @@ private extension PSCardForm {
                 switch result {
                 case let .success(cardForm):
                     cardForm.psAPIClient = PSAPIClientMock(
-                        apiKey: "apiKey",
+                        apiKey: "am9objpkb2UK",
                         environment: .test
                     )
                     completion(.success(cardForm))
@@ -442,27 +442,13 @@ private extension PSCardForm {
     }
 }
 
-private extension PSTokenizeOptions {
-    static func createMock() -> PSTokenizeOptions {
-        PSTokenizeOptions(
+private extension PSCardTokenizeOptions {
+    static func createMock() -> PSCardTokenizeOptions {
+        PSCardTokenizeOptions(
             amount: 1000,
             currencyCode: "USD",
             transactionType: .payment,
             merchantRefNum: UUID().uuidString,
-            customerDetails: CustomerDetails(
-                billingDetails: BillingDetails(
-                    country: "US",
-                    zip: "33172",
-                    state: "FL",
-                    city: nil,
-                    street: nil,
-                    street1: nil,
-                    street2: nil,
-                    phone: "0777777777777",
-                    nickName: nil
-                ),
-                profile: nil
-            ),
             accountId: "1001456390",
             threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop")
         )

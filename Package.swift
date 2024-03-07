@@ -62,7 +62,11 @@ let package = Package(
         ),
         .target(
             name: "PaysafePayPal",
-            dependencies: ["PaysafeCommon", .product(name: "PayPalNativePayments", package: "paypal-ios")]
+            dependencies: [
+                "PaysafeCommon",
+                .product(name: "PayPalNativePayments", package: "paypal-ios"),
+                .product(name: "PayPalWebPayments", package: "paypal-ios")
+            ]
         ),
         .testTarget(
             name: "PaysafeCoreTests",

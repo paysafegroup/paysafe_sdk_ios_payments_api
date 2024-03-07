@@ -17,18 +17,7 @@ public extension Paysafe3DS {
         /// Challenge timeout in minutes
         let challengeTimeout: UInt
         /// Interface types that the device supports for displaying specific challenge user interfaces within the SDK.
-        var supportedUI: SupportedUI = .both {
-            didSet {
-                switch supportedUI {
-                case .native:
-                    renderType = [.singleSelect, .multiSelect, .oob, .otp]
-                case .html, .both:
-                    renderType = [.html, .singleSelect, .multiSelect, .oob, .otp]
-                }
-            }
-        }
-        /// List of all the RenderTypes that the device supports for displaying specific challenge user interfaces within the SDK
-        var renderType: Set<RenderType> = [.html, .singleSelect, .multiSelect, .oob, .otp]
+        var supportedUI: SupportedUI = .both
 
         /// - Parameters:
         ///   - environment: Environment used: staging or production
@@ -51,8 +40,23 @@ public extension Paysafe3DS {
             configuration.requestTimeout = requestTimeout
             configuration.challengeTimeout = challengeTimeout
             configuration.uiType = supportedUI.cardinalSessionUIType
-            configuration.renderType = renderType.map(\.rawValue)
-
+            switch supportedUI {
+            case .native:
+                configuration.renderType = [
+                    CardinalSessionRenderTypeOTP,
+                    CardinalSessionRenderTypeOOB,
+                    CardinalSessionRenderTypeSingleSelect,
+                    CardinalSessionRenderTypeMultiSelect
+                ]
+            case .html, .both:
+                configuration.renderType = [
+                    CardinalSessionRenderTypeOTP,
+                    CardinalSessionRenderTypeHTML,
+                    CardinalSessionRenderTypeOOB,
+                    CardinalSessionRenderTypeSingleSelect,
+                    CardinalSessionRenderTypeMultiSelect
+                ]
+            }
             // UI customization
             let uiCustomization = UiCustomization()
             let toolbarCustomization = ToolbarCustomization()
@@ -91,20 +95,6 @@ public extension Paysafe3DS {
                 return .staging
             }
         }
-    }
-
-    /// Represents different render types supported
-    enum RenderType: String {
-        /// RenderType for OTP
-        case otp = "CardinalSessionRenderTypeOTP"
-        /// RenderType for HTML
-        case html = "CardinalSessionRenderTypeHTML"
-        /// RenderType for OOB
-        case oob = "CardinalSessionRenderTypeOOB"
-        /// RenderType for Single Select
-        case singleSelect = "CardinalSessionRenderTypeSingleSelect"
-        /// RenderType for Multi Select
-        case multiSelect = "CardinalSessionRenderTypeMultiSelect"
     }
 
     /// Sets the Interface type that the device supports for displaying specific challenge user interfaces within the SDK.

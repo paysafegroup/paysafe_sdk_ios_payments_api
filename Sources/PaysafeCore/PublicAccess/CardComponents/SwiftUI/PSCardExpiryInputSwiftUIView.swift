@@ -14,8 +14,15 @@ public struct PSCardExpiryInputSwiftUIView: UIViewRepresentable, PSCardInputView
 
     /// - Parameters:
     ///   - inputType: PSCardExpiryInputType, default as `datePicker`
-    public init(inputType: PSCardExpiryInputType = .datePicker) {
-        cardExpiryView = PSCardExpiryInputView(inputType: inputType)
+    ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    public init(
+        inputType: PSCardExpiryInputType = .datePicker,
+        animateTopPlaceholderLabel: Bool = true
+    ) {
+        cardExpiryView = PSCardExpiryInputView(
+            inputType: inputType,
+            animateTopPlaceholderLabel: animateTopPlaceholderLabel
+        )
     }
 
     /// PSCardFieldInputEventBlock

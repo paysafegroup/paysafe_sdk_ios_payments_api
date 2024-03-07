@@ -10,7 +10,7 @@ struct SavedCardsResponse: Decodable {
     /// Id
     let id: String
     /// Time to live seconds
-    let timeToLiveSeconds: Int
+    let timeToLiveSeconds: Int?
     /// Status
     let status: String
     /// Single use customer token
@@ -18,25 +18,25 @@ struct SavedCardsResponse: Decodable {
     /// Locale
     let locale: String
     /// First name
-    let firstName: String
+    let firstName: String?
     /// Middle name
-    let middleName: String
+    let middleName: String?
     /// Last name
-    let lastName: String
+    let lastName: String?
     /// Date of birth
-    let dateOfBirth: DateOfBirth
+    let dateOfBirth: DateOfBirth?
     /// Email
-    let email: String
+    let email: String?
     /// Phone
-    let phone: String
+    let phone: String?
     /// IP
-    let ip: String
+    let ip: String?
     /// Nationality
-    let nationality: String
+    let nationality: String?
     /// Addresses
-    let addresses: [Address]
+    let addresses: [Address]?
     /// Payment handles
-    let paymentHandles: [PaymentHandle]
+    let paymentHandles: [PaymentHandle]?
     /// Customer id
-    let customerId: String
+    let customerId: String?
 }

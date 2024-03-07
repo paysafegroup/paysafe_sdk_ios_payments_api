@@ -19,6 +19,7 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
     lazy var cardholderNameTextField: PSCardholderNameInputTextField = {
         let textField = PSCardholderNameInputTextField()
         textField.psCardholderNameInputTextFieldDelegate = self
+        textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
         return textField
     }()
 
@@ -38,11 +39,18 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
             cardholderNameTextField.theme = theme
         }
     }
+    /// Indicates if the textfield should use the top placeholder animation
+    private var animateTopPlaceholderLabel: Bool = true
 
     /// - Parameters:
     ///   - cardholderName: Cardholder name
-    public init(cardholderName: String? = nil) {
+    ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    public init(
+        cardholderName: String? = nil,
+        animateTopPlaceholderLabel: Bool = true
+    ) {
         super.init(frame: .zero)
+        self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
         cardholderNameTextField.cardholderNameValue = cardholderName
         configure()
     }
