@@ -44,7 +44,11 @@ final class AppCoordinator: ObservableObject {
         case .SwiftUI:
             let mainView = MainView(selectedTab: .shop)
                 .environmentObject(self)
-            navigationController.viewControllers = [mainView.asUIViewController]
+            if #available(iOS 16.0, *) {
+                navigationController.viewControllers = [mainView.asUIViewController]
+            } else {
+                window.rootViewController = mainView.asUIViewController
+            }
         case .UIKit:
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let viewController = storyboard.instantiateViewController(withIdentifier: "ViewController")

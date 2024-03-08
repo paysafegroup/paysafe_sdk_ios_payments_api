@@ -68,15 +68,6 @@ struct ShopView<ViewModel: ShopViewModel>: View {
                     .imageScale(.large)
                     .foregroundColor(.ltDarkPurple)
             }
-
-            Button {
-                // self.tabSelection = 4
-            } label: {
-                Image("profile")
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .clipShape(Circle())
-            }
         }
     }
 }

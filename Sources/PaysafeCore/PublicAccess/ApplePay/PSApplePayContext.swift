@@ -310,7 +310,16 @@ private extension PSApplePayContext {
         }
         .map { applePaymentResponse in
             // Signal Apple Pay success completion
-            applePaymentResponse.completion?(.success, nil)
+            switch applePaymentResponse.status {
+            case .payable:
+                applePaymentResponse.completion?(.success, nil)
+            default:
+                let error = PSError.corePaymentHandleCreationFailed(
+                    PaysafeSDK().correlationId,
+                    message: "Status of the payment handle is \(applePaymentResponse.status)"
+                )
+                applePaymentResponse.completion?(.failure, error)
+            }
             return applePaymentResponse.paymentHandleToken
         }
         .eraseToAnyPublisher()
@@ -369,6 +378,7 @@ private extension PSApplePayContext {
         .map {
             ApplePaymentResponse(
                 paymentHandleToken: $0.paymentHandleToken,
+                status: $0.status,
                 completion: response.completion
             )
         }

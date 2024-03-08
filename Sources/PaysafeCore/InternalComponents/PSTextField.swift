@@ -151,6 +151,7 @@ class PSTextField: UITextField {
     func configureRightView(iconName: String?) {
         guard let iconName else { return rightView = nil }
         rightView = UIImageView(image: UIImage(named: iconName))
+        rightView?.accessibilityIdentifier = iconName
         rightViewMode = .always
         layoutIfNeeded()
     }

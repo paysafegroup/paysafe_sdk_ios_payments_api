@@ -28,6 +28,12 @@ class PSCardholderNameInputTextField: PSTextField {
             psCardholderNameInputTextFieldDelegate?.didUpdateCardholderNameInputValidationState(isValid: cardholderNameValue != nil)
         }
     }
+    /// Default placeholder for the selected state
+    var selectedPlaceholder: String = "Cardholder Name" {
+        didSet {
+            updateSelectedPlaceholder(selectedPlaceholder)
+        }
+    }
 
     /// PSCardholderNameInputTextFieldDelegate
     weak var psCardholderNameInputTextFieldDelegate: PSCardholderNameInputTextFieldDelegate?
@@ -70,8 +76,12 @@ class PSCardholderNameInputTextField: PSTextField {
     private func configurePlaceholders() {
         let defaultPlaceholder = "Cardholder Name"
         placeholders[PSTextField.PSTextFieldState.normal] = defaultPlaceholder
-        placeholders[PSTextField.PSTextFieldState.selected] = defaultPlaceholder
+        placeholders[PSTextField.PSTextFieldState.selected] = selectedPlaceholder
         placeholders[PSTextField.PSTextFieldState.error] = defaultPlaceholder
+    }
+
+    private func updateSelectedPlaceholder(_ value: String) {
+        placeholders[PSTextField.PSTextFieldState.selected] = value
     }
 
     /// Setup accessibility

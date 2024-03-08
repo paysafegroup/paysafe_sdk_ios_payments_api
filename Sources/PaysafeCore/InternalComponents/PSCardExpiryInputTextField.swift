@@ -28,6 +28,12 @@ class PSCardExpiryInputTextField: PSTextField {
             psCardExpiryInputTextFieldDelegate?.didUpdateCardExpiryInputValidationState(isValid: cardExpiryDateValue != nil)
         }
     }
+    /// Default placeholder for the selected state
+    var selectedPlaceholder: String = "MM  YY" {
+        didSet {
+            updateSelectedPlaceholder(selectedPlaceholder)
+        }
+    }
 
     /// PSCardExpiryInputType
     var inputType: PSCardExpiryInputType = .text {
@@ -87,10 +93,13 @@ class PSCardExpiryInputTextField: PSTextField {
     /// Configures placeholders for normal, selected and error state
     private func configurePlaceholders() {
         let defaultPlaceholder = "Expiry Date"
-        let selectedPlaceholder = "MM  YY"
         placeholders[PSTextField.PSTextFieldState.normal] = defaultPlaceholder
         placeholders[PSTextField.PSTextFieldState.selected] = selectedPlaceholder
         placeholders[PSTextField.PSTextFieldState.error] = defaultPlaceholder
+    }
+
+    private func updateSelectedPlaceholder(_ value: String) {
+        placeholders[PSTextField.PSTextFieldState.selected] = value
     }
 
     /// Setup accessibility

@@ -30,10 +30,10 @@ struct NewCreditCardPaymentMethodView<ViewModel: NewCreditCardPaymentMethodViewM
             billingAddress: billingAddress,
             totalPrice: totalPrice
         )
-        cardNumberView = PSCardNumberInputSwiftUIView(animateTopPlaceholderLabel: false)
-        cardholderNameView = PSCardholderNameInputSwiftUIView(animateTopPlaceholderLabel: false)
-        cardExpiryView = PSCardExpiryInputSwiftUIView(inputType: .datePicker, animateTopPlaceholderLabel: false)
-        cardCVVView = PSCardCVVInputSwiftUIView(animateTopPlaceholderLabel: false)
+        cardNumberView = PSCardNumberInputSwiftUIView()
+        cardholderNameView = PSCardholderNameInputSwiftUIView()
+        cardExpiryView = PSCardExpiryInputSwiftUIView()
+        cardCVVView = PSCardCVVInputSwiftUIView()
     }
 
     var body: some View {

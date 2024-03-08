@@ -22,6 +22,7 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
         let textField = PSCardNumberInputTextField()
         textField.separatorType = separatorType
         textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
+        textField.selectedPlaceholder = selectedPlaceholder
         textField.psCardNumberInputTextFieldDelegate = self
         return textField
     }()
@@ -42,6 +43,9 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
 
     /// PSTheme
     private var storedTheme: PSTheme = PaysafeSDK.shared.psTheme
+    /// Placeholder for the selected state
+    private var selectedPlaceholder: String?
+    /// Theme
     public var theme: PSTheme {
         get {
             storedTheme
@@ -55,13 +59,16 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
     /// - Parameters:
     ///   - separatorType: PSCardNumberInputSeparatorType, default as `whitespace`
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
     public init(
         separatorType: PSCardNumberInputSeparatorType = .whitespace,
-        animateTopPlaceholderLabel: Bool = true
+        animateTopPlaceholderLabel: Bool = true,
+        hint: String? = nil
     ) {
         super.init(frame: .zero)
         self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
         self.separatorType = separatorType
+        selectedPlaceholder = hint
         configure()
     }
 

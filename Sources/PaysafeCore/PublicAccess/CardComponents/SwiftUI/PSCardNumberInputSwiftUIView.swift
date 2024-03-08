@@ -15,13 +15,16 @@ public struct PSCardNumberInputSwiftUIView: UIViewRepresentable, PSCardInputView
     /// - Parameters:
     ///   - separatorType: PSCardNumberInputSeparatorType, default as `whitespace`
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
     public init(
         separatorType: PSCardNumberInputSeparatorType = .whitespace,
-        animateTopPlaceholderLabel: Bool = true
+        animateTopPlaceholderLabel: Bool = true,
+        hint: String? = nil
     ) {
         cardNumberView = PSCardNumberInputView(
             separatorType: separatorType,
-            animateTopPlaceholderLabel: animateTopPlaceholderLabel
+            animateTopPlaceholderLabel: animateTopPlaceholderLabel,
+            hint: hint
         )
     }
 

@@ -12,6 +12,7 @@ import XCTest
 
 class PSAPIClientMock: PSAPIClient {
     var tokenizeShouldFail = false
+    var expectedTokenizeResultStatus: PaymentHandleTokenStatus = .payable
     override func tokenize(options: PSTokenizable, paymentType: PaymentType, card: CardRequest?) -> AnyPublisher<PaymentHandle, PSError> {
         switch tokenizeShouldFail {
         case true:
@@ -20,6 +21,7 @@ class PSAPIClientMock: PSAPIClient {
             return Just(
                 PaymentHandle(
                     accountId: "accountId",
+                    status: expectedTokenizeResultStatus,
                     merchantRefNum: "merchantRefNum",
                     paymentHandleToken: String(repeating: "*", count: 16),
                     redirectPaymentLink: ReturnLink(

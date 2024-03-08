@@ -31,18 +31,4 @@ enum ShopCategory: Int, CaseIterable {
             return "Trivia & Quizes"
         }
     }
-
-    /// Shop category icon name
-    var iconName: String {
-        switch self {
-        case .lotteryTickets:
-            return "lotteryTickets"
-        case .raffleDraws:
-            return "raffleDraws"
-        case .bingoGames:
-            return "bingoGames"
-        case .triviaQuizes:
-            return "triviaQuizes"
-        }
-    }
 }

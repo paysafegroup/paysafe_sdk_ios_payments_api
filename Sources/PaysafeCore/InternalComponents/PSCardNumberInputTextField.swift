@@ -30,6 +30,12 @@ class PSCardNumberInputTextField: PSTextField {
             psCardNumberInputTextFieldDelegate?.didUpdateCardNumberInputValidationState(isValid: cardNumberValue != nil)
         }
     }
+    /// Default placeholder for the selected state
+    var selectedPlaceholder: String? {
+        didSet {
+            updateSelectedPlaceholder(selectedPlaceholder)
+        }
+    }
 
     /// PSCardNumberInputSeparatorType
     var separatorType: PSCardNumberInputSeparatorType = .whitespace {
@@ -98,10 +104,18 @@ class PSCardNumberInputTextField: PSTextField {
     private func configurePlaceholders() {
         let defaultPlaceholder = "Card number"
         let separator = separatorType.separator
-        let selectedPlaceholder = "xxxx\(separator)xxxx\(separator)xxxx\(separator)xxxx"
+        var placeholder: String = "xxxx\(separator)xxxx\(separator)xxxx\(separator)xxxx"
+        if let selectedPlaceholder {
+            placeholder = selectedPlaceholder
+        }
         placeholders[PSTextField.PSTextFieldState.normal] = defaultPlaceholder
-        placeholders[PSTextField.PSTextFieldState.selected] = selectedPlaceholder
+        placeholders[PSTextField.PSTextFieldState.selected] = placeholder
         placeholders[PSTextField.PSTextFieldState.error] = defaultPlaceholder
+    }
+
+    private func updateSelectedPlaceholder(_ value: String?) {
+        guard let value else { return }
+        placeholders[PSTextField.PSTextFieldState.selected] = value
     }
 
     /// Setup accessibility

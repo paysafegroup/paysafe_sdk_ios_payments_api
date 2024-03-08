@@ -9,6 +9,8 @@
 struct PaymentHandle {
     /// Account id
     let accountId: String?
+    /// Status
+    let status: PaymentHandleTokenStatus
     /// Merchant reference number
     let merchantRefNum: String
     /// Payment handle token

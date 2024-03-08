@@ -30,9 +30,9 @@ struct ShopCategoryView: View {
     }
 
     private var categoryBackgroundView: some View {
-        Image(category.iconName)
-            .resizable()
+        Color(red: 90 / 255, green: 40 / 255, blue: 255 / 255)
             .frame(height: geometryHeight)
+            .accessibilityIdentifier("lotteryTickets")
     }
 
     private var categoryTitleView: some View {

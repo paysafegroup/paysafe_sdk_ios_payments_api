@@ -135,6 +135,33 @@ final class PSApplePayContextTests: XCTestCase {
         }
     }
 
+    func test_tokenize_success_statusFailed() {
+        // Given
+        PSApplePayContext.createSUT { result in
+            guard case let .success(sut) = result else {
+                return XCTFail("Expected a success PSApplePayContext result.")
+            }
+            let options = PSApplePayTokenizeOptions.createMock()
+            guard let mockAPIClient = sut.psAPIClient as? PSAPIClientMock else {
+                return XCTFail("PSAPIClient couln't be casted to PSAPIClientMock.")
+            }
+
+            mockAPIClient.expectedTokenizeResultStatus = .failed
+
+            // When
+            sut.tokenize(using: options) { tokenizeResult in
+                switch tokenizeResult {
+                case let .success(paymentHandleToken):
+                    XCTAssertFalse(paymentHandleToken.isEmpty)
+                    XCTAssertEqual(paymentHandleToken.count, 16)
+                case let .failure(error):
+                    // Then
+                    XCTFail("Expected a successful tokenize response.")
+                }
+            }
+        }
+    }
+
     func test_tokenize_failure() {
         // Given
         PSApplePayContext.createSUT { result in

@@ -457,6 +457,7 @@ private extension PSAPIClient {
     ) -> AnyPublisher<PaymentHandle, PSError> {
         let paymentHandle = PaymentHandle(
             accountId: paymentResponse.accountId,
+            status: PaymentHandleTokenStatus(rawValue: paymentResponse.status) ?? .failed,
             merchantRefNum: paymentResponse.merchantRefNum,
             paymentHandleToken: paymentResponse.paymentHandleToken,
             redirectPaymentLink: paymentResponse.links?.first { $0.rel == .redirectPayment },

@@ -58,12 +58,12 @@ struct CheckoutFormView: View {
 struct CheckoutFormView_Previews: PreviewProvider {
     static var previews: some View {
         let billingAddress = BillingAddress(
-            nickName: "CARLOS\nMONGE BONILLA",
-            street: "11350 NW 25TH ST",
-            city: "SWEETWATER",
+            nickName: "John Doe",
+            street: "5335 Gate Parkway Fourth Floor",
+            city: "Jacksonvillle",
             state: "FL",
             country: "US",
-            zip: "33172"
+            zip: "32256"
         )
         let shopItem = ShopItem(
             id: 0,

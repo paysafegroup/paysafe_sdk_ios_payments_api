@@ -44,12 +44,12 @@ final class CheckoutViewModel: ObservableObject {
         guard isFirstLaunch else { return }
         isFirstLaunch = false
         billingAddress = BillingAddress(
-            nickName: "CARLOS\nMONGE BONILLA",
-            street: "11350 NW 25TH ST",
-            city: "SWEETWATER",
+            nickName: "John Doe",
+            street: "5335 Gate Parkway Fourth Floor",
+            city: "Jacksonvillle",
             state: "FL",
             country: "US",
-            zip: "33172"
+            zip: "32256"
         )
     }
 }
