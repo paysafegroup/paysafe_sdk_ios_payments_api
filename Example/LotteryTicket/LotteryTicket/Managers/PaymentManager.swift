@@ -14,8 +14,8 @@ final class PaymentManager {
     let apiKey = ""
     /// Paysafe Card payments account id
     let cardAccountId = ""
-    /// Paysafe PayPal payments account id
-    let paypalAccountId = ""
+    /// Paysafe Venmo payments account id
+    let venmoAccountId = ""
 
     /// Setup Paysafe SDK.
     func setupPaysafeSDK() {
@@ -27,6 +27,7 @@ final class PaymentManager {
             placeholderColor: .ltDarkPurple,
             hintColor: .ltPalePurple
         )
+        
         PaysafeSDK.shared.setup(
             apiKey: apiKey,
             environment: .test,

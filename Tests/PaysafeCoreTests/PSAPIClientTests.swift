@@ -517,49 +517,4 @@ final class PSAPIClientTests: XCTestCase {
 
         wait(for: [expectation], timeout: 1.0)
     }
-
-    func test_tokenize_payPal_success() throws {
-        // Given
-        let expectation = expectation(description: "Tokenize method succeeds for apple pay.")
-        let mockTokenizeOptions = PSCardTokenizeOptions.mockForPayPal(accountId: "139203223")
-        let paymentType: PaymentType = .card
-        let paymentHandleId = "test_id1234"
-        guard let mockAuthenticationData = AuthenticationResponse.jsonMock().data(using: .utf8),
-              let mockTokenizeData = PaymentResponse.jsonMockWith3DS(paymentHandleId: paymentHandleId).data(using: .utf8),
-              let mockFinalizeData = FinalizeResponse.jsonMock().data(using: .utf8),
-              let mockSearchData = RefreshPaymentHandleTokenResponse.jsonMock(status: .payable).data(using: .utf8) else {
-            return XCTFail("Unable to convert mock JSON to Data")
-        }
-        mock3DS.stub3DSSucceeds(challengeAuthenticationId: "challengeAuthenticationId")
-        let tokenizeURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles"))
-        let authenticationURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/cardadapter/v1/paymenthandles/\(paymentHandleId)/authentications"))
-        let finalizeURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/cardadapter/v1/paymenthandles/\(paymentHandleId)/authentications/challengeAuthenticationId/finalize"))
-        let searchURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles/search"))
-        let mockResponse = HTTPURLResponse(url: tokenizeURL, statusCode: 200, httpVersion: nil, headerFields: nil)
-        mockSession.stubRequest(url: tokenizeURL, data: mockTokenizeData, response: mockResponse, error: nil)
-        mockSession.stubRequest(url: authenticationURL, data: mockAuthenticationData, response: mockResponse, error: nil)
-        mockSession.stubRequest(url: searchURL, data: mockSearchData, response: mockResponse, error: nil)
-        mockSession.stubRequest(url: finalizeURL, data: mockFinalizeData, response: mockResponse, error: nil)
-
-        // When
-        sut.tokenize(
-            options: mockTokenizeOptions,
-            paymentType: paymentType
-        )
-        .sink { completion in
-            switch completion {
-            case .finished:
-                expectation.fulfill()
-            case .failure:
-                XCTFail("Expected success, received failure.")
-            }
-        } receiveValue: { paymentHandleResponse in
-            // Then
-            XCTAssertEqual(paymentHandleResponse.accountId, mockTokenizeOptions.accountId)
-            XCTAssertFalse(paymentHandleResponse.paymentHandleToken.isEmpty)
-        }
-        .store(in: &cancellables)
-
-        wait(for: [expectation], timeout: 1.0)
-    }
 }

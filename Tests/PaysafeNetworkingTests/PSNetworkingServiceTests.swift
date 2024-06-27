@@ -414,4 +414,21 @@ final class PSNetworkingServiceTests: XCTestCase {
 
         wait(for: [expectation], timeout: 0.1)
     }
+    
+    func test_urlSession_performRedirection() {
+        let expectation = expectation(description: "Handle redirection")
+        
+        let service = PSNetworkingService(overrideSessionToBlockRedirects: true,authorizationKey: "authKey", correlationId: "correlationId", sdkVersion: "sdkVersion")
+        
+        guard let url = URL(string: "https://www.google.com") else {
+            XCTFail("Expected URL")
+            return
+        }
+        
+        service.urlSession(URLSession.shared, task: URLSessionTask(), willPerformHTTPRedirection: HTTPURLResponse(), newRequest: URLRequest(url: url)) { request in
+            expectation.fulfill()
+            XCTAssertNil(request, "Redirection Request should be nil")
+        }
+        wait(for: [expectation], timeout: 0.1)
+    }
 }

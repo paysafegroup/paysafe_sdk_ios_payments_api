@@ -11,7 +11,6 @@
 		7C9FCBE12AC2F1900042C471 /* Paysafe3DS in Frameworks */ = {isa = PBXBuildFile; productRef = 7C9FCBE02AC2F1900042C471 /* Paysafe3DS */; };
 		7CAE00A22B0E133000CB0F47 /* PaysafeApplePay in Frameworks */ = {isa = PBXBuildFile; productRef = 7CAE00A12B0E133000CB0F47 /* PaysafeApplePay */; };
 		7CCB43222B6394A400F1A7EC /* MerchantBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB43212B6394A400F1A7EC /* MerchantBackend.swift */; };
-		7CE927232B28A1F900FEBDBD /* PaysafePayPal in Frameworks */ = {isa = PBXBuildFile; productRef = 7CE927222B28A1F900FEBDBD /* PaysafePayPal */; };
 		D30407B32ABB5C82005F2DF0 /* PaysafeCore in Frameworks */ = {isa = PBXBuildFile; productRef = D30407B22ABB5C82005F2DF0 /* PaysafeCore */; };
 		D32C5A692B01253B005C7940 /* OrderConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C5A682B01253B005C7940 /* OrderConfirmationView.swift */; };
 		D32C5A6B2B012547005C7940 /* OrderConfirmationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C5A6A2B012547005C7940 /* OrderConfirmationViewModel.swift */; };
@@ -97,6 +96,7 @@
 		D3EA1FAE2A99053600012F38 /* View+UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EA1FAD2A99053600012F38 /* View+UIViewController.swift */; };
 		D3EA1FB02A99F43D00012F38 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EA1FAF2A99F43D00012F38 /* AppCoordinator.swift */; };
 		D3EA1FB32A99F49A00012F38 /* BaseNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EA1FB22A99F49A00012F38 /* BaseNavigationController.swift */; };
+		D4890E762C062158004A60B8 /* PaysafeNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = D4890E752C062158004A60B8 /* PaysafeNetworking */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -198,11 +198,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7CE927232B28A1F900FEBDBD /* PaysafePayPal in Frameworks */,
 				7CAE00A22B0E133000CB0F47 /* PaysafeApplePay in Frameworks */,
 				D30407B32ABB5C82005F2DF0 /* PaysafeCore in Frameworks */,
 				7C9FCBE12AC2F1900042C471 /* Paysafe3DS in Frameworks */,
 				7C4CDF452AF3F24E003F7545 /* PaysafeCommon in Frameworks */,
+				D4890E762C062158004A60B8 /* PaysafeNetworking in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -695,7 +695,7 @@
 				7C9FCBE02AC2F1900042C471 /* Paysafe3DS */,
 				7C4CDF442AF3F24E003F7545 /* PaysafeCommon */,
 				7CAE00A12B0E133000CB0F47 /* PaysafeApplePay */,
-				7CE927222B28A1F900FEBDBD /* PaysafePayPal */,
+				D4890E752C062158004A60B8 /* PaysafeNetworking */,
 			);
 			productName = LotteryTicket;
 			productReference = D3EA1F642A97AEF100012F38 /* LotteryTicket.app */;
@@ -972,9 +972,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = LotteryTicket/LotteryTicket.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = W53SMN886V;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LotteryTicket/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -990,6 +992,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.paysafe.LotteryTicket-dev";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Lottery ticket - Paysafe SDK";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -1006,9 +1009,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = LotteryTicket/LotteryTicket.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = W53SMN886V;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LotteryTicket/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1024,6 +1029,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.paysafe.LotteryTicket-dev";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Lottery ticket - Paysafe SDK";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -1069,13 +1075,13 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = PaysafeApplePay;
 		};
-		7CE927222B28A1F900FEBDBD /* PaysafePayPal */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PaysafePayPal;
-		};
 		D30407B22ABB5C82005F2DF0 /* PaysafeCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PaysafeCore;
+		};
+		D4890E752C062158004A60B8 /* PaysafeNetworking */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PaysafeNetworking;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

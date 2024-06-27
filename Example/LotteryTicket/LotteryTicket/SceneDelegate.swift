@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import PaysafeCore
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -15,7 +16,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
         let window = UIWindow(windowScene: windowScene)
         self.window = window
+        PSVenmoContext.setURLScheme(scheme: "com.paysafe.LotteryTicket-dev.payments")
         appCoordinator = AppCoordinator(window: window)
         appCoordinator?.start()
+    }
+    
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        PSVenmoContext.setURLContexts(contexts: URLContexts)
     }
 }

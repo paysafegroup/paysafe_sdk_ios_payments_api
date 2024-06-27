@@ -28,21 +28,27 @@ let package = Package(
             targets: ["PaysafeApplePay"]
         ),
         .library(
-            name: "PaysafePayPal",
-            targets: ["PaysafePayPal"]
+            name: "PaysafeVenmo",
+            targets: ["PaysafeVenmo"]
         )
+        //        .library(
+        //            name: "PaysafePayPal",
+        //            targets: ["PaysafePayPal"]
+        //        )
     ],
     dependencies: [
-        .package(url: "https://github.com/paypal/paypal-ios", from: "1.1.0")
+        //        .package(url: "https://github.com/paypal/paypal-ios", from: "1.1.0"),
+        .package(url: "https://github.com/braintree/braintree_ios", from: "6.18.2")
     ],
     targets: [
         .binaryTarget(
-            name: "CardinalMobile",
+            name: "PSCardinalMobile",
             path: "./Frameworks/CardinalMobile.xcframework"
         ),
         .target(
             name: "PaysafeCore",
-            dependencies: ["Paysafe3DS", "PaysafeApplePay", "PaysafePayPal", "PaysafeNetworking", "PaysafeCommon"]
+            //            dependencies: ["Paysafe3DS", "PaysafeApplePay", "PaysafePayPal", "PaysafeNetworking", "PaysafeCommon"]
+            dependencies: ["Paysafe3DS", "PaysafeApplePay", "PaysafeNetworking", "PaysafeCommon", "PaysafeVenmo"]
         ),
         .target(
             name: "PaysafeCommon",
@@ -50,7 +56,7 @@ let package = Package(
         ),
         .target(
             name: "Paysafe3DS",
-            dependencies: ["CardinalMobile", "PaysafeNetworking", "PaysafeCommon"]
+            dependencies: ["PSCardinalMobile", "PaysafeNetworking", "PaysafeCommon"]
         ),
         .target(
             name: "PaysafeNetworking",
@@ -60,13 +66,19 @@ let package = Package(
             name: "PaysafeApplePay",
             dependencies: ["PaysafeCommon"]
         ),
+        //        .target(
+        //            name: "PaysafePayPal",
+        //            dependencies: [
+        //                "PaysafeCommon",
+        //                .product(name: "PayPalNativePayments", package: "paypal-ios"),
+        //                .product(name: "PayPalWebPayments", package: "paypal-ios")
+        //            ]
+        //        ),
         .target(
-            name: "PaysafePayPal",
-            dependencies: [
-                "PaysafeCommon",
-                .product(name: "PayPalNativePayments", package: "paypal-ios"),
-                .product(name: "PayPalWebPayments", package: "paypal-ios")
-            ]
+            name: "PaysafeVenmo",
+            dependencies: ["PaysafeCommon",
+                           .product(name: "BraintreeVenmo", package: "braintree_ios"),
+                           .product(name: "BraintreeCore", package: "braintree_ios")]
         ),
         .testTarget(
             name: "PaysafeCoreTests",
@@ -87,10 +99,11 @@ let package = Package(
         .testTarget(
             name: "PaysafeApplePayTests",
             dependencies: ["PaysafeApplePay"]
-        ),
-        .testTarget(
-            name: "PaysafePayPalTests",
-            dependencies: ["PaysafePayPal"]
         )
+        //,
+        //        .testTarget(
+        //            name: "PaysafePayPalTests",
+        //            dependencies: ["PaysafePayPal"]
+        //        )
     ]
 )

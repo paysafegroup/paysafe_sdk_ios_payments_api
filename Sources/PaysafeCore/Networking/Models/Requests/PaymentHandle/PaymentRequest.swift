@@ -41,6 +41,6 @@ struct PaymentRequest: Encodable {
     let paymentHandleTokenFrom: String?
     /// Apple Pay request
     let applePay: ApplePayRequest?
-    /// PayPal request
-    let paypal: PayPalRequest?
+    /// Venmo request
+    let venmo: VenmoRequest?
 }

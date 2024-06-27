@@ -154,7 +154,7 @@ final class PSApplePayContextTests: XCTestCase {
                 case let .success(paymentHandleToken):
                     XCTAssertFalse(paymentHandleToken.isEmpty)
                     XCTAssertEqual(paymentHandleToken.count, 16)
-                case let .failure(error):
+                case .failure(_):
                     // Then
                     XCTFail("Expected a successful tokenize response.")
                 }

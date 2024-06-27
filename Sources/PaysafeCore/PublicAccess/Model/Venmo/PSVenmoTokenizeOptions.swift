@@ -1,12 +1,12 @@
 //
-//  PSPayPalTokenizeOptions.swift
+//  PSVenmoTokenizeOptions.swift
 //
 //
-//  Copyright (c) 2024 Paysafe Group
+//  Created by Eduardo Oliveros on 5/28/24.
 //
 
-/// PSPayPalTokenizeOptions
-public struct PSPayPalTokenizeOptions: PSTokenizable {
+/// PSVenmoTokenizeOptions
+public struct PSVenmoTokenizeOptions: PSTokenizable {
     /// Payment amount in minor units
     public let amount: Int
     /// Currency code
@@ -21,12 +21,18 @@ public struct PSPayPalTokenizeOptions: PSTokenizable {
     public var profile: Profile?
     /// Account id
     public let accountId: String
+    /// Dub Check
+    public let dupCheck: Bool
     /// Merchant descriptor
     public var merchantDescriptor: MerchantDescriptor?
     /// Shipping details
     public var shippingDetails: ShippingDetails?
-    /// PayPal additional data
-    public let paypal: PayPalAdditionalData?
+    /// Device Finger Printing
+    public var deviceFingerprinting: DeviceFingerprinting?
+    /// SingleUseCustomerToken
+    public var singleUseCustomerToken: String?
+    /// Venmol additional data
+    public let venmo: VenmoAdditionalData?
 
     /// - Parameters:
     ///   - amount: Payment amount in minor units
@@ -36,9 +42,11 @@ public struct PSPayPalTokenizeOptions: PSTokenizable {
     ///   - billingDetails: Billing details
     ///   - profile: User profile
     ///   - accountId: Account id
+    ///   - dupCheck: DupCheck
     ///   - merchantDescriptor: Merchant descriptor
     ///   - shippingDetails: Shipping details
-    ///   - paypal: Paypal additional data
+    ///   - deviceFingerprinting: Device finger printing
+    ///   - venmo: Venmo additional data
     public init(
         amount: Int,
         currencyCode: String,
@@ -47,9 +55,12 @@ public struct PSPayPalTokenizeOptions: PSTokenizable {
         billingDetails: BillingDetails? = nil,
         profile: Profile? = nil,
         accountId: String,
+        dupCheck: Bool,
         merchantDescriptor: MerchantDescriptor? = nil,
         shippingDetails: ShippingDetails? = nil,
-        paypal: PayPalAdditionalData? = nil
+        deviceFingerprinting: DeviceFingerprinting? = nil,
+        singleUseCustomerToken: String? = nil,
+        venmo: VenmoAdditionalData? = nil
     ) {
         self.amount = amount
         self.currencyCode = currencyCode
@@ -58,8 +69,11 @@ public struct PSPayPalTokenizeOptions: PSTokenizable {
         self.billingDetails = billingDetails
         self.profile = profile
         self.accountId = accountId
+        self.dupCheck = dupCheck
+        self.singleUseCustomerToken = singleUseCustomerToken
+        self.deviceFingerprinting = deviceFingerprinting
         self.merchantDescriptor = merchantDescriptor
         self.shippingDetails = shippingDetails
-        self.paypal = paypal
+        self.venmo = venmo
     }
 }

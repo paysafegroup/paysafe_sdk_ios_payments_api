@@ -21,4 +21,8 @@ struct PaymentHandle {
     let returnLinks: [ReturnLink]
     /// Order id
     let orderId: String?
+    /// Gateway response
+    let gatewayResponse: GatewayResponse?
+    /// Action
+    let action: String?
 }

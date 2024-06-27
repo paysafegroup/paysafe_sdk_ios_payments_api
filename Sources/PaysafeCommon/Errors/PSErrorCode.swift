@@ -46,10 +46,11 @@ public enum PSErrorCode {
     /// Predefined Apple Pay error codes
     case applePayNotSupported
     case applePayUserCancelled
-
-    /// Predefined PayPal error codes
-    case payPalFailedAuthorization
-    case payPalUserCancelled
+    
+    /// Predefined Venmo error codes
+    case venmoFailedAuthorization
+    case venmoUserCancelled
+    case venmoAppIsNotInstalled
 
     /// Predefined PSCardForm error codes
     case invalidCardFields
@@ -67,23 +68,23 @@ public enum PSErrorCode {
     public var type: PSErrorType {
         switch self {
         case .genericAPIError, .invalidResponse, .invalidURL,
-             .encodingError, .timeoutError, .noConnectionToServer:
+                .encodingError, .timeoutError, .noConnectionToServer:
             return .apiError
         case .coreInvalidAPIKey, .coreInvalidAPIKeyFormat, .coreUnavailableEnvironment, .coreSDKInitializeError, .coreMerchantAccountConfigurationError,
-             .coreInvalidCurrencyCode, .corePaymentHandleCreationFailed, .coreInvalidAccountId,
-             .coreFailedToFetchAvailablePayments, .coreThreeDSAuthenticationRejected, .coreTokenizationAlreadyInProgress:
+                .coreInvalidCurrencyCode, .corePaymentHandleCreationFailed, .coreInvalidAccountId,
+                .coreFailedToFetchAvailablePayments, .coreThreeDSAuthenticationRejected, .coreTokenizationAlreadyInProgress:
             return .coreError
         case .threeDSFailedValidation, .threeDSUserCancelled, .threeDSTimeout,
-             .threeDSSessionFailure, .threeDSChallengePayloadError, .threeDSInvalidCountry, .threeDSInvalidApiKey, .coreAPIInvalidCardDetails, .threeDSInvalidAmount, .threeDSEncodingError, .threeDSInvalidURL,
-             .threeDSInvalidResponse, .threeDSInvalidCurrency:
+                .threeDSSessionFailure, .threeDSChallengePayloadError, .threeDSInvalidCountry, .threeDSInvalidApiKey, .coreAPIInvalidCardDetails, .threeDSInvalidAmount, .threeDSEncodingError, .threeDSInvalidURL,
+                .threeDSInvalidResponse, .threeDSInvalidCurrency:
             return .threeDSError
         case .applePayNotSupported, .applePayUserCancelled:
             return .applePayError
-        case .payPalFailedAuthorization, .payPalUserCancelled:
-            return .payPalError
         case .invalidCardFields, .invalidAccountIdFormat, .noAvailablePayments, .unsuportedCardBrand, .invalidAmount,
-             .invalidDynamicDescriptor, .invalidPhone, .invalidFirstName, .invalidLastName, .invalidEmail:
+                .invalidDynamicDescriptor, .invalidPhone, .invalidFirstName, .invalidLastName, .invalidEmail:
             return .cardFormError
+        case .venmoFailedAuthorization, .venmoUserCancelled, .venmoAppIsNotInstalled:
+            return .venmoError
         }
     }
 }

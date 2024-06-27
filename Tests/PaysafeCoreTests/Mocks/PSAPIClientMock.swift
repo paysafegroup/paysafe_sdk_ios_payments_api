@@ -51,7 +51,9 @@ class PSAPIClientMock: PSAPIClient {
                             method: nil
                         )
                     ],
-                    orderId: "orderId"
+                    orderId: "orderId", 
+                    gatewayResponse: nil, 
+                    action: "REDIRECT"
                 )
             )
             .setFailureType(to: PSError.self)
@@ -64,8 +66,7 @@ class PSAPIClientMock: PSAPIClient {
     var getPaymentMethodShouldFailCardPaymentValidation = false
     var getPaymentMethodShouldSucceedApplePayValidation = false
     var getPaymentMethodShouldFailApplePayValidation = false
-    var getPaymentMethodShouldSucceedPayPalValidation = false
-    var getPaymentMethodShouldFailPayPalValidation = false
+
     override func getPaymentMethod(currencyCode: String, accountId: String, completion: @escaping PSPaymentMethodBlock) {
         switch getPaymentMethodShouldFail {
         case true:
@@ -91,7 +92,7 @@ class PSAPIClientMock: PSAPIClient {
                     )
                 )
                 completion(.success(paymentMethod))
-            case getPaymentMethodShouldSucceedApplePayValidation, getPaymentMethodShouldFailPayPalValidation:
+            case getPaymentMethodShouldSucceedApplePayValidation:
                 let paymentMethod = PaymentMethod(
                     paymentMethod: .card,
                     currencyCode: currencyCode,
@@ -110,16 +111,16 @@ class PSAPIClientMock: PSAPIClient {
                     )
                 )
                 completion(.success(paymentMethod))
-            case getPaymentMethodShouldSucceedPayPalValidation, getPaymentMethodShouldFailCardPaymentValidation:
+            case getPaymentMethodShouldFailCardPaymentValidation:
                 let paymentMethod = PaymentMethod(
-                    paymentMethod: .payPal,
+                    paymentMethod: .venmo,
                     currencyCode: currencyCode,
                     accountId: accountId,
                     accountConfiguration: AccountConfiguration(
                         id: "id",
                         isApplePay: false,
                         cardTypeConfig: nil,
-                        clientId: "payPalClientId"
+                        clientId: "clientId"
                     )
                 )
                 completion(.success(paymentMethod))
@@ -130,12 +131,12 @@ class PSAPIClientMock: PSAPIClient {
     }
 
     var refreshPaymentTokenShouldFail = false
-    override func refreshPaymentToken(using paymentHandleToken: String, and retryCount: Int = 3, and delayInSeconds: TimeInterval = 6) -> AnyPublisher<Void, PSError> {
+    override func refreshPaymentToken(using paymentHandleToken: String, and retryCount: Int = 3, and delayInSeconds: TimeInterval = 6) -> AnyPublisher<String, PSError> {
         switch refreshPaymentTokenShouldFail {
         case true:
             return Fail(error: .genericAPIError("correlationId")).eraseToAnyPublisher()
         case false:
-            return Just(()).setFailureType(to: PSError.self).eraseToAnyPublisher()
+            return Just("token").setFailureType(to: PSError.self).eraseToAnyPublisher()
         }
     }
 }

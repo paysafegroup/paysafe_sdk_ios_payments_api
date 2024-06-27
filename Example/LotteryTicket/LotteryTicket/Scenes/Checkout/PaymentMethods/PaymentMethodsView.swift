@@ -83,13 +83,13 @@ struct PaymentMethodsView<ViewModel: PaymentMethodsViewModel>: View {
                 }
                 .padding(.vertical)
                 .accessibilityIdentifier("applePayPaymentMethodView")
-            case .payPal:
+            case .venmo:
                 Button {
-                    viewModel.presentPayPal(using: appCoordinator.paymentManager)
+                    viewModel.presentVenmo(using: appCoordinator.paymentManager)
                 } label: {
                     PaymentMethodView(paymentMethod: paymentMethod)
                 }
-                .accessibilityIdentifier("payPalPaymentMethodView")
+                .accessibilityIdentifier("venmoPaymentMethodView")
             }
         }
         .disabled(!paymentMethod.isEnabled)

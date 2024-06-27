@@ -15,8 +15,8 @@ public enum PSErrorType: String {
     case threeDSError = "3DSError"
     /// Predefined Apple Pay error type
     case applePayError = "ApplePayError"
-    /// Predefined PayPal error type
-    case payPalError = "PayPalError"
     /// Predefined PSCardForm error type
     case cardFormError = "CardFormError"
+    /// Predefined Venmo error type
+    case venmoError = "VenmoError"
 }

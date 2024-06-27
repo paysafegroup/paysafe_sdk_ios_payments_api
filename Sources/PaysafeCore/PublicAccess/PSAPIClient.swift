@@ -9,6 +9,7 @@ import Combine
 import Foundation
 #if canImport(PaysafeCommon)
 import Paysafe3DS
+import PaysafeVenmo
 @_spi(PS) import PaysafeCommon
 import PaysafeNetworking
 #endif
@@ -39,16 +40,14 @@ public class PSAPIClient {
     private var accountId: String?
     /// Base url for return links
     private let baseHref = "https://usgaminggamblig.com/payment/return/"
-
+    
     /// - Parameters:
     ///   - apiKey: Paysafe API key
     ///   - environment: Paysafe environment
-    init(
-        apiKey: String,
-        environment: PaysafeEnvironment
-    ) {
+    init(apiKey: String, environment: PaysafeEnvironment) {
         self.environment = environment
         networkingService = PSNetworkingService(
+            overrideSessionToBlockRedirects: true,
             authorizationKey: apiKey,
             correlationId: PaysafeSDK.shared.correlationId,
             sdkVersion: SDKConfiguration.sdkVersion
@@ -65,18 +64,14 @@ public class PSAPIClient {
         )
         logEvent("Object passed on PSAPIClient init: environment: \(environment)")
     }
-
+    
     /// Get the payment method associated with `currencyCode` and `accountId`.
     ///
     /// - Parameters:
     ///   - currencyCode: Currency code
     ///   - accountId: Account id
     ///   - completion: PSPaymentMethodBlock
-    func getPaymentMethod(
-        currencyCode: String,
-        accountId: String,
-        completion: @escaping PSPaymentMethodBlock
-    ) {
+    func getPaymentMethod(currencyCode: String, accountId: String, completion: @escaping PSPaymentMethodBlock) {
         let startRequestTime = Date()
         getAvailablePaymentMethods(
             for: currencyCode
@@ -109,17 +104,13 @@ public class PSAPIClient {
         }
         .store(in: &cancellables)
     }
-
+    
     /// PaysafeCore tokenize method.
     ///
     /// - Parameters:
     ///   - options: PSTokenizeOptions
     ///   - card: CardRequest
-    func tokenize(
-        options: PSTokenizable,
-        paymentType: PaymentType,
-        card: CardRequest? = nil
-    ) -> AnyPublisher<PaymentHandle, PSError> {
+    func tokenize(options: PSTokenizable, paymentType: PaymentType, card: CardRequest? = nil) -> AnyPublisher<PaymentHandle, PSError> {
         guard !tokenizeInProgress else {
             let error = PSError.coreTokenizationAlreadyInProgress(PaysafeSDK.shared.correlationId)
             logEvent(error)
@@ -141,24 +132,15 @@ public class PSAPIClient {
             }
             let shouldProcessTransaction: Bool? = {
                 switch options {
-                case let cardOptions as PSCardTokenizeOptions:
-                    return cardOptions.threeDS?.process
-                default:
-                    return nil
+                case let cardOptions as PSCardTokenizeOptions: return cardOptions.threeDS?.process
+                default: return nil
                 }
             }()
-            return handlePaymentResponse(
-                using: paymentResponse,
-                process: shouldProcessTransaction
-            )
+            return handlePaymentResponse(using: paymentResponse, process: shouldProcessTransaction)
         }
         .handleEvents(
-            receiveOutput: { [weak self] _ in
-                self?.tokenizeInProgress = false
-            },
-            receiveCompletion: { [weak self] _ in
-                self?.tokenizeInProgress = false
-            }
+            receiveOutput: { [weak self] _ in self?.tokenizeInProgress = false },
+            receiveCompletion: { [weak self] _ in self?.tokenizeInProgress = false }
         )
         .catch { [weak self] error -> AnyPublisher<PaymentHandle, PSError> in
             self?.logEvent(error)
@@ -166,22 +148,64 @@ public class PSAPIClient {
         }
         .eraseToAnyPublisher()
     }
-
+    
+    /// update PaymentNonce
+    ///
+    /// - Parameters:
+    ///   - venmoAccount: Venmo account information
+    ///   - jwtToken: JWT Token
+    ///
+    func updatePaymentNonce(using venmoAccount: VenmoAccount, jwtToken: String) -> AnyPublisher<Bool, PSError> {
+        let paymentMethodNonce = venmoAccount.nonce
+        let paymentMethodDeviceData = "{\"correlation_id\": \"" + networkingService.correlationId + "\"}"
+        let detailsRequest = BraintreeDetailsRequest(
+            paymentMethodJwtToken: jwtToken,
+            paymentMethodNonce: paymentMethodNonce,
+            paymentMethodDeviceData: paymentMethodDeviceData,
+            errorCode: 0,
+            paymentMethodPayerInfo: venmoAccount.serialize()
+        )
+        
+        guard var urlComps = URLComponents(string: environment.baseURL + "/alternatepayments/venmo/v1/hostedSession/braintreeDetails") else {
+            return Fail(error: .venmoFailedAuthorization(networkingService.correlationId)).eraseToAnyPublisher()
+        }
+        let queryItems = [URLQueryItem(name: "payment_method_nonce", value: detailsRequest.paymentMethodNonce),
+                          URLQueryItem(name: "payment_method_payerInfo", value: venmoAccount.serialize()),
+                          URLQueryItem(name: "payment_method_jwtToken", value: detailsRequest.paymentMethodJwtToken),
+                          URLQueryItem(name: "payment_method_deviceData", value: detailsRequest.paymentMethodDeviceData),
+                          URLQueryItem(name: "errorCode", value: "")]
+                          
+        urlComps.queryItems = queryItems
+        guard let sendPaymentNonceUrl = urlComps.url?.absoluteString else {
+            return Fail(error: .venmoFailedAuthorization(networkingService.correlationId)).eraseToAnyPublisher()
+        }
+        
+        logEvent("/braintreeDetails endpoint called with: \(sendPaymentNonceUrl)")
+        
+        return networkingService.request(
+            url: sendPaymentNonceUrl,
+            httpMethod: .get,
+            payload: EmptyRequest()
+        )
+        .mapError { [weak self] error in
+            self?.logEvent(error.localizedDescription)
+            return PSError.venmoFailedAuthorization(
+                self?.networkingService.correlationId ?? PaysafeSDK.shared.correlationId
+            )
+        }
+        .eraseToAnyPublisher()
+    }
     /// Refresh payment token.
     ///
     /// - Parameters:
     ///   - paymentHandleToken: Payment handle token
     ///   - retryCount: Number of retry attempts, default as 3
     ///   - delayInSeconds: Delay between retries, default as 6 seconds
-    func refreshPaymentToken(
-        using paymentHandleToken: String,
-        and retryCount: Int = 3,
-        and delayInSeconds: TimeInterval = 6
-    ) -> AnyPublisher<Void, PSError> {
+    func refreshPaymentToken(using paymentHandleToken: String, and retryCount: Int = 3, and delayInSeconds: TimeInterval = 6) -> AnyPublisher<String, PSError> {
         getPaymentHandleTokenStatus(
             using: paymentHandleToken
         )
-        .flatMap { [weak self] refreshPaymentHandleTokenResponse -> AnyPublisher<Void, PSError> in
+        .flatMap { [weak self] refreshPaymentHandleTokenResponse -> AnyPublisher<String, PSError> in
             guard let self else {
                 return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
             }
@@ -193,7 +217,10 @@ public class PSAPIClient {
         }
         .eraseToAnyPublisher()
     }
+}
 
+// MARK: - Log events
+extension PSAPIClient {
     /// Log event with message.
     ///
     /// - Parameters:
@@ -202,7 +229,7 @@ public class PSAPIClient {
         guard !performsUnitTests() else { return }
         logger.log(eventType: .conversion, message: message)
     }
-
+    
     /// Log event with PSError.
     ///
     /// - Parameters:
@@ -210,7 +237,7 @@ public class PSAPIClient {
     func logEvent(_ error: PSError) {
         guard !performsUnitTests() else { return }
         switch error.errorCode.type {
-        case .apiError, .coreError, .applePayError, .payPalError, .cardFormError:
+        case .apiError, .coreError, .applePayError, .cardFormError, .venmoError:
             logger.log(eventType: .conversion, message: error.toLogError().jsonString())
         case .threeDSError:
             logger.log3DS(eventType: .internalSDKError, message: error.detailedMessage)
@@ -220,6 +247,7 @@ public class PSAPIClient {
 
 // MARK: - Private
 private extension PSAPIClient {
+    
     /// Get available payment methods.
     ///
     /// - Parameters:
@@ -236,7 +264,7 @@ private extension PSAPIClient {
         .mapError { _ in PSError.coreFailedToFetchAvailablePayments(PaysafeSDK.shared.correlationId) }
         .eraseToAnyPublisher()
     }
-
+    
     /// Get single use payment handle method.
     ///
     /// - Parameters:
@@ -259,17 +287,21 @@ private extension PSAPIClient {
         let invocationId = UUID().uuidString.lowercased()
         logEvent("Options object passed on tokenize: \(options.jsonString()), invocationId: \(invocationId)")
         let tokenizeUrl = environment.baseURL + "/paymenthub/v1/singleusepaymenthandles"
+        let transactionSource = "IosSDKV2"
+        
         return networkingService.request(
             url: tokenizeUrl,
             httpMethod: .post,
             payload: paymentRequest,
             invocationId: invocationId,
-            transactionSource: paymentType == .payPal ? "PaysafeJSV1" : "IosSDKV2"
+            transactionSource: transactionSource
         )
-        .mapError { $0.toPSError(PaysafeSDK.shared.correlationId) }
+        .mapError {
+            $0.toPSError(PaysafeSDK.shared.correlationId)
+        }
         .eraseToAnyPublisher()
     }
-
+    
     /// Create and prepare payment request for saved card payment or new card payment
     ///
     /// - Parameters:
@@ -290,13 +322,13 @@ private extension PSAPIClient {
             return applePaymentRequest(
                 from: options
             )
-        case let options as PSPayPalTokenizeOptions:
-            return payPalPaymentRequest(from: options)
+        case let options as PSVenmoTokenizeOptions:
+            return venmoPaymentRequest(from: options)
         default:
             return nil
         }
     }
-
+    
     func cardPaymentRequest(
         from options: PSCardTokenizeOptions,
         card: CardRequest?
@@ -305,7 +337,7 @@ private extension PSAPIClient {
             singleUseCustomerToken: options.singleUseCustomerToken,
             paymentToken: options.paymentTokenFrom
         )
-
+        
         return PaymentRequest(
             merchantRefNum: options.merchantRefNum,
             transactionType: options.transactionType.request,
@@ -344,10 +376,10 @@ private extension PSAPIClient {
             singleUseCustomerToken: savedCardTokens?.singleUseCustomerToken,
             paymentHandleTokenFrom: savedCardTokens?.paymentToken,
             applePay: nil,
-            paypal: nil
+            venmo: nil
         )
     }
-
+    
     func applePaymentRequest(from options: PSApplePayTokenizeOptions) -> PaymentRequest {
         PaymentRequest(
             merchantRefNum: options.merchantRefNum,
@@ -387,17 +419,17 @@ private extension PSAPIClient {
             singleUseCustomerToken: nil,
             paymentHandleTokenFrom: nil,
             applePay: options.applePay?.request,
-            paypal: nil
+            venmo: nil
         )
     }
-
-    func payPalPaymentRequest(from options: PSPayPalTokenizeOptions) -> PaymentRequest {
+    
+    func venmoPaymentRequest(from options: PSVenmoTokenizeOptions) -> PaymentRequest {
         PaymentRequest(
             merchantRefNum: options.merchantRefNum,
             transactionType: options.transactionType.request,
             card: nil,
             accountId: options.accountId,
-            paymentType: .payPal,
+            paymentType: .venmo,
             amount: options.amount,
             currencyCode: options.currencyCode,
             returnLinks: [
@@ -430,10 +462,10 @@ private extension PSAPIClient {
             singleUseCustomerToken: nil,
             paymentHandleTokenFrom: nil,
             applePay: nil,
-            paypal: options.paypal?.request
+            venmo: options.venmo?.request
         )
     }
-
+    
     /// Return card object with details for saved card payment or new card payment.
     ///
     /// - Parameters:
@@ -446,7 +478,7 @@ private extension PSAPIClient {
         guard let card else { return nil }
         return isNewCard ? card : CardRequest(cvv: card.cvv, holderName: card.holderName)
     }
-
+    
     /// Handle payment response.
     ///
     /// - Parameters:
@@ -455,6 +487,8 @@ private extension PSAPIClient {
         using paymentResponse: PaymentResponse,
         process: Bool?
     ) -> AnyPublisher<PaymentHandle, PSError> {
+        let gatewayResponse = paymentResponse.gatewayResponse
+        
         let paymentHandle = PaymentHandle(
             accountId: paymentResponse.accountId,
             status: PaymentHandleTokenStatus(rawValue: paymentResponse.status) ?? .failed,
@@ -462,10 +496,12 @@ private extension PSAPIClient {
             paymentHandleToken: paymentResponse.paymentHandleToken,
             redirectPaymentLink: paymentResponse.links?.first { $0.rel == .redirectPayment },
             returnLinks: paymentResponse.returnLinks,
-            orderId: paymentResponse.gatewayResponse?.id
+            orderId: paymentResponse.gatewayResponse?.id,
+            gatewayResponse: gatewayResponse,
+            action: paymentResponse.action
         )
-        // Publish paymentHandleResponse directly in PayPal flow
-        if paymentResponse.paymentType == .payPal {
+        // Publish paymentHandleResponse directly in Venmo flow
+        if paymentResponse.paymentType == .venmo {
             return Just(paymentHandle).setFailureType(to: PSError.self).eraseToAnyPublisher()
         }
         // Publish paymentHandleResponse directly in Apple Pay flow
@@ -480,7 +516,7 @@ private extension PSAPIClient {
         .map { _ in paymentHandle }
         .eraseToAnyPublisher()
     }
-
+    
     /// Handle card payment response.
     ///
     /// - Parameters:
@@ -488,7 +524,7 @@ private extension PSAPIClient {
     func handleCardPaymentResponse(
         using paymentResponse: PaymentResponse,
         process: Bool?
-    ) -> AnyPublisher<Void, PSError> {
+    ) -> AnyPublisher<String, PSError> {
         guard let cardBin = paymentResponse.card?.networkToken?.bin ?? paymentResponse.card?.cardBin else {
             return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId))
                 .eraseToAnyPublisher()
@@ -503,7 +539,7 @@ private extension PSAPIClient {
             ))
             .eraseToAnyPublisher()
         }
-
+        
         let threeDSOptions = Paysafe3DSOptions(
             accountId: availableAccountId,
             bin: cardBin
@@ -537,7 +573,7 @@ private extension PSAPIClient {
                 and: id
             )
         }
-        .flatMap { [weak self] _ -> AnyPublisher<Void, PSError> in
+        .flatMap { [weak self] _ -> AnyPublisher<String, PSError> in
             guard let self else {
                 return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
             }
@@ -547,7 +583,7 @@ private extension PSAPIClient {
         }
         .eraseToAnyPublisher()
     }
-
+    
     /// Get challenge payload.
     ///
     /// - Parameters:
@@ -571,7 +607,7 @@ private extension PSAPIClient {
         .mapError { $0.toPSError(PaysafeSDK.shared.correlationId) }
         .eraseToAnyPublisher()
     }
-
+    
     /// Handle authentication response.
     ///
     /// - Parameters:
@@ -597,7 +633,7 @@ private extension PSAPIClient {
             return Fail(error: error).eraseToAnyPublisher()
         }
     }
-
+    
     /// Handle pending authentication status.
     ///
     /// - Parameters:
@@ -629,7 +665,7 @@ private extension PSAPIClient {
         }
         .eraseToAnyPublisher()
     }
-
+    
     /// Finalize payment handle.
     ///
     /// - Parameters:
@@ -648,7 +684,7 @@ private extension PSAPIClient {
         .mapError { $0.toPSError(PaysafeSDK.shared.correlationId) }
         .eraseToAnyPublisher()
     }
-
+    
     /// Handle finalize response status.
     ///
     /// - Parameters:
@@ -669,7 +705,7 @@ private extension PSAPIClient {
             return Fail(error: error).eraseToAnyPublisher()
         }
     }
-
+    
     /// Get payment handle token status.
     ///
     /// - Parameters:
@@ -687,7 +723,7 @@ private extension PSAPIClient {
         .mapError { $0.toPSError(PaysafeSDK.shared.correlationId) }
         .eraseToAnyPublisher()
     }
-
+    
     /// Handle refresh payment handle token response status.
     ///
     /// - Parameters:
@@ -698,12 +734,12 @@ private extension PSAPIClient {
         using response: RefreshPaymentHandleTokenResponse,
         and retryCount: Int,
         and delayInSeconds: TimeInterval
-    ) -> AnyPublisher<Void, PSError> {
+    ) -> AnyPublisher<String, PSError> {
         print("[Payment token refresh] STATUS \(response.status.rawValue)")
         switch response.status {
         case .payable:
             logEvent("Payment Handle Tokenize function call.")
-            return Just(()).setFailureType(to: PSError.self).eraseToAnyPublisher()
+            return Just(response.paymentHandleToken).setFailureType(to: PSError.self).eraseToAnyPublisher()
         case .completed, .initiated, .processing:
             guard retryCount > 0 else {
                 let error = PSError.corePaymentHandleCreationFailed(
@@ -725,7 +761,7 @@ private extension PSAPIClient {
             return Fail(error: error).eraseToAnyPublisher()
         }
     }
-
+    
     /// Retry refresh payment token after delay.
     ///
     /// - Parameters:
@@ -736,7 +772,7 @@ private extension PSAPIClient {
         using paymentHandleToken: String,
         and retryCount: Int,
         and delayInSeconds: TimeInterval
-    ) -> AnyPublisher<Void, PSError> {
+    ) -> AnyPublisher<String, PSError> {
         Future { promise in
             // Skip delay in unit tests
             guard NSClassFromString("XCTest") == nil else { return promise(.success(())) }
@@ -744,7 +780,7 @@ private extension PSAPIClient {
                 promise(.success(()))
             }
         }
-        .flatMap { [weak self] _ -> AnyPublisher<Void, PSError> in
+        .flatMap { [weak self] _ -> AnyPublisher<String, PSError> in
             guard let self else {
                 return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
             }
@@ -755,7 +791,7 @@ private extension PSAPIClient {
         }
         .eraseToAnyPublisher()
     }
-
+    
     /// Maps the render type chosen by the merchant and returns the ThreeDS supported ui.
     func getSupportedUI(from renderType: RenderType?) -> Paysafe3DS.SupportedUI? {
         guard let renderType else { return nil }
@@ -768,7 +804,7 @@ private extension PSAPIClient {
             return .both
         }
     }
-
+    
     /// Determines if unit tests are being performed.
     func performsUnitTests() -> Bool {
         NSClassFromString("XCTest") != nil

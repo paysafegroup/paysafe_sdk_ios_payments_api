@@ -93,10 +93,10 @@ public extension PSError {
         )
     }
 
-    static func noConnectionToServer(_ correlationId: String?) -> PSError {
+    static func noConnectionToServer(_ correlationId: String) -> PSError {
         PSError(
             errorCode: .noConnectionToServer,
-            correlationId: correlationId ?? "N/A",
+            correlationId: correlationId,
             code: 9001,
             detailedMessage: "No connection to server."
         )
@@ -302,23 +302,32 @@ public extension PSError {
     }
 }
 
-// MARK: - PayPal errors
+// MARK: - Venmo errors
 public extension PSError {
-    static func payPalFailedAuthorization(_ correlationId: String) -> PSError {
+    static func venmoFailedAuthorization(_ correlationId: String) -> PSError {
         PSError(
-            errorCode: .payPalFailedAuthorization,
+            errorCode: .venmoFailedAuthorization,
             correlationId: correlationId,
-            code: 9171,
-            detailedMessage: "PayPal failed authorization."
+            code: 9291,
+            detailedMessage: "Venmo failed authorization."
         )
     }
 
-    static func payPalUserCancelled(_ correlationId: String) -> PSError {
+    static func venmoUserCancelled(_ correlationId: String) -> PSError {
         PSError(
-            errorCode: .payPalUserCancelled,
+            errorCode: .venmoUserCancelled,
             correlationId: correlationId,
             code: 9195,
-            detailedMessage: "User cancelled PayPal flow."
+            detailedMessage: "User cancelled Venmo flow."
+        )
+    }
+    
+    static func venmoAppNotFound(_ correlationId: String? = nil) -> PSError {
+        PSError(
+            errorCode: .venmoAppIsNotInstalled,
+            correlationId: correlationId ?? "N/A",
+            code: 9197,
+            detailedMessage: "Venmo App Doesn't exist."
         )
     }
 }

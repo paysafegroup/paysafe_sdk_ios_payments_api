@@ -13,28 +13,28 @@ final class PaymentMethodsViewModel: ObservableObject {
     let billingAddress: BillingAddress?
     let item: ShopItem?
     let totalPrice: Double
-
+    
     @Published var paymentMethods: [PaymentMethod] = []
     @Published var isloading = false
     @Published var presentAlert = false
     @Published var orderConfirmationDetails: OrderConfirmationDetails?
-
+    
     private(set) var applePayContext: PSApplePayContext?
-    private var payPalContext: PSPayPalContext?
-
+    private var venmoContext: PSVenmoContext?
+    
     private var alertTexts: (title: String, message: String)?
     var alertTitle: String { alertTexts?.title ?? "" }
     var alertMessage: String { alertTexts?.message ?? "" }
-
+    
     private var isFirstLaunch = true
-
+    
     private let dispatchGroup = DispatchGroup()
     private var temporaryPaymentMethods: [(paymentMethod: PaymentMethod, isAvailable: Bool)] = [
         (.creditCard, true),
-        (.payPal, false),
+        (.venmo, false),
         (.applePay, false)
     ]
-
+    
     init(
         billingAddress: BillingAddress?,
         item: ShopItem?,
@@ -44,7 +44,7 @@ final class PaymentMethodsViewModel: ObservableObject {
         self.item = item
         self.totalPrice = totalPrice
     }
-
+    
     func onAppear(using paymentManager: PaymentManager) {
         guard isFirstLaunch, !isloading else { return }
         isloading = true
@@ -69,26 +69,9 @@ final class PaymentMethodsViewModel: ObservableObject {
                 dispatchGroup.leave()
             }
         }
-        dispatchGroup.enter()
-        PSPayPalContext.initialize(
-            currencyCode: "USD",
-            accountId: paymentManager.paypalAccountId,
-            renderType: .web
-        ) { [weak self] result in
-            asyncMain { [weak self] in
-                guard let self else { return }
-                switch result {
-                case let .success(payPalContext):
-                    self.payPalContext = payPalContext
-                    if let index = temporaryPaymentMethods.firstIndex(where: { $0.paymentMethod == .payPal }) {
-                        temporaryPaymentMethods[index].isAvailable = true
-                    }
-                case .failure:
-                    break
-                }
-                dispatchGroup.leave()
-            }
-        }
+        
+        initializeVenmoContext(using: paymentManager)
+        
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self else { return }
             isloading = false
@@ -98,7 +81,30 @@ final class PaymentMethodsViewModel: ObservableObject {
         }
         isFirstLaunch = false
     }
-
+    
+    func initializeVenmoContext(using paymentManager: PaymentManager) {
+        dispatchGroup.enter()
+        
+        PSVenmoContext.initialize(
+            currencyCode: "USD",
+            accountId: paymentManager.venmoAccountId
+        ) { [weak self] result in
+            asyncMain { [weak self] in
+                guard let self else { return }
+                switch result {
+                case let .success(venmoContext):
+                    self.venmoContext = venmoContext
+                    if let index = temporaryPaymentMethods.firstIndex(where: { $0.paymentMethod == .venmo }) {
+                        temporaryPaymentMethods[index].isAvailable = true
+                    }
+                case .failure:
+                    break
+                }
+                dispatchGroup.leave()
+            }
+        }
+    }
+    
     func presentApplePay(using paymentManager: PaymentManager) {
         guard let applePayContext, let item else { return }
         let completion: PSTokenizeBlock = { [weak self] tokenizeResult in
@@ -137,9 +143,10 @@ final class PaymentMethodsViewModel: ObservableObject {
             completion: completion
         )
     }
-
-    func presentPayPal(using paymentManager: PaymentManager) {
-        guard let payPalContext, let billingAddress, !isloading else { return }
+    
+    func presentVenmo(using paymentManager: PaymentManager) {
+        guard let venmoContext, let billingAddress, !isloading else { return }
+        
         let completion: PSTokenizeBlock = { [weak self] tokenizeResult in
             guard let self else { return }
             asyncMain { [weak self] in
@@ -148,38 +155,35 @@ final class PaymentMethodsViewModel: ObservableObject {
                 switch tokenizeResult {
                 case let .success(paymentHandleToken):
                     orderConfirmationDetails = OrderConfirmationDetails(
-                        accountId: paymentManager.paypalAccountId,
+                        accountId: paymentManager.venmoAccountId,
                         merchantRefNum: PaysafeSDK.shared.getMerchantReferenceNumber(),
                         paymentHandleToken: paymentHandleToken
                     )
                 case let .failure(error):
-                    guard error.errorCode != .payPalUserCancelled else { return }
-                    alertTexts = ("Error", "\(error.displayMessage)")
+                    alertTexts = ("Error", error.displayMessage)
                     presentAlert = true
                 }
             }
         }
+        
         /// Payment amount in minor units
         let amount = Int(totalPrice * 100)
-        let options = PSPayPalTokenizeOptions(
+        let options = PSVenmoTokenizeOptions(
             amount: amount,
             currencyCode: "USD",
             transactionType: .payment,
             merchantRefNum: PaysafeSDK.shared.getMerchantReferenceNumber(),
             billingDetails: billingAddress.toBillingDetails(),
-            accountId: paymentManager.paypalAccountId,
-            paypal: PayPalAdditionalData(
-                consumerId: "consumer@gmail.com",
-                recipientDescription: "Merchant store description",
-                language: .US,
-                shippingPreference: .getFromFile,
-                consumerMessage: "My note to payer",
-                orderDescription: "My order description",
-                recipientType: .payPalId
+            accountId: paymentManager.venmoAccountId,
+            dupCheck: false,
+            venmo: VenmoAdditionalData(
+                consumerId: "consumer+16@gmail.com"
             )
         )
         asyncMain { [weak self] in self?.isloading = true }
-        payPalContext.tokenize(
+        
+        
+        venmoContext.tokenize(
             using: options,
             completion: completion
         )

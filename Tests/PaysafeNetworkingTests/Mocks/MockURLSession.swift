@@ -10,13 +10,15 @@ import Foundation
 import PaysafeCommon
 @testable import PaysafeNetworking
 
-final class MockURLSession: URLSessionProtocol {
+public final class MockURLSession: URLSessionProtocol {
     var lastRequest: URLRequest?
     var stubbedData: Data?
     var stubbedResponse: URLResponse?
     var stubbedError: URLError?
+    
+    public init() { }
 
-    func psDataTaskPublisher(
+    public func psDataTaskPublisher(
         for request: URLRequest
     ) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
         lastRequest = request
@@ -35,7 +37,7 @@ final class MockURLSession: URLSessionProtocol {
 }
 
 // MARK: - Convenience methods for setting stubs
-extension MockURLSession {
+public extension MockURLSession {
     func stubSuccess(data: Data, response: URLResponse = HTTPURLResponse()) {
         stubbedData = data
         stubbedResponse = response

@@ -371,7 +371,7 @@ final class PSErrorTests: XCTestCase {
         // Given
         let error = PSError.applePayUserCancelled("correlationId")
         let expectedCode = 9042
-
+        
         // Then
         XCTAssertEqual(error.errorCode, .applePayUserCancelled)
         XCTAssertEqual(error.errorCode.type, .applePayError)
@@ -381,34 +381,65 @@ final class PSErrorTests: XCTestCase {
         XCTAssertEqual(error.detailedMessage, "User aborted authentication.")
         XCTAssertEqual(error.correlationId, "correlationId")
     }
-
-    func test_payPalFailedAuthorization() {
+    
+    func test_venmoFailedAuthorization() {
         // Given
-        let error = PSError.payPalFailedAuthorization("correlationId")
-        let expectedCode = 9171
+        let error = PSError.venmoFailedAuthorization("correlationId")
+        let expectedCode = 9291
 
         // Then
-        XCTAssertEqual(error.errorCode, .payPalFailedAuthorization)
-        XCTAssertEqual(error.errorCode.type, .payPalError)
-        XCTAssertEqual(error.errorCode.type.rawValue, "PayPalError")
+        XCTAssertEqual(error.errorCode, .venmoFailedAuthorization)
+        XCTAssertEqual(error.errorCode.type, .venmoError)
+        XCTAssertEqual(error.errorCode.type.rawValue, "VenmoError")
         XCTAssertEqual(error.code, expectedCode)
         XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
-        XCTAssertEqual(error.detailedMessage, "PayPal failed authorization.")
+        XCTAssertEqual(error.detailedMessage, "Venmo failed authorization.")
         XCTAssertEqual(error.correlationId, "correlationId")
     }
-
-    func test_payPalUserCancelled() {
+    
+    func test_coreAPIInvalidCardDetails() {
         // Given
-        let error = PSError.payPalUserCancelled("correlationId")
+        let correlationId = "correlationId"
+        let error = PSError.coreAPIInvalidCardDetails(correlationId)
+        let expectedCode = 9003
+
+        // Then
+        XCTAssertEqual(error.errorCode, .coreAPIInvalidCardDetails)
+        XCTAssertEqual(error.errorCode.type, .threeDSError)
+        XCTAssertEqual(error.errorCode.type.rawValue, "3DSError")
+        XCTAssertEqual(error.code, expectedCode)
+        XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
+        XCTAssertEqual(error.detailedMessage, "You submitted an invalid card number or brand or combination of card number and brand with your request.")
+        XCTAssertEqual(error.correlationId, correlationId)
+    }
+    
+    func test_venmoAppNotFound() {
+        // Given
+        let error = PSError.venmoAppNotFound()
+        let expectedCode = 9197
+
+        // Then
+        XCTAssertEqual(error.errorCode, .venmoAppIsNotInstalled)
+        XCTAssertEqual(error.errorCode.type, .venmoError)
+        XCTAssertEqual(error.errorCode.type.rawValue, "VenmoError")
+        XCTAssertEqual(error.code, expectedCode)
+        XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
+        XCTAssertEqual(error.detailedMessage, "Venmo App Doesn't exist.")
+        XCTAssertEqual(error.correlationId, "N/A")
+    }
+
+    func test_venmoUserCancelled() {
+        // Given
+        let error = PSError.venmoUserCancelled("correlationId")
         let expectedCode = 9195
 
         // Then
-        XCTAssertEqual(error.errorCode, .payPalUserCancelled)
-        XCTAssertEqual(error.errorCode.type, .payPalError)
-        XCTAssertEqual(error.errorCode.type.rawValue, "PayPalError")
+        XCTAssertEqual(error.errorCode, .venmoUserCancelled)
+        XCTAssertEqual(error.errorCode.type, .venmoError)
+        XCTAssertEqual(error.errorCode.type.rawValue, "VenmoError")
         XCTAssertEqual(error.code, expectedCode)
         XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
-        XCTAssertEqual(error.detailedMessage, "User cancelled PayPal flow.")
+        XCTAssertEqual(error.detailedMessage, "User cancelled Venmo flow.")
         XCTAssertEqual(error.correlationId, "correlationId")
     }
 
@@ -625,3 +656,4 @@ final class PSErrorTests: XCTestCase {
         XCTAssertEqual(error.correlationId, "correlationId")
     }
 }
+

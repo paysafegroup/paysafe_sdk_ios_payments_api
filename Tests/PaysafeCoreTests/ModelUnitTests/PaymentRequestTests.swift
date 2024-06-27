@@ -58,7 +58,7 @@ class PaymentRequestTests: XCTestCase {
             singleUseCustomerToken: nil,
             paymentHandleTokenFrom: nil,
             applePay: nil,
-            paypal: nil
+            venmo: nil
         )
 
         // When

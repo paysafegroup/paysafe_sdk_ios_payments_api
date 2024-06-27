@@ -389,16 +389,22 @@ extension PSCardTokenizeOptions {
         )
         return tokenizeOptions
     }
-
-    static func mockForPayPal(accountId: String) -> PSPayPalTokenizeOptions {
-        PSPayPalTokenizeOptions(
-            amount: 1000,
+    
+    static func mockForVenmo(
+        accountId: String,
+        amount: Int = 1000,
+        email: String = "john.doe@paysafe.com",
+        firstName: String = "John",
+        lastName: String = "Doe"
+    ) -> PSVenmoTokenizeOptions {
+        PSVenmoTokenizeOptions(
+            amount: amount,
             currencyCode: "USD",
             transactionType: .payment,
             merchantRefNum: UUID().uuidString,
             profile: Profile(
-                firstName: "John",
-                lastName: "Doe",
+                firstName: "\(firstName)",
+                lastName:  "\(lastName)",
                 locale: .en_GB,
                 merchantCustomerId: "merchantCustomerId",
                 dateOfBirth: DateOfBirth(
@@ -406,7 +412,7 @@ extension PSCardTokenizeOptions {
                     month: 6,
                     year: 1991
                 ),
-                email: "john.doe@paysafe.com",
+                email: "\(email)",
                 phone: "319493030030",
                 mobile: "32919399439",
                 gender: .male,
@@ -416,6 +422,7 @@ extension PSCardTokenizeOptions {
                 )]
             ),
             accountId: accountId,
+            dupCheck: false,
             merchantDescriptor: MerchantDescriptor(
                 dynamicDescriptor: "testMerchantDescriptor",
                 phone: "testPhone"
@@ -428,7 +435,8 @@ extension PSCardTokenizeOptions {
                 state: "Texas",
                 country: nil,
                 zip: "400234"
-            )
+            ),
+            deviceFingerprinting: DeviceFingerprinting(threatMetrixSessionId: "")
         )
     }
 }

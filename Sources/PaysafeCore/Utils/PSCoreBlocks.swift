@@ -23,8 +23,8 @@ public typealias PSCardFieldInputEventBlock = (PSCardFieldInputEvent) -> Void
 public typealias PSCardFormInitializeBlock = (Result<PSCardForm, PSError>) -> Void
 /// Paysafe Apple Pay context initialize block.
 public typealias PSApplePayContextInitializeBlock = (Result<PSApplePayContext, PSError>) -> Void
-/// Paysafe PayPal context initialize block.
-public typealias PSPayPalContextInitializeBlock = (Result<PSPayPalContext, PSError>) -> Void
+/// Paysafe Venmo context initialize block.
+public typealias PSVenmoContextInitializeBlock = (Result<PSVenmoContext, PSError>) -> Void
 
 /// Paysafe payment methods block used in the `getAvailablePaymentMethod` method that contains a result with a payment method or a PSError.
 typealias PSPaymentMethodBlock = (Result<PaymentMethod, PSError>) -> Void

@@ -9,8 +9,8 @@
 enum PaymentType: String, Codable {
     /// Card
     case card = "CARD"
-    /// PayPal
-    case payPal = "PAYPAL"
+    /// Venmo
+    case venmo = "VENMO"
     /// Unknown
     case unknown = "UNKNOWN"
 

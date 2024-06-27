@@ -31,4 +31,6 @@ struct PaymentResponse: Decodable {
     let links: [ReturnLinkResponse]?
     /// Gateway response
     let gatewayResponse: GatewayResponse?
+    /// Action
+    let action: String?
 }

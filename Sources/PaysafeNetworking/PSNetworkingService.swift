@@ -28,23 +28,25 @@ public protocol URLSessionProtocol {
 extension URLSession: URLSessionProtocol {
     public func psDataTaskPublisher(for request: URLRequest) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
         dataTaskPublisher(for: request)
-            .map { ($0.data, $0.response) }
+            .map { 
+                ($0.data, $0.response)
+            }
             .eraseToAnyPublisher()
     }
 }
 
-public class PSNetworkingService: RequestPerforming {
+public class PSNetworkingService: NSObject, RequestPerforming {
     /// URLSessionProtocol
-    private let session: URLSessionProtocol
+    private var session: URLSessionProtocol
     /// Authorization key
     private let authorizationKey: String
     /// Correlation id
-    private let correlationId: String
+    public let correlationId: String
     /// SDK version
     private let sdkVersion: String
     /// Timeout interval, configured at 15 seconds.
     private let timeoutInterval: TimeInterval = 15
-
+    
     /// - Parameters:
     ///   - session: URLSessionProtocol
     ///   - authorizationKey: Authorization key
@@ -52,6 +54,7 @@ public class PSNetworkingService: RequestPerforming {
     ///   - sdkVersion: SDK version
     public init(
         session: URLSessionProtocol = URLSession.shared,
+        overrideSessionToBlockRedirects: Bool = false,
         authorizationKey: String,
         correlationId: String,
         sdkVersion: String
@@ -60,8 +63,17 @@ public class PSNetworkingService: RequestPerforming {
         self.authorizationKey = authorizationKey
         self.correlationId = correlationId
         self.sdkVersion = sdkVersion
+        super.init()
+        
+        if overrideSessionToBlockRedirects {
+            let defaultSession = URLSession(
+                configuration: URLSessionConfiguration.default,
+                delegate: self,
+                delegateQueue: nil)
+            self.session = defaultSession // session
+        }
     }
-
+    
     /// Request method
     ///
     /// - Parameters:
@@ -115,9 +127,7 @@ public class PSNetworkingService: RequestPerforming {
                 switch httpResponse.statusCode {
                 case 200...299:
                     guard !data.isEmpty else {
-                        guard let emptyObject = EmptyResponse() as? ResponseType else {
-                            throw APIError.invalidResponse
-                        }
+                        guard let emptyObject = EmptyResponse() as? ResponseType else { throw APIError.invalidResponse }
                         return emptyObject
                     }
                     do {
@@ -125,8 +135,12 @@ public class PSNetworkingService: RequestPerforming {
                     } catch {
                         throw APIError.invalidResponse
                     }
-                default:
-                    throw (try? JSONDecoder().decode(APIError.self, from: data)) ?? APIError.genericAPIError
+                case 300...399:
+                    if let value = true as? ResponseType { 
+                        return value 
+                    }
+                    throw APIError.invalidResponse
+                default: throw (try? JSONDecoder().decode(APIError.self, from: data)) ?? APIError.genericAPIError
                 }
             }
             .mapError { error in
@@ -162,5 +176,17 @@ private extension PSNetworkingService {
         print(jsonString)
         print("\n====================== END \(title) ======================\n")
 #endif
+    }
+}
+
+extension PSNetworkingService: URLSessionTaskDelegate {
+    public func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        completionHandler(nil)
     }
 }

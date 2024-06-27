@@ -13,8 +13,8 @@ enum PaymentMethod {
     case creditCard
     /// Apple pay payment method
     case applePay
-    /// PayPal payment method
-    case payPal
+    /// Venmo payment method
+    case venmo
 
     /// Payment method icon name
     var iconName: String {
@@ -23,8 +23,8 @@ enum PaymentMethod {
             return "paymentMethods.creditCard"
         case .applePay:
             return "paymentMethods.applePay"
-        case .payPal:
-            return "paymentMethods.payPal"
+        case .venmo:
+            return "paymentMethods.venmo"
         }
     }
 
@@ -35,8 +35,8 @@ enum PaymentMethod {
             return 33.0
         case .applePay:
             return 42.0
-        case .payPal:
-            return 80.0
+        case .venmo:
+            return 100.0
         }
     }
 
@@ -45,7 +45,7 @@ enum PaymentMethod {
         switch self {
         case .creditCard:
             return "Credit card"
-        case .payPal, .applePay:
+        case .applePay, .venmo:
             return nil
         }
     }
@@ -53,7 +53,7 @@ enum PaymentMethod {
     /// Payment method enabled state
     var isEnabled: Bool {
         switch self {
-        case .creditCard, .applePay, .payPal:
+        case .creditCard, .applePay, .venmo:
             return true
         }
     }
