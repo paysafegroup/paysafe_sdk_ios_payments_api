@@ -124,7 +124,7 @@ public class PSNetworkingService: NSObject, RequestPerforming {
                 return (data, httpResponse)
             }
             .tryMap { data, httpResponse in
-                switch httpResponse.statusCode {
+                 switch httpResponse.statusCode {
                 case 200...299:
                     guard !data.isEmpty else {
                         guard let emptyObject = EmptyResponse() as? ResponseType else { throw APIError.invalidResponse }
@@ -132,9 +132,7 @@ public class PSNetworkingService: NSObject, RequestPerforming {
                     }
                     do {
                         return try JSONDecoder().decode(ResponseType.self, from: data)
-                    } catch {
-                        throw APIError.invalidResponse
-                    }
+                    } catch { throw APIError.invalidResponse }
                 case 300...399:
                     if let value = true as? ResponseType { 
                         return value 
@@ -142,6 +140,7 @@ public class PSNetworkingService: NSObject, RequestPerforming {
                     throw APIError.invalidResponse
                 default: throw (try? JSONDecoder().decode(APIError.self, from: data)) ?? APIError.genericAPIError
                 }
+
             }
             .mapError { error in
                 switch error {

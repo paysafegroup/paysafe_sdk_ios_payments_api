@@ -134,6 +134,7 @@ public class PSAPIClient {
                 switch options {
                 case let cardOptions as PSCardTokenizeOptions: return cardOptions.threeDS?.process
                 default: return nil
+
                 }
             }()
             return handlePaymentResponse(using: paymentResponse, process: shouldProcessTransaction)
@@ -141,6 +142,7 @@ public class PSAPIClient {
         .handleEvents(
             receiveOutput: { [weak self] _ in self?.tokenizeInProgress = false },
             receiveCompletion: { [weak self] _ in self?.tokenizeInProgress = false }
+
         )
         .catch { [weak self] error -> AnyPublisher<PaymentHandle, PSError> in
             self?.logEvent(error)
@@ -245,9 +247,9 @@ extension PSAPIClient {
     }
 }
 
+
 // MARK: - Private
 private extension PSAPIClient {
-    
     /// Get available payment methods.
     ///
     /// - Parameters:

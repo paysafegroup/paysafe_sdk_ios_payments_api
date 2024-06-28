@@ -101,7 +101,7 @@ public extension PSApplePay {
             fatalError("Both firstName and lastName cannot be nil")
         }
     }
-
+    
     /// Map PKConctact to BillingContact
     ///
     /// - Parameters:

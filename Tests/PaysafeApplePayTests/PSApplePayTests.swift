@@ -186,38 +186,38 @@ final class PSApplePayTests: XCTestCase {
         XCTAssertNotNil(fullName)
         XCTAssertEqual(fullName, "\(firstName) \(lastName)")
     }
-
+    
     func test_constructName_just_firstName() {
         // Given
         let firstName = "Test"
         let lastName: String? = nil
-
+        
         // When
         let fullName = sut.constructName(using: firstName, and: lastName)
-
+        
         // Then
         XCTAssertNotNil(fullName)
         XCTAssertEqual(fullName, "\(firstName)")
     }
-
+    
     func test_constructName_just_lastName() {
         // Given
         let firstName: String? = nil
         let lastName = "Test"
-
+        
         // When
         let fullName = sut.constructName(using: firstName, and: lastName)
-
+        
         // Then
         XCTAssertNotNil(fullName)
         XCTAssertEqual(fullName, "\(lastName)")
     }
-
+    
     func testMapPKContactToBillingContact_WithNilPKContact_ShouldReturnNil() {
         let result = sut.mapPKContactToBillingContact(nil)
         XCTAssertNil(result)
     }
-
+    
     func testMapPKContactToBillingContact_WithValidPKContact_ShouldMapCorrectly() {
         // Create a mock CNPostalAddress
         let postalAddress = CNMutablePostalAddress()
@@ -227,19 +227,19 @@ final class PSApplePayTests: XCTestCase {
         postalAddress.postalCode = "12345"
         postalAddress.country = "USA"
         postalAddress.isoCountryCode = "US"
-
+        
         // Create a mock PersonNameComponents
         var nameComponents = PersonNameComponents()
         nameComponents.givenName = "John"
         nameComponents.familyName = "Doe"
-
+        
         // Create a mock PKContact
         let pkContact = PKContact()
         pkContact.name = nameComponents
         pkContact.postalAddress = postalAddress
         pkContact.emailAddress = "john.doe@example.com"
         pkContact.phoneNumber = CNPhoneNumber(stringValue: "1234567890")
-
+        
         // Expected BillingContact
         let expectedBillingContact = BillingContact(
             addressLines: ["123 Main St", "Apt 4B"],
@@ -252,9 +252,9 @@ final class PSApplePayTests: XCTestCase {
             postalCode: "12345",
             administrativeArea: "CA"
         )
-
+        
         let result = sut.mapPKContactToBillingContact(pkContact)
-
+        
         XCTAssertEqual(result?.addressLines, expectedBillingContact.addressLines)
         XCTAssertEqual(result?.countryCode, expectedBillingContact.countryCode)
         XCTAssertEqual(result?.email, expectedBillingContact.email)
