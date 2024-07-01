@@ -17,7 +17,7 @@ final class PSAPIClientTests: XCTestCase {
     var mock3DS: Paysafe3DSMock!
     var mockNetworkingService: PSNetworkingService!
     var cancellables: Set<AnyCancellable>!
-
+    
     override func setUp() {
         super.setUp()
         mockSession = URLSessionMock()
@@ -39,7 +39,7 @@ final class PSAPIClientTests: XCTestCase {
         sut.paysafe3DS = mock3DS
         cancellables = []
     }
-
+    
     override func tearDown() {
         mockSession = nil
         mock3DS = nil
@@ -48,11 +48,34 @@ final class PSAPIClientTests: XCTestCase {
         cancellables = nil
         super.tearDown()
     }
-
+    
     func test_init() {
         XCTAssertNotNil(sut)
     }
-
+    
+    func test_venmoCanceledRequest() {
+        // Given
+        let expectation = expectation(description: "Call Venmo canceled Request.")
+        
+        // When
+        sut.venmoCanceledRequest(jwtToken: "token")
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    XCTFail("Expected failure but received success")
+                case let .failure(error):
+                    // Then
+                    XCTAssertEqual(error.errorCode, .venmoFailedAuthorization)
+                    expectation.fulfill()
+                }
+            } receiveValue: { _ in
+                XCTFail("Expected failure but received success")
+            }
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
     func test_getPaymentMethod_success() throws {
         // Given
         let expectation = expectation(description: "Fetches the available payment method for the selected accountId successfully.")
@@ -63,7 +86,7 @@ final class PSAPIClientTests: XCTestCase {
         let getAvailablePaymentsURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/paymentmethods?currencyCode=USD"))
         let mockResponse = try XCTUnwrap(HTTPURLResponse(url: getAvailablePaymentsURL, statusCode: 200, httpVersion: nil, headerFields: nil))
         mockSession.stubRequest(url: getAvailablePaymentsURL, data: mockData, response: mockResponse, error: nil)
-
+        
         // When
         sut.getPaymentMethod(
             currencyCode: currencyCode,
@@ -80,10 +103,10 @@ final class PSAPIClientTests: XCTestCase {
                 XCTFail("Expected success, received failure.")
             }
         }
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_getAvailablePaymentMethod_unavailablePaymentMethod() throws {
         // Given
         let expectation = expectation(description: "Unavailable payment method for the selected accountId.")
@@ -95,7 +118,7 @@ final class PSAPIClientTests: XCTestCase {
         let getAvailablePaymentsURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/paymentmethods?currencyCode=USD"))
         let mockResponse = try XCTUnwrap(HTTPURLResponse(url: getAvailablePaymentsURL, statusCode: 200, httpVersion: nil, headerFields: nil))
         mockSession.stubRequest(url: getAvailablePaymentsURL, data: mockData, response: mockResponse, error: nil)
-
+        
         // When
         sut.getPaymentMethod(
             currencyCode: currencyCode,
@@ -110,10 +133,10 @@ final class PSAPIClientTests: XCTestCase {
                 expectation.fulfill()
             }
         }
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_getAvailablePaymentMethod_failure() throws {
         // Given
         let expectation = expectation(description: "Handles failure in fetching payment methods")
@@ -122,7 +145,7 @@ final class PSAPIClientTests: XCTestCase {
         let error = URLError(URLError.Code.badServerResponse)
         let getAvailablePaymentsURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/paymentmethods?currencyCode=USD"))
         mockSession.stubRequest(url: getAvailablePaymentsURL, data: nil, response: nil, error: error)
-
+        
         // When
         sut.getPaymentMethod(
             currencyCode: currencyCode,
@@ -137,10 +160,10 @@ final class PSAPIClientTests: XCTestCase {
                 expectation.fulfill()
             }
         }
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_cardTokenize_noThreeDS_failure() throws {
         // Given
         let expectation = expectation(description: "Tokenize method fails without ThreeDS attribute.")
@@ -152,7 +175,7 @@ final class PSAPIClientTests: XCTestCase {
         let tokenizeURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles"))
         let mockResponse = try XCTUnwrap(HTTPURLResponse(url: tokenizeURL, statusCode: 400, httpVersion: nil, headerFields: nil))
         mockSession.stubRequest(url: tokenizeURL, data: mockData, response: mockResponse, error: expectedError)
-
+        
         // When
         sut.tokenize(
             options: mockTokenizeOptions,
@@ -172,10 +195,10 @@ final class PSAPIClientTests: XCTestCase {
             XCTFail("Expected failure but received success")
         }
         .store(in: &cancellables)
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_tokenize_newCard_3DS_success_payable() throws {
         // Given
         let expectation = expectation(description: "Tokenize method succeeds with 3DS flow and new card")
@@ -199,7 +222,7 @@ final class PSAPIClientTests: XCTestCase {
         mockSession.stubRequest(url: authenticationURL, data: mockAuthenticationData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: searchURL, data: mockSearchData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: finalizeURL, data: mockFinalizeData, response: mockResponse, error: nil)
-
+        
         // When
         sut.tokenize(
             options: mockTokenizeOptions,
@@ -220,10 +243,10 @@ final class PSAPIClientTests: XCTestCase {
             XCTAssertFalse(paymentHandleResponse.paymentHandleToken.isEmpty)
         }
         .store(in: &cancellables)
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_tokenize_newCard_3DS_failure_nonPayable() throws {
         // Given
         let expectation = expectation(description: "Tokenize method fails with non payable status.")
@@ -247,7 +270,7 @@ final class PSAPIClientTests: XCTestCase {
         mockSession.stubRequest(url: authenticationURL, data: mockAuthenticationData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: searchURL, data: mockSearchData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: finalizeURL, data: mockFinalizeData, response: mockResponse, error: nil)
-
+        
         // When
         sut.tokenize(
             options: mockTokenizeOptions,
@@ -269,10 +292,10 @@ final class PSAPIClientTests: XCTestCase {
             XCTAssertFalse(paymentHandleResponse.paymentHandleToken.isEmpty)
         }
         .store(in: &cancellables)
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_tokenize_savedCard_3DS_success_payable() throws {
         // Given
         let expectation = expectation(description: "Tokenize method succeeds with 3DS flow and saved card")
@@ -296,7 +319,7 @@ final class PSAPIClientTests: XCTestCase {
         mockSession.stubRequest(url: authenticationURL, data: mockAuthenticationData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: searchURL, data: mockSearchData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: finalizeURL, data: mockFinalizeData, response: mockResponse, error: nil)
-
+        
         // When
         sut.tokenize(
             options: mockTokenizeOptions,
@@ -316,10 +339,10 @@ final class PSAPIClientTests: XCTestCase {
             XCTAssertFalse(paymentHandleResponse.paymentHandleToken.isEmpty)
         }
         .store(in: &cancellables)
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_tokenize_savedCard_3DS_withNetworkTokenBin_success() throws {
         // Given
         let expectation = expectation(description: "Tokenize method succeeds with 3DS flow and saved card")
@@ -330,12 +353,12 @@ final class PSAPIClientTests: XCTestCase {
         let networkToken = NetworkToken(bin: "networkTokenBin")
         guard let mockAuthenticationData = AuthenticationResponse.jsonMock().data(using: .utf8),
               let mockTokenizeData = PaymentResponse.jsonMockWith3DS(
-                  paymentHandleId: paymentHandleId,
-                  networkToken: networkToken
+                paymentHandleId: paymentHandleId,
+                networkToken: networkToken
               )
-              .data(using: .utf8),
+            .data(using: .utf8),
               let mockFinalizeData = FinalizeResponse.jsonMock(with: networkToken)
-              .data(using: .utf8),
+            .data(using: .utf8),
               let mockSearchData = RefreshPaymentHandleTokenResponse.jsonMock(status: .payable).data(using: .utf8) else {
             return XCTFail("Unable to convert mock JSON to Data")
         }
@@ -349,7 +372,7 @@ final class PSAPIClientTests: XCTestCase {
         mockSession.stubRequest(url: authenticationURL, data: mockAuthenticationData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: searchURL, data: mockSearchData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: finalizeURL, data: mockFinalizeData, response: mockResponse, error: nil)
-
+        
         // When
         sut.tokenize(
             options: mockTokenizeOptions,
@@ -369,10 +392,10 @@ final class PSAPIClientTests: XCTestCase {
             XCTAssertFalse(paymentHandleResponse.paymentHandleToken.isEmpty)
         }
         .store(in: &cancellables)
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_tokenize_savedCard_3DS_shippingMethodTwoDayService_success_payable() throws {
         // Given
         let expectation = expectation(description: "Tokenize method succeeds with 3DS flow and saved card")
@@ -399,7 +422,7 @@ final class PSAPIClientTests: XCTestCase {
         mockSession.stubRequest(url: authenticationURL, data: mockAuthenticationData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: searchURL, data: mockSearchData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: finalizeURL, data: mockFinalizeData, response: mockResponse, error: nil)
-
+        
         // When
         sut.tokenize(
             options: mockTokenizeOptions,
@@ -419,10 +442,10 @@ final class PSAPIClientTests: XCTestCase {
             XCTAssertFalse(paymentHandleResponse.paymentHandleToken.isEmpty)
         }
         .store(in: &cancellables)
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_tokenize_savedCard_3DS_shippingMethodOther_success_payable() throws {
         // Given
         let expectation = expectation(description: "Tokenize method succeeds with 3DS flow and saved card")
@@ -449,7 +472,7 @@ final class PSAPIClientTests: XCTestCase {
         mockSession.stubRequest(url: authenticationURL, data: mockAuthenticationData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: searchURL, data: mockSearchData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: finalizeURL, data: mockFinalizeData, response: mockResponse, error: nil)
-
+        
         // When
         sut.tokenize(
             options: mockTokenizeOptions,
@@ -469,10 +492,10 @@ final class PSAPIClientTests: XCTestCase {
             XCTAssertFalse(paymentHandleResponse.paymentHandleToken.isEmpty)
         }
         .store(in: &cancellables)
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
-
+    
     func test_tokenize_applePay_success() throws {
         // Given
         let expectation = expectation(description: "Tokenize method succeeds for apple pay.")
@@ -495,7 +518,7 @@ final class PSAPIClientTests: XCTestCase {
         mockSession.stubRequest(url: authenticationURL, data: mockAuthenticationData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: searchURL, data: mockSearchData, response: mockResponse, error: nil)
         mockSession.stubRequest(url: finalizeURL, data: mockFinalizeData, response: mockResponse, error: nil)
-
+        
         // When
         sut.tokenize(
             options: mockTokenizeOptions,
@@ -514,7 +537,7 @@ final class PSAPIClientTests: XCTestCase {
             XCTAssertFalse(paymentHandleResponse.paymentHandleToken.isEmpty)
         }
         .store(in: &cancellables)
-
+        
         wait(for: [expectation], timeout: 1.0)
     }
 }

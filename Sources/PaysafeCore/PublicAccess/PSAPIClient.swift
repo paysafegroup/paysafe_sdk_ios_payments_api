@@ -134,7 +134,6 @@ public class PSAPIClient {
                 switch options {
                 case let cardOptions as PSCardTokenizeOptions: return cardOptions.threeDS?.process
                 default: return nil
-
                 }
             }()
             return handlePaymentResponse(using: paymentResponse, process: shouldProcessTransaction)
@@ -142,11 +141,77 @@ public class PSAPIClient {
         .handleEvents(
             receiveOutput: { [weak self] _ in self?.tokenizeInProgress = false },
             receiveCompletion: { [weak self] _ in self?.tokenizeInProgress = false }
-
         )
         .catch { [weak self] error -> AnyPublisher<PaymentHandle, PSError> in
             self?.logEvent(error)
             return Fail(error: error).eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
+    }
+
+    /// Refresh payment token.
+    ///
+    /// - Parameters:
+    ///   - paymentHandleToken: Payment handle token
+    ///   - retryCount: Number of retry attempts, default as 3
+    ///   - delayInSeconds: Delay between retries, default as 6 seconds
+    func refreshPaymentToken(using paymentHandleToken: String, and retryCount: Int = 3, and delayInSeconds: TimeInterval = 6) -> AnyPublisher<String, PSError> {
+        getPaymentHandleTokenStatus(
+            using: paymentHandleToken
+        )
+        .flatMap { [weak self] refreshPaymentHandleTokenResponse -> AnyPublisher<String, PSError> in
+            guard let self else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
+            return handleRefreshPaymentHandleTokenResponse(
+                using: refreshPaymentHandleTokenResponse,
+                and: retryCount,
+                and: delayInSeconds
+            )
+        }
+        .eraseToAnyPublisher()
+    }
+}
+
+// MARK:- Venmo
+extension PSAPIClient {
+    /// Venmo CanceledRequest
+    ///
+    /// - Parameters:
+    ///   - jwtToken: JWT Token
+    ///
+    ///
+    func venmoCanceledRequest(jwtToken: String) -> AnyPublisher<Bool, PSError> {
+        let paymentMethodDeviceData = "{\"correlation_id\": \"" + networkingService.correlationId + "\"}"
+        
+        guard var urlComps = URLComponents(string: environment.baseURL + "/alternatepayments/venmo/v1/hostedSession/braintreeDetails") else {
+            return Fail(error: .venmoFailedAuthorization(networkingService.correlationId)).eraseToAnyPublisher()
+        }
+        let queryItems = [URLQueryItem(name: "payment_method_nonce", value: ""),
+                          URLQueryItem(name: "payment_method_payerInfo", value: ""),
+                          URLQueryItem(name: "payment_method_jwtToken", value: jwtToken),
+                          URLQueryItem(name: "payment_method_deviceData", value: paymentMethodDeviceData),
+                          URLQueryItem(name: "errorCode", value: "VENMO_CANCELED")]
+                          
+        urlComps.queryItems = queryItems
+        guard let sendPaymentNonceUrl = urlComps.url?.absoluteString else {
+            return Fail(error: .venmoFailedAuthorization(networkingService.correlationId)).eraseToAnyPublisher()
+        }
+        
+        return networkingService.request(
+            url: sendPaymentNonceUrl,
+            httpMethod: .get,
+            payload: EmptyRequest()
+        )
+        .tryMap { value in
+            if value {
+                return false
+            }
+            throw PSError.venmoFailedAuthorization(self.networkingService.correlationId)
+        }
+        .mapError { [weak self] error in
+            self?.logEvent(error.localizedDescription)
+            return PSError.venmoFailedAuthorization(self?.networkingService.correlationId)
         }
         .eraseToAnyPublisher()
     }
@@ -197,28 +262,6 @@ public class PSAPIClient {
         }
         .eraseToAnyPublisher()
     }
-    /// Refresh payment token.
-    ///
-    /// - Parameters:
-    ///   - paymentHandleToken: Payment handle token
-    ///   - retryCount: Number of retry attempts, default as 3
-    ///   - delayInSeconds: Delay between retries, default as 6 seconds
-    func refreshPaymentToken(using paymentHandleToken: String, and retryCount: Int = 3, and delayInSeconds: TimeInterval = 6) -> AnyPublisher<String, PSError> {
-        getPaymentHandleTokenStatus(
-            using: paymentHandleToken
-        )
-        .flatMap { [weak self] refreshPaymentHandleTokenResponse -> AnyPublisher<String, PSError> in
-            guard let self else {
-                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
-            }
-            return handleRefreshPaymentHandleTokenResponse(
-                using: refreshPaymentHandleTokenResponse,
-                and: retryCount,
-                and: delayInSeconds
-            )
-        }
-        .eraseToAnyPublisher()
-    }
 }
 
 // MARK: - Log events
@@ -247,9 +290,9 @@ extension PSAPIClient {
     }
 }
 
-
 // MARK: - Private
 private extension PSAPIClient {
+    
     /// Get available payment methods.
     ///
     /// - Parameters:

@@ -12,6 +12,8 @@ public enum PSVenmoBraintreeResult {
     case success(venmoAccount: VenmoAccount)
     /// Venmo failed result
     case failed
+    /// Venmo Cancel result
+    case cancel
 }
 
 public enum PSVenmoResult {

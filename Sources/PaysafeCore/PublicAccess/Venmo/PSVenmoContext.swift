@@ -6,9 +6,13 @@
 //
 
 import Foundation
+#if canImport(PaysafeCommon)
 import PaysafeCommon
 import PaysafeVenmo
 import BraintreeCore
+#else
+import Braintree
+#endif
 import Combine
 import UIKit
 
@@ -111,7 +115,9 @@ public class PSVenmoContext {
                     using: venmoAccount,
                     jwtToken: jwtToken)
             case .failed:
-                return Fail(error: PSError.venmoUserCancelled(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+                return Fail(error: PSError.venmoFailedAuthorization(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            case .cancel:
+                return psAPIClient.venmoCanceledRequest(jwtToken: jwtToken)
             }
         }
         .eraseToAnyPublisher()
@@ -196,21 +202,12 @@ private extension PSVenmoContext {
             return handleTokenizeResponse(using: paymentHandle, amount: options.amount)
         }
         .flatMap { result -> AnyPublisher<String, PSError> in
-            let (paymentHandle, venmoResult) = result
-            switch venmoResult {
-            case .success:
-                return psAPIClient.refreshPaymentToken(
-                          using: paymentHandle.paymentHandleToken
-                        )
-                        .map { _ in paymentHandle.paymentHandleToken }
-                        .eraseToAnyPublisher()
-            case .failed:
-                return Fail(error: .venmoFailedAuthorization(PaysafeSDK.shared.correlationId))
-                    .eraseToAnyPublisher()
-            case .cancelled:
-                return Fail(error: .venmoUserCancelled(PaysafeSDK.shared.correlationId))
-                    .eraseToAnyPublisher()
-            }
+            let (paymentHandle, _) = result
+            return psAPIClient.refreshPaymentToken(
+                using: paymentHandle.paymentHandleToken
+            )
+            .map { _ in paymentHandle.paymentHandleToken }
+            .eraseToAnyPublisher()
         }
         .catch { [weak self] error -> AnyPublisher<String, PSError> in
             self?.psAPIClient?.logEvent(error)

@@ -304,19 +304,19 @@ public extension PSError {
 
 // MARK: - Venmo errors
 public extension PSError {
-    static func venmoFailedAuthorization(_ correlationId: String) -> PSError {
+    static func venmoFailedAuthorization(_ correlationId: String? = nil) -> PSError {
         PSError(
             errorCode: .venmoFailedAuthorization,
-            correlationId: correlationId,
+            correlationId: correlationId ?? "N/A",
             code: 9291,
             detailedMessage: "Venmo failed authorization."
         )
     }
 
-    static func venmoUserCancelled(_ correlationId: String) -> PSError {
+    static func venmoUserCancelled(_ correlationId: String? = nil) -> PSError {
         PSError(
             errorCode: .venmoUserCancelled,
-            correlationId: correlationId,
+            correlationId: correlationId ?? "N/A",
             code: 9195,
             detailedMessage: "User cancelled Venmo flow."
         )

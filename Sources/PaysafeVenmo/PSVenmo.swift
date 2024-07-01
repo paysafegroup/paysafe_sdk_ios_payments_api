@@ -5,10 +5,14 @@
 //  Created by Eduardo Oliveros on 5/28/24.
 //
 
+import Combine
+#if canImport(PaysafeCommon)
 import PaysafeCommon
 import BraintreeVenmo
 import BraintreeCore
-import Combine
+#else
+import Braintree
+#endif
 
 /// PSVenmo
 public class PSVenmo {
@@ -55,6 +59,11 @@ public class PSVenmo {
         request.collectCustomerShippingAddress = true
         
         venmoClient?.tokenize(request) { [weak self] (venmoAccount, error) in
+            
+            if error != nil {
+                self?.initiateVenmoFlowSubject.send(.cancel)
+                return
+            }
             guard let venmoAccount = venmoAccount else {
                 self?.initiateVenmoFlowSubject.send(.failed)
                 return

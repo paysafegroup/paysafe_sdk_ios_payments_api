@@ -97,9 +97,11 @@ final class PSVenmoTests: XCTestCase {
                 // Then
                 switch result {
                 case .failed:
-                    XCTAssertNotNil(result)
+                    XCTFail("tokenizeVenmoAccount should receive cancel Value")
                 case .success(_):
-                    XCTFail("tokenizeVenmoAccount should receive failed Value")
+                    XCTFail("tokenizeVenmoAccount should receive cancel Value")
+                case .cancel:
+                    XCTAssertNotNil(result)
                 }
                 
                 expectation.fulfill()

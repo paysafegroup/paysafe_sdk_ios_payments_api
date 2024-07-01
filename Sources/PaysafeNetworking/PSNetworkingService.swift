@@ -90,6 +90,9 @@ public class PSNetworkingService: NSObject, RequestPerforming {
         guard let requestURL = URL(string: url) else {
             return Fail(error: .invalidURL).eraseToAnyPublisher()
         }
+        
+        logData(title: "\(httpMethod.rawValue) REQUEST", string: url)
+        
         var request = URLRequest(url: requestURL, timeoutInterval: timeoutInterval)
         request.httpMethod = httpMethod.rawValue
         request.allHTTPHeaderFields = [
@@ -104,11 +107,11 @@ public class PSNetworkingService: NSObject, RequestPerforming {
             request.addValue(invocationId, forHTTPHeaderField: "Invocationid")
             request.addValue("EXTERNAL", forHTTPHeaderField: "Simulator")
         }
-
+        
         if case .post = httpMethod {
             do {
                 let data = try JSONEncoder().encode(payload)
-                logData(title: "REQUEST", data: data)
+                logData(title: "REQUEST BODY", data: data)
                 request.httpBody = data
             } catch {
                 return Fail(error: .encodingError).eraseToAnyPublisher()
@@ -120,11 +123,11 @@ public class PSNetworkingService: NSObject, RequestPerforming {
                 guard let httpResponse = response as? HTTPURLResponse else {
                     throw APIError.invalidResponse
                 }
-                self?.logData(title: "RESPONSE", data: data)
+                self?.logData(title: "RESPONSE (status code \(httpResponse.statusCode))", data: data)
                 return (data, httpResponse)
             }
             .tryMap { data, httpResponse in
-                 switch httpResponse.statusCode {
+                switch httpResponse.statusCode {
                 case 200...299:
                     guard !data.isEmpty else {
                         guard let emptyObject = EmptyResponse() as? ResponseType else { throw APIError.invalidResponse }
@@ -132,15 +135,16 @@ public class PSNetworkingService: NSObject, RequestPerforming {
                     }
                     do {
                         return try JSONDecoder().decode(ResponseType.self, from: data)
-                    } catch { throw APIError.invalidResponse }
+                    } catch {
+                        throw APIError.invalidResponse
+                    }
                 case 300...399:
                     if let value = true as? ResponseType { 
-                        return value 
-                    }
+						return value 
+					}
                     throw APIError.invalidResponse
                 default: throw (try? JSONDecoder().decode(APIError.self, from: data)) ?? APIError.genericAPIError
                 }
-
             }
             .mapError { error in
                 switch error {
@@ -173,6 +177,20 @@ private extension PSNetworkingService {
               jsonString != "{\n\n}" else { return }
         print("\n======================== \(title) ========================\n")
         print(jsonString)
+        print("\n====================== END \(title) ======================\n")
+#endif
+    }
+    
+    /// Log console data on debug builds.
+    ///
+    /// - Parameters:
+    ///   - title: Log title
+    ///   - data: Request HTTP method
+    func logData(title: String, string: String) {
+#if DEBUG
+        guard !string.isEmpty || string != "{\n\n}" else { return }
+        print("\n======================== \(title) ========================\n")
+        print(string)
         print("\n====================== END \(title) ======================\n")
 #endif
     }
