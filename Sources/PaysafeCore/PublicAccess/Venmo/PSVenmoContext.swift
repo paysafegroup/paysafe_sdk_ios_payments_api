@@ -29,6 +29,10 @@ public class PSVenmoContext {
     )
     /// Cancellables set
     private var cancellables = Set<AnyCancellable>()
+
+    /// The URL scheme to return to this app after switching to another app or opening a SFSafariViewController.
+    /// This URL scheme must be registered as a URL Type in the app's info.plist, and it must start with the app's bundle ID.
+    static var returnURLScheme: String = ""
     
     /// Initializes the PSVenmoContext.
     ///
@@ -49,16 +53,18 @@ public class PSVenmoContext {
     }
     
     public static func setURLScheme(scheme: String) {
+        self.returnURLScheme = scheme
         BTAppContextSwitcher.sharedInstance.returnURLScheme = scheme
     }
     
     public static func setURLContexts(contexts urlContexts: Set<UIOpenURLContext>) {
         urlContexts.forEach { context in
-            if context.url.scheme?.localizedCaseInsensitiveCompare("com.paysafe.LotteryTicket-dev.payments") == .orderedSame {
+            if context.url.scheme?.localizedCaseInsensitiveCompare(returnURLScheme) == .orderedSame {
                 _ = BTAppContextSwitcher.sharedInstance.handleOpenURL(context: context)
             }
         }
     }
+
     ///
     /// - Parameters:
     ///   - clientId: Venmo client id

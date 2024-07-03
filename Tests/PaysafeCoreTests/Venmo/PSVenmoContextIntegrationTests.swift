@@ -460,6 +460,7 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
         PSVenmoContext.setURLScheme(scheme: scheme)
         
         XCTAssertEqual(BTAppContextSwitcher.sharedInstance.returnURLScheme, scheme)
+        XCTAssertEqual(PSVenmoContext.returnURLScheme, scheme)
     }
 }
 
