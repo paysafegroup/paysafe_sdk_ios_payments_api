@@ -12,7 +12,7 @@ struct GatewayResponse: Decodable {
     /// Client token
     let clientToken: String?
     /// JWT token
-    let jwtToken: String?
+    let sessionToken: String?
     /// Processor
     let processor: String?
 }

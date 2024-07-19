@@ -148,39 +148,14 @@ public class PSAPIClient {
         }
         .eraseToAnyPublisher()
     }
-
-    /// Refresh payment token.
-    ///
-    /// - Parameters:
-    ///   - paymentHandleToken: Payment handle token
-    ///   - retryCount: Number of retry attempts, default as 3
-    ///   - delayInSeconds: Delay between retries, default as 6 seconds
-    func refreshPaymentToken(using paymentHandleToken: String, and retryCount: Int = 3, and delayInSeconds: TimeInterval = 6) -> AnyPublisher<String, PSError> {
-        getPaymentHandleTokenStatus(
-            using: paymentHandleToken
-        )
-        .flatMap { [weak self] refreshPaymentHandleTokenResponse -> AnyPublisher<String, PSError> in
-            guard let self else {
-                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
-            }
-            return handleRefreshPaymentHandleTokenResponse(
-                using: refreshPaymentHandleTokenResponse,
-                and: retryCount,
-                and: delayInSeconds
-            )
-        }
-        .eraseToAnyPublisher()
-    }
-}
-
-// MARK:- Venmo
-extension PSAPIClient {
+    
     /// Venmo CanceledRequest
     ///
     /// - Parameters:
     ///   - jwtToken: JWT Token
     ///
     ///
+    
     func venmoCanceledRequest(jwtToken: String) -> AnyPublisher<Bool, PSError> {
         let paymentMethodDeviceData = "{\"correlation_id\": \"" + networkingService.correlationId + "\"}"
         
@@ -192,7 +167,7 @@ extension PSAPIClient {
                           URLQueryItem(name: "payment_method_jwtToken", value: jwtToken),
                           URLQueryItem(name: "payment_method_deviceData", value: paymentMethodDeviceData),
                           URLQueryItem(name: "errorCode", value: "VENMO_CANCELED")]
-                          
+        
         urlComps.queryItems = queryItems
         guard let sendPaymentNonceUrl = urlComps.url?.absoluteString else {
             return Fail(error: .venmoFailedAuthorization(networkingService.correlationId)).eraseToAnyPublisher()
@@ -216,6 +191,32 @@ extension PSAPIClient {
         .eraseToAnyPublisher()
     }
     
+    /// Refresh payment token.
+    ///
+    /// - Parameters:
+    ///   - paymentHandleToken: Payment handle token
+    ///   - retryCount: Number of retry attempts, default as 3
+    ///   - delayInSeconds: Delay between retries, default as 6 seconds
+    func refreshPaymentToken(using paymentHandleToken: String, and retryCount: Int = 3, and delayInSeconds: TimeInterval = 6) -> AnyPublisher<String, PSError> {
+        getPaymentHandleTokenStatus(
+            using: paymentHandleToken
+        )
+        .flatMap { [weak self] refreshPaymentHandleTokenResponse -> AnyPublisher<String, PSError> in
+            guard let self else {
+                return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
+            }
+            return handleRefreshPaymentHandleTokenResponse(
+                using: refreshPaymentHandleTokenResponse,
+                and: retryCount,
+                and: delayInSeconds
+            )
+        }
+        .eraseToAnyPublisher()
+    }
+}
+    
+// MARK: - Venmo related methods
+extension PSAPIClient {
     /// update PaymentNonce
     ///
     /// - Parameters:

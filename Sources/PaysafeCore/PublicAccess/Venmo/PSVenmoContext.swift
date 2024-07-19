@@ -27,12 +27,13 @@ public class PSVenmoContext {
     private let currencyConverter = CurrencyConverter(
         conversionRules: CurrencyConverter.defaultCurrenciesMap()
     )
-    /// Cancellables set
-    private var cancellables = Set<AnyCancellable>()
-
+    
     /// The URL scheme to return to this app after switching to another app or opening a SFSafariViewController.
     /// This URL scheme must be registered as a URL Type in the app's info.plist, and it must start with the app's bundle ID.
     static var returnURLScheme: String = ""
+    
+    /// Cancellables set
+    private var cancellables = Set<AnyCancellable>()
     
     /// Initializes the PSVenmoContext.
     ///
@@ -64,7 +65,7 @@ public class PSVenmoContext {
             }
         }
     }
-
+    
     ///
     /// - Parameters:
     ///   - clientId: Venmo client id
@@ -84,11 +85,11 @@ public class PSVenmoContext {
         case .initiated, .processing:
             if paymentHandle.action == "REDIRECT" {
                 guard let clientToken = paymentHandle.gatewayResponse?.clientToken,
-                      let jwtToken = paymentHandle.gatewayResponse?.jwtToken else {
+                      let sessionToken = paymentHandle.gatewayResponse?.sessionToken else {
                     return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
                 }
                 psVenmo.configureClient(clientId: clientToken)
-                return venmoFlow(using: jwtToken, amount: amount).map { result in
+                return venmoFlow(using: sessionToken, amount: amount).map { result in
                     if result {
                         return (paymentHandle, PSVenmoResult.success)
                     } else {

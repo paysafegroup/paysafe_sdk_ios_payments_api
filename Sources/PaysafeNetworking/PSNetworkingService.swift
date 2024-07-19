@@ -139,9 +139,9 @@ public class PSNetworkingService: NSObject, RequestPerforming {
                         throw APIError.invalidResponse
                     }
                 case 300...399:
-                    if let value = true as? ResponseType { 
-						return value 
-					}
+                    if let value = true as? ResponseType {
+                        return value
+                    }
                     throw APIError.invalidResponse
                 default: throw (try? JSONDecoder().decode(APIError.self, from: data)) ?? APIError.genericAPIError
                 }
