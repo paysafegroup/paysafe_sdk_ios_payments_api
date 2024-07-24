@@ -10,7 +10,7 @@ import Combine
 import UIKit
 
 #if canImport(PaysafeCommon)
-import PaysafeCommon
+@_exported import PaysafeCommon
 #endif
 #if canImport(BraintreeCore)
 import BraintreeCore
