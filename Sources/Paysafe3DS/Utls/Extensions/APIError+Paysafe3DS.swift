@@ -7,7 +7,6 @@
 
 #if canImport(PaysafeCommon)
 import PaysafeCommon
-import PaysafeNetworking
 #endif
 
 /// Map APIError to PSError

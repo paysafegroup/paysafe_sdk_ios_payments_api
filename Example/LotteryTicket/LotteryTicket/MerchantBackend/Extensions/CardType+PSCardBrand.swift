@@ -5,7 +5,9 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-import PaysafeCore
+#if canImport(PaysafeCommon)
+import PaysafeCommon
+#endif
 
 extension CardType {
     func toPSCardBrand() -> PSCardBrand {

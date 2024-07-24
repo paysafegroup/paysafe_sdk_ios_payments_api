@@ -6,7 +6,7 @@
 //
 
 @testable import Paysafe3DS
-@testable import PaysafeNetworking
+@testable import PaysafeCommon
 
 import XCTest
 

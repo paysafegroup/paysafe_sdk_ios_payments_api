@@ -6,7 +6,7 @@
 //
 
 import PaysafeApplePay
-import PaysafeCore
+import PaysafeVenmo
 import SwiftUI
 
 final class PaymentMethodsViewModel: ObservableObject {
@@ -177,7 +177,7 @@ final class PaymentMethodsViewModel: ObservableObject {
             accountId: paymentManager.venmoAccountId,
             dupCheck: false,
             venmo: VenmoAdditionalData(
-                consumerId: "consumer+16@gmail.com"
+                consumerId: "consumer+166@gmail.com"
             )
         )
         asyncMain { [weak self] in self?.isloading = true }

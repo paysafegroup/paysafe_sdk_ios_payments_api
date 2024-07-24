@@ -6,10 +6,13 @@
 //
 
 import Combine
-#if canImport(PaysafeCommon)
-import PaysafeCommon
-#endif
 import SwiftUI
+#if canImport(PaysafeCommon)
+@_exported import PaysafeCommon
+#endif
+#if canImport(Paysafe3DS)
+import Paysafe3DS
+#endif
 
 /// PSCardForm. The PSCardForm class is responsable for handling the 3D Secure authentication in a seamless way.
 /// Its main responsability is to present the UI elements, capture and manipulate card details and tokenizing the card details.
@@ -26,6 +29,8 @@ import SwiftUI
 public class PSCardForm {
     /// Paysafe API client
     var psAPIClient: PSAPIClient? = PaysafeSDK.shared.psAPIClient
+    /// 3DS client
+    var paysafe3DS: Paysafe3DS?
     /// Card number UIView that merchants can use to capture the card's PAN.
     /// This data is hidden from the merchant and only the sdk can manipulate or send the data to the paysafe backend.
     let cardNumberView: PSCardNumberInputView?
@@ -40,14 +45,14 @@ public class PSCardForm {
     let cardCVVView: PSCardCVVInputView?
     /// Supported card networks
     private static var supportedNetworks: Set<PSCardBrand> = []
-
+    
     /// Card form update event
     public var onCardFormUpdate: PSCardFormUpdateBlock?
     /// Card brand recognition event
     public var onCardBrandRecognition: PSCardBrandBlock?
     /// Cancellables set
     private var cancellables = Set<AnyCancellable>()
-
+    
     /// PSCardForm private initializer.
     ///
     /// - Parameters:
@@ -65,6 +70,9 @@ public class PSCardForm {
         self.cardholderNameView = cardholderNameView
         self.cardExpiryView = cardExpiryView
         self.cardCVVView = cardCVVView
+        if let psAPIClient {
+            self.paysafe3DS = Paysafe3DS(apiKey: psAPIClient.apiKey, environment: psAPIClient.environment.to3DSEnvironment())
+        }
         setupDelegates()
         logInitializedFields()
     }
@@ -162,6 +170,7 @@ public class PSCardForm {
             psAPIClient.logEvent(error)
             return completion(.failure(error))
         }
+        
         /// Validate tokenize options
         if let error = validateTokenizeOptions(options) {
             psAPIClient.logEvent(error)
@@ -182,11 +191,28 @@ public class PSCardForm {
                 completion(.failure(error))
             }
         } receiveValue: { paymentHandleResponse in
-            completion(.success(paymentHandleResponse.paymentHandleToken))
+            guard let paysafe3DS = self.paysafe3DS else {
+                return completion(.failure(.coreSDKInitializeError(PaysafeSDK.shared.correlationId)))
+            }
+            
+            psAPIClient
+                .handleCardPaymentResponse(using: paymentHandleResponse, process: options.threeDS?.process, paysafe3DS: paysafe3DS)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] publisherCompletion in
+                    self?.resetCardDetails()
+                    switch publisherCompletion {
+                    case .finished: break
+                    case let .failure(error): completion(.failure(error))
+                    }
+                } receiveValue: { paymentHandleResponse in completion(.success(paymentHandleResponse)) }
+                .store(in: &self.cancellables)
         }
         .store(in: &cancellables)
     }
+}
 
+// MARK: - Public helper methods
+extension PSCardForm {
     /// Resets all text fields.
     public func resetCardDetails() {
         cardNumberView?.reset()

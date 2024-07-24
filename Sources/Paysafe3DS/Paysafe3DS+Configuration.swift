@@ -6,6 +6,9 @@
 //
 
 import CardinalMobile
+#if canImport(PaysafeCommon)
+import PaysafeCommon
+#endif
 
 public extension Paysafe3DS {
     /// Configurations required for the 3DS flow

@@ -6,6 +6,10 @@
 //
 
 import UIKit
+#if canImport(PaysafeCommon)
+import PaysafeCommon
+#endif
+
 
 /// PSCardCVVInputTextFieldDelegate
 protocol PSCardCVVInputTextFieldDelegate: AnyObject {

@@ -8,11 +8,14 @@
 import Combine
 #if canImport(PaysafeCommon)
 import PaysafeCommon
+#endif
+#if canImport(BraintreeCore)
 import BraintreeVenmo
 import BraintreeCore
 #else
 import Braintree
 #endif
+
 
 /// PSVenmo
 public class PSVenmo {

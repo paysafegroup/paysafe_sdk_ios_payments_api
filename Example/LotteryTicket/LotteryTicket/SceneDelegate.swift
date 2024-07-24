@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import PaysafeCore
+import PaysafeVenmo
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?

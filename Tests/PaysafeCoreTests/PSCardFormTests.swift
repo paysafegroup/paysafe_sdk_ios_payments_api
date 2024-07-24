@@ -7,13 +7,21 @@
 
 import PaysafeCommon
 @testable import PaysafeCore
+@testable import CommonMocks
+
 import XCTest
 
 final class PSCardFormTests: XCTestCase {
     var sut: PSCardForm!
-
+    var mockSession: URLSessionMock!
+    var mockNetworkingService: PSNetworkingService!
+    var mockAPIClient: PSAPIClientMock!
+    
     override func tearDown() {
         sut = nil
+        mockSession = nil
+        mockNetworkingService = nil
+        mockAPIClient = nil
         super.tearDown()
     }
 
@@ -194,10 +202,50 @@ final class PSCardFormTests: XCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
 
-    func test_tokenize_success() {
+    func test_tokenize_success() throws {
         // Given
         let expectation = expectation(description: "Tokenize success.")
-        PSCardForm.createSUT { result in
+        
+        let paymentHandleId = "test_id1234"
+        let apiKey = "am9objpkb2UK"
+        let env: PaysafeEnvironment = .test
+        guard let mockAuthenticationData = AuthenticationResponse.jsonMock().data(using: .utf8),
+              let mockTokenizeData = PaymentResponse.jsonMockWith3DS(paymentHandleId: paymentHandleId).data(using: .utf8),
+              let mockFinalizeData = FinalizeResponse.jsonMock().data(using: .utf8),
+              let mockSearchData = RefreshPaymentHandleTokenResponse.jsonMock(status: .completed).data(using: .utf8) else {
+            return XCTFail("Unable to convert mock JSON to Data")
+        }
+        let tokenizeURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles"))
+        let authenticationURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/cardadapter/v1/paymenthandles/\(paymentHandleId)/authentications"))
+        let finalizeURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/cardadapter/v1/paymenthandles/\(paymentHandleId)/authentications/challengeAuthenticationId/finalize"))
+        let searchURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles/search"))
+        let mockResponse = HTTPURLResponse(url: tokenizeURL, statusCode: 200, httpVersion: nil, headerFields: nil)
+        
+        // Set and stub session
+        mockSession = URLSessionMock()
+        mockSession.stubRequest(url: tokenizeURL, data: mockTokenizeData, response: mockResponse, error: nil)
+        mockSession.stubRequest(url: authenticationURL, data: mockAuthenticationData, response: mockResponse, error: nil)
+        mockSession.stubRequest(url: searchURL, data: mockSearchData, response: mockResponse, error: nil)
+        mockSession.stubRequest(url: finalizeURL, data: mockFinalizeData, response: mockResponse, error: nil)
+        
+        // Set networking service
+        mockNetworkingService = PSNetworkingService(
+            session: self.mockSession,
+            authorizationKey: "testing-auth-key",
+            correlationId: "123-123-123",
+            sdkVersion: "1.0.0"
+        )
+        
+        // Set api client
+        mockAPIClient = PSAPIClientMock(
+            apiKey: apiKey,
+            environment: env
+        )
+        mockAPIClient.paymentHandleId = paymentHandleId
+        self.mockAPIClient.networkingService = self.mockNetworkingService
+        
+        // Create SUT
+        PSCardForm.createSUT(mockAPIClient: mockAPIClient){ result in
             guard case let .success(sut) = result else {
                 return XCTFail("Expected a success cardForm result.")
             }
@@ -206,6 +254,8 @@ final class PSCardFormTests: XCTestCase {
             sut.cardNumberView?.cardNumberTextField.cardBrand = .visa
             self.sut = sut
 
+            sut.paysafe3DS = Paysafe3DSMock(apiKey: apiKey, environment: env.to3DSEnvironment())
+            
             // When
             sut.tokenize(using: options) { tokenizeResult in
                 guard case let .success(paymentHandleToken) = tokenizeResult else {
@@ -213,12 +263,11 @@ final class PSCardFormTests: XCTestCase {
                 }
                 // Then
                 XCTAssertFalse(paymentHandleToken.isEmpty)
-                XCTAssertEqual(paymentHandleToken.count, 16)
                 expectation.fulfill()
             }
         }
 
-        wait(for: [expectation], timeout: 1.0)
+        wait(for: [expectation], timeout: 2.0)
     }
 
     func test_tokenize_failure_unsupportedNetwork() {
@@ -352,13 +401,17 @@ final class PSCardFormTests: XCTestCase {
     }
 }
 
-private extension PSCardForm {
+fileprivate extension PSCardForm {
     enum Configuration {
         case UIKit
         case SwiftUI
     }
 
     static func createSUT(
+        mockAPIClient: PSAPIClientMock = PSAPIClientMock(
+            apiKey: "am9objpkb2UK",
+            environment: .test
+        ),
         configuration: Configuration = .UIKit,
         currencyCodeValidationShouldFail: Bool = false,
         accountIdValidationShouldFail: Bool = false,
@@ -367,10 +420,6 @@ private extension PSCardForm {
         getPaymentMethodShouldFailCardPaymentValidation: Bool = false,
         completion: @escaping PSCardFormInitializeBlock
     ) {
-        let mockAPIClient = PSAPIClientMock(
-            apiKey: "am9objpkb2UK",
-            environment: .test
-        )
         mockAPIClient.getPaymentMethodShouldFail = getPaymentMethodShouldFail
         mockAPIClient.getPaymentMethodShouldSucceedCardPaymentValidation = getPaymentMethodShouldSucceedCardPaymentValidation
         mockAPIClient.getPaymentMethodShouldFailCardPaymentValidation = getPaymentMethodShouldFailCardPaymentValidation

@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(PaysafeCommon)
+import PaysafeCommon
+#endif
 
 enum PSCardUtils {
     /// Determines the Card brand based on the card number

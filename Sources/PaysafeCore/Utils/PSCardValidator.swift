@@ -5,7 +5,9 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-import Foundation
+#if canImport(PaysafeCommon)
+import PaysafeCommon
+#endif
 
 enum PSCardValidator {
     /// Verifies card number using the Luhn algorithm
@@ -108,4 +110,10 @@ enum PSCardValidator {
     static func validCVVCharactersCheck(_ characters: String) -> Bool {
         PSRegexValidator.evaluate(string: characters, pattern: .onlyDigitsRegexPattern)
     }
+}
+
+// MARK: - Regex patterns
+extension String {
+    /// Only digits regex pattern
+    static let onlyDigitsRegexPattern = "[0-9]+"
 }

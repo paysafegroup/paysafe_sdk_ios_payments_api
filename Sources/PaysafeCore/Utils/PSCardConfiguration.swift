@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(PaysafeCommon)
+import PaysafeCommon
+#endif
 
 enum PSCardConfiguration {
     /// Make card number display text

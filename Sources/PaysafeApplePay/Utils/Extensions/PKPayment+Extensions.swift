@@ -6,6 +6,9 @@
 //
 
 import PassKit
+#if canImport(PaysafeCommon)
+import PaysafeCommon
+#endif
 
 extension PKPayment {
     func toApplePayPaymentToken(using billingContact: BillingContact?) -> ApplePayPaymentToken {

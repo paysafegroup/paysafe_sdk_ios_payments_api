@@ -7,7 +7,8 @@
 
 import Combine
 @testable import Paysafe3DS
-import PaysafeNetworking
+@testable import CommonMocks
+import PaysafeCommon
 import XCTest
 
 final class Paysafe3DSTests: XCTestCase {

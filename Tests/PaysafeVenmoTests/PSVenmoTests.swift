@@ -7,7 +7,7 @@
 
 import Combine
 @testable import PaysafeVenmo
-import PaysafeCommon
+@testable import PaysafeCommon
 import BraintreeCore
 import XCTest
 
@@ -109,5 +109,32 @@ final class PSVenmoTests: XCTestCase {
             .store(in: &cancellables)
         
         wait(for: [expectation], timeout: 2.0)
+    }
+    
+    func test_venmoCanceledRequest() {
+        // Given
+        let expectation = expectation(description: "Call Venmo canceled Request.")
+        let client = PSAPIClient(
+            apiKey: "am9objpkb2UK",
+            environment: .test
+        )
+        
+        // When
+        client.venmoCanceledRequest(jwtToken: "token")
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    XCTFail("Expected failure but received success")
+                case let .failure(error):
+                    // Then
+                    XCTAssertEqual(error.errorCode, .venmoFailedAuthorization)
+                    expectation.fulfill()
+                }
+            } receiveValue: { _ in
+                XCTFail("Expected failure but received success")
+            }
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
     }
 }

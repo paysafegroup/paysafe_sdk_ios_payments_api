@@ -39,13 +39,6 @@
         "identifier" : "PaysafeCoreTests",
         "name" : "PaysafeCoreTests"
       }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:",
-        "identifier" : "PaysafeNetworkingTests",
-        "name" : "PaysafeNetworkingTests"
-      }
     }
   ],
   "version" : 1

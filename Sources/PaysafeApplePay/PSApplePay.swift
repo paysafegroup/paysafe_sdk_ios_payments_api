@@ -8,7 +8,7 @@
 import Combine
 import PassKit
 #if canImport(PaysafeCommon)
-import PaysafeCommon
+@_exported import PaysafeCommon
 #endif
 
 /// PSApplePay

@@ -1,4 +1,4 @@
-// swift-tools-version: 5.5
+// swift-tools-version: 5.9
 import PackageDescription
 
 let package = Package(
@@ -14,10 +14,6 @@ let package = Package(
         .library(
             name: "Paysafe3DS",
             targets: ["Paysafe3DS"]
-        ),
-        .library(
-            name: "PaysafeNetworking",
-            targets: ["PaysafeNetworking"]
         ),
         .library(
             name: "PaysafeCommon",
@@ -42,7 +38,7 @@ let package = Package(
         ),
         .target(
             name: "PaysafeCore",
-            dependencies: ["Paysafe3DS", "PaysafeApplePay", "PaysafeNetworking", "PaysafeCommon", "PaysafeVenmo"],
+            dependencies: ["Paysafe3DS", "PaysafeCommon"],
             resources: [.process("PrivacyInfo.xcprivacy")]
         ),
         .target(
@@ -50,13 +46,13 @@ let package = Package(
             dependencies: []
         ),
         .target(
-            name: "Paysafe3DS",
-            dependencies: ["PSCardinalMobile", "PaysafeNetworking", "PaysafeCommon"],
-            resources: [.process("PrivacyInfo.xcprivacy")]
+            name: "CommonMocks",
+            dependencies: ["PaysafeCommon", "Paysafe3DS", "PaysafeCore"]
         ),
         .target(
-            name: "PaysafeNetworking",
-            dependencies: ["PaysafeCommon"]
+            name: "Paysafe3DS",
+            dependencies: ["PSCardinalMobile", "PaysafeCommon"],
+            resources: [.process("PrivacyInfo.xcprivacy")]
         ),
         .target(
             name: "PaysafeApplePay",
@@ -72,27 +68,23 @@ let package = Package(
         ),
         .testTarget(
             name: "PaysafeCoreTests",
-            dependencies: ["PaysafeCore"]
+            dependencies: ["PaysafeCore", "CommonMocks"]
         ),
         .testTarget(
             name: "PaysafeVenmoTests",
-            dependencies: ["PaysafeVenmo"]
+            dependencies: ["PaysafeVenmo", "CommonMocks"]
         ),
         .testTarget(
             name: "PaysafeCommonTests",
-            dependencies: ["PaysafeCommon"]
+            dependencies: ["PaysafeCommon", "CommonMocks"]
         ),
         .testTarget(
             name: "Paysafe3DSTests",
-            dependencies: ["Paysafe3DS"]
-        ),
-        .testTarget(
-            name: "PaysafeNetworkingTests",
-            dependencies: ["PaysafeNetworking"]
+            dependencies: ["Paysafe3DS", "CommonMocks"]
         ),
         .testTarget(
             name: "PaysafeApplePayTests",
-            dependencies: ["PaysafeApplePay"]
+            dependencies: ["PaysafeApplePay", "CommonMocks"]
         )
     ]
 )
