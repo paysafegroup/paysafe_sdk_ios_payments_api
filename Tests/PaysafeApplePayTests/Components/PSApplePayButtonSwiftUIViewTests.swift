@@ -9,23 +9,15 @@
 import XCTest
 
 final class PSApplePayButtonSwiftUIViewTests: XCTestCase {
-    var sut: PSApplePayButtonSwiftUIView!
-
-    override func setUp() {
-        super.setUp()
-        sut = PSApplePayButtonSwiftUIView(
+    
+    func test_init() {
+        // Given
+        var sut = PSApplePayButtonSwiftUIView(
             buttonType: .buy,
             buttonStyle: .automatic,
             action: nil
         )
-    }
-
-    override func tearDown() {
-        sut = nil
-        super.tearDown()
-    }
-
-    func test_init() {
+        // Then
         XCTAssertNotNil(sut)
     }
 }

@@ -284,4 +284,67 @@ final class APIErrorToPSErrorTests: XCTestCase {
         XCTAssertEqual(resultError.code, expectedCode, "The code does not match the expected value.")
         XCTAssertEqual(resultError.detailedMessage, detailedMessage, "The detailedMessage does not match.")
     }
+    
+    func test_with9002ErrorCode_threeDSInvalidResponse() {
+        // Given
+        let errorCode = "9002"
+        let detailedMessage = "Error communicating with server."
+        let correlationId = "test-correlation-id"
+        let expectedCode = 9002
+        let apiError = APIError(error: ErrorDetails(
+            code: errorCode,
+            message: detailedMessage
+        ))
+
+        // When
+        let resultError = apiError.from3DStoPSError(correlationId)
+
+        // Then
+        XCTAssertEqual(resultError.errorCode, .threeDSInvalidResponse, "The errorCode does not match the expected value.")
+        XCTAssertEqual(resultError.correlationId, correlationId, "The correlationId does not match.")
+        XCTAssertEqual(resultError.code, expectedCode, "The code does not match the expected value.")
+        XCTAssertEqual(resultError.detailedMessage, detailedMessage, "The detailedMessage does not match.")
+    }
+    
+    func test_with9014ErrorCode_threeDSInvalidResponse() {
+        // Given
+        let errorCode = "9014"
+        let detailedMessage = "Unhandled error occurred."
+        let correlationId = "test-correlation-id"
+        let expectedCode = 9014
+        let apiError = APIError(error: ErrorDetails(
+            code: errorCode,
+            message: detailedMessage
+        ))
+
+        // When
+        let resultError = apiError.from3DStoPSError(correlationId)
+
+        // Then
+        XCTAssertEqual(resultError.errorCode, .genericAPIError, "The errorCode does not match the expected value.")
+        XCTAssertEqual(resultError.correlationId, correlationId, "The correlationId does not match.")
+        XCTAssertEqual(resultError.code, expectedCode, "The code does not match the expected value.")
+        XCTAssertEqual(resultError.detailedMessage, detailedMessage, "The detailedMessage does not match.")
+    }
+    
+    func test_default_threeDSInvalidResponse() {
+        // Given
+        let errorCode = "00"
+        let detailedMessage = "Unhandled error occurred."
+        let correlationId = "test-correlation-id"
+        let expectedCode = 00
+        let apiError = APIError(error: ErrorDetails(
+            code: errorCode,
+            message: detailedMessage
+        ))
+
+        // When
+        let resultError = apiError.from3DStoPSError(correlationId)
+
+        // Then
+        XCTAssertEqual(resultError.errorCode, .genericAPIError, "The errorCode does not match the expected value.")
+        XCTAssertEqual(resultError.correlationId, correlationId, "The correlationId does not match.")
+        XCTAssertEqual(resultError.code, expectedCode, "The code does not match the expected value.")
+        XCTAssertEqual(resultError.detailedMessage, detailedMessage, "The detailedMessage does not match.")
+    }
 }

@@ -52,6 +52,7 @@ final class PSAPIClientTests: XCTestCase {
     
     func test_init() {
         XCTAssertNotNil(sut)
+        XCTAssertFalse(PSJailbreakChecker.isJailbroken())
     }
 
     
@@ -154,7 +155,7 @@ final class PSAPIClientTests: XCTestCase {
         let tokenizeURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles"))
         let mockResponse = try XCTUnwrap(HTTPURLResponse(url: tokenizeURL, statusCode: 400, httpVersion: nil, headerFields: nil))
         mockSession.stubRequest(url: tokenizeURL, data: mockData, response: mockResponse, error: expectedError)
-        
+
         // When
         sut.tokenize(
             options: mockTokenizeOptions,
@@ -174,7 +175,8 @@ final class PSAPIClientTests: XCTestCase {
             XCTFail("Expected failure but received success")
         }
         .store(in: &cancellables)
-        
+        XCTAssert(mockTokenizeOptions.threeDS?.userAccountDetails?.passwordChangedRange?.request == .noChange)
+
         wait(for: [expectation], timeout: 1.0)
     }
     

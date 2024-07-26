@@ -6,29 +6,48 @@
 //
 
 @testable import PaysafeApplePay
+import PassKit
 import XCTest
 
 class StringExtensionTests: XCTestCase {
-    func test_nilIfEmpty_ReturnsNilForEmptyString() {
+    func test_pkPaymentMethodType_unknown() {
         // Given
-        let emptyString = ""
-
-        // When
-        let result = emptyString.nilIfEmpty
+        let emptyStrmethodType = PKPaymentMethodType.unknown
 
         // Then
-        XCTAssertNil(result, "Expected nil for an empty string, but got something else.")
+        XCTAssertEqual(emptyStrmethodType.toString(), "unknown")
     }
 
-    func test_nilIfEmpty_ReturnsOriginalStringForNonEmptyString() {
+    func test_pkPaymentMethodType_debit() {
         // Given
-        let nonEmptyString = "Paysafe"
-
-        // When
-        let result = nonEmptyString.nilIfEmpty
+        let emptyStrmethodType = PKPaymentMethodType.debit
 
         // Then
-        XCTAssertNotNil(result, "Expected the original string for a non-empty string, but got nil.")
-        XCTAssertEqual(result, nonEmptyString, "Expected the original string, but the result was different.")
+        XCTAssertEqual(emptyStrmethodType.toString(), "debit")
     }
+    
+    func test_pkPaymentMethodType_credit() {
+        // Given
+        let emptyStrmethodType = PKPaymentMethodType.credit
+
+        // Then
+        XCTAssertEqual(emptyStrmethodType.toString(), "credit")
+    }
+    
+    func test_pkPaymentMethodType_prepaid() {
+        // Given
+        let emptyStrmethodType = PKPaymentMethodType.prepaid
+
+        // Then
+        XCTAssertEqual(emptyStrmethodType.toString(), "prepaid")
+    }
+    
+    func test_pkPaymentMethodType_store() {
+        // Given
+        let emptyStrmethodType = PKPaymentMethodType.store
+
+        // Then
+        XCTAssertEqual(emptyStrmethodType.toString(), "store")
+    }
+    
 }

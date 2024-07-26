@@ -9,6 +9,17 @@
 import XCTest
 
 class PaymentRequestTests: XCTestCase {
+    var billingDetails = BillingDetails(
+        country: "US",
+        zip: "400523",
+        state: "New York",
+        city: "New York",
+        street: "Avenu 1",
+        street1: nil,
+        street2: nil,
+        phone: "12345678",
+        nickName: "John"
+    )
     func test_paymentRequest_Encoding() throws {
         // Given
         let merchantRefNum = "testMerchantRef"
@@ -52,7 +63,7 @@ class PaymentRequestTests: XCTestCase {
             returnLinks: returnLinks,
             profile: profile,
             threeDs: nil,
-            billingDetails: nil,
+            billingDetails: billingDetails.request,
             merchantDescriptor: nil,
             shippingDetails: nil,
             singleUseCustomerToken: nil,

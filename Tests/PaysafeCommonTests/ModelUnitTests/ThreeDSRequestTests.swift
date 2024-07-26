@@ -31,7 +31,7 @@ class ThreeDSRequestTests: XCTestCase {
             orderItemDetails: nil,
             purchasedGiftCardDetails: nil,
             userAccountDetails: nil,
-            priorThreeDSAuthentication: nil,
+            priorThreeDSAuthentication: PriorThreeDSAuthentication(data: "Data", method: .otherIssuerMethod, id: "id", time: "10:35").request,
             shippingDetailsUsage: nil,
             suspiciousAccountActivity: nil,
             totalPurchasesSixMonthCount: nil,

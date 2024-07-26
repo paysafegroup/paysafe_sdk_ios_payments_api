@@ -85,7 +85,7 @@ public extension PSCardTokenizeOptions {
                     changedDate: nil,
                     changedRange: .from30To60Days,
                     passwordChangedDate: nil,
-                    passwordChangedRange: nil,
+                    passwordChangedRange: .noChange,
                     totalPurchasesSixMonthCount: nil,
                     transactionCountForPreviousDay: nil,
                     transactionCountForPreviousYear: nil,

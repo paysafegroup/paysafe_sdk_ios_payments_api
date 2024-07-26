@@ -24,12 +24,17 @@ final class APIErrorToPSErrorTests: XCTestCase {
 
         // When
         let resultError = apiError.toPSError(correlationId)
+        let logError = resultError.toLogError().jsonString()
 
         // Then
         XCTAssertEqual(resultError.errorCode, .coreInvalidCurrencyCode, "The errorCode does not match the expected value.")
         XCTAssertEqual(resultError.correlationId, correlationId, "The correlationId does not match.")
         XCTAssertEqual(resultError.code, expectedCode, "The code does not match the expected value.")
         XCTAssertEqual(resultError.detailedMessage, detailedMessage, "Invalid currency parameter.")
+        XCTAssert(logError.contains("Invalid currency parameter."))
+        XCTAssert(logError.contains("There was an error (9055), please contact our support."))
+        XCTAssert(logError.contains("CoreError"))
+        XCTAssert(logError.contains("9055"))
     }
 
     func test_with9205ErrorCode_returnsEncodingError() {
