@@ -20,7 +20,7 @@ final class PSCardExpiryInputViewTests: XCTestCase {
 
     func test_theme() {
         // Given
-        let sut = PSCardNumberInputView()
+        let sut = PSCardExpiryInputView()
         let theme = PSTheme()
 
         // When

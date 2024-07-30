@@ -41,6 +41,14 @@ final class Paysafe3DSTests: XCTestCase {
     func test_init() {
         XCTAssertNotNil(sut)
     }
+    
+    func test_updateRenderType() {
+        let merchantRenderType =  Paysafe3DS.SupportedUI.html
+        
+        sut.updateRenderType(using: merchantRenderType)
+        
+        XCTAssertEqual(sut.configuration.supportedUI, merchantRenderType)
+    }
 
     func test_initiate3DSFlow_success() throws {
         // Given

@@ -23,6 +23,7 @@ final class PSCardExpiryInputSwiftUIViewTests: XCTestCase {
 
     func test_init() {
         XCTAssertNotNil(sut)
+        XCTAssertNotNil(sut.getPlaceholder())
     }
 
     func test_theme() {
@@ -34,6 +35,10 @@ final class PSCardExpiryInputSwiftUIViewTests: XCTestCase {
 
         // Then
         XCTAssertEqual(sut.theme, theme)
+        
+        sut.resetTheme()
+        
+        XCTAssertEqual(sut.theme, PaysafeSDK.shared.psTheme)
     }
 
     func test_onEventSetter() {

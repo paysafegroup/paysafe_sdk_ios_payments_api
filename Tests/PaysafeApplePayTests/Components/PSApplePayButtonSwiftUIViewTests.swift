@@ -12,7 +12,7 @@ final class PSApplePayButtonSwiftUIViewTests: XCTestCase {
     
     func test_init() {
         // Given
-        var sut = PSApplePayButtonSwiftUIView(
+        let sut = PSApplePayButtonSwiftUIView(
             buttonType: .buy,
             buttonStyle: .automatic,
             action: nil

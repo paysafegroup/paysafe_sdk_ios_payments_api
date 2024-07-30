@@ -15,6 +15,7 @@ public class PSAPIClientMock: PSAPIClient {
     public var paymentHandleId = "id"
     
     public override func tokenize(options: PSTokenizable, paymentType: PaymentType, card: CardRequest?) -> AnyPublisher<PaymentHandle, PSError> {
+        self.renderType = .html
         switch tokenizeShouldFail {
         case true:
             return Fail(error: .genericAPIError("correlationId")).eraseToAnyPublisher()

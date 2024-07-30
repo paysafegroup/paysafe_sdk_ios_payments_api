@@ -36,6 +36,10 @@ final class PSCardholderNameInputSwiftUIViewTests: XCTestCase {
         XCTAssertEqual(sut.theme, theme)
         XCTAssertEqual(sut.getPlaceholder(), "Cardholder Name")
         XCTAssertEqual(sut.theme, PaysafeSDK.shared.psTheme)
+        
+        sut.resetTheme()
+        
+        XCTAssertEqual(sut.theme, PaysafeSDK.shared.psTheme)
     }
 
     func test_onEventSetter() {

@@ -185,7 +185,7 @@ final class PSCardFormTests: XCTestCase {
                 return XCTFail("PSAPIClient couldn't be casted to PSAPIClientMock.")
             }
             mockAPIClient.tokenizeShouldFail = true
-            let options = PSCardTokenizeOptions.createMock()
+            let options = PSCardTokenizeOptions.createMockNative()
             self.sut = sut
 
             // When
@@ -249,7 +249,7 @@ final class PSCardFormTests: XCTestCase {
             guard case let .success(sut) = result else {
                 return XCTFail("Expected a success cardForm result.")
             }
-            let options = PSCardTokenizeOptions.createMock()
+            let options = PSCardTokenizeOptions.createMockHtml()
             sut.populateFields()
             sut.cardNumberView?.cardNumberTextField.cardBrand = .visa
             self.sut = sut
@@ -277,7 +277,7 @@ final class PSCardFormTests: XCTestCase {
             guard case let .success(sut) = result else {
                 return XCTFail("Expected a success cardForm result.")
             }
-            let options = PSCardTokenizeOptions.createMock()
+            let options = PSCardTokenizeOptions.createMockBoth()
             sut.populateFields()
             sut.cardNumberView?.cardNumberTextField.cardBrand = .unknown
             self.sut = sut
@@ -307,7 +307,7 @@ final class PSCardFormTests: XCTestCase {
                 return XCTFail("PSAPIClient couln't be casted to PSAPIClientMock.")
             }
             mockAPIClient.tokenizeShouldFail = true
-            let options = PSCardTokenizeOptions.createMock()
+            let options = PSCardTokenizeOptions.createMockNative()
             sut.populateFields()
             self.sut = sut
 
@@ -492,14 +492,36 @@ fileprivate extension PSCardForm {
 }
 
 private extension PSCardTokenizeOptions {
-    static func createMock() -> PSCardTokenizeOptions {
+    static func createMockNative() -> PSCardTokenizeOptions {
         PSCardTokenizeOptions(
             amount: 1000,
             currencyCode: "USD",
             transactionType: .payment,
             merchantRefNum: UUID().uuidString,
             accountId: "1001456390",
-            threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop")
+            threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop"), renderType: .html
+        )
+    }
+    
+    static func createMockHtml() -> PSCardTokenizeOptions {
+        PSCardTokenizeOptions(
+            amount: 1000,
+            currencyCode: "USD",
+            transactionType: .payment,
+            merchantRefNum: UUID().uuidString,
+            accountId: "1001456390",
+            threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop"), renderType: .html
+        )
+    }
+    
+    static func createMockBoth() -> PSCardTokenizeOptions {
+        PSCardTokenizeOptions(
+            amount: 1000,
+            currencyCode: "USD",
+            transactionType: .payment,
+            merchantRefNum: UUID().uuidString,
+            accountId: "1001456390",
+            threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop"), renderType: .both
         )
     }
 }

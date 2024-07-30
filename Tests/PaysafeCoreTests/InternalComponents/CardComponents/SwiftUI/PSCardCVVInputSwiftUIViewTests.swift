@@ -25,6 +25,7 @@ final class PSCardCVVInputSwiftUIViewTests: XCTestCase {
         sut = PSCardCVVInputSwiftUIView(isMasked: true, cardBrand: .mastercard)
         
         XCTAssertNotNil(sut)
+        XCTAssertNotNil(sut.getPlaceholder())
         XCTAssertTrue(sut.isEmpty())
         
         sut.reset()
@@ -40,6 +41,10 @@ final class PSCardCVVInputSwiftUIViewTests: XCTestCase {
 
         // Then
         XCTAssertEqual(sut.theme, theme)
+        
+        sut.resetTheme()
+        
+        XCTAssertEqual(sut.theme, PaysafeSDK.shared.psTheme)
     }
 
     func test_onEventSetter() {
