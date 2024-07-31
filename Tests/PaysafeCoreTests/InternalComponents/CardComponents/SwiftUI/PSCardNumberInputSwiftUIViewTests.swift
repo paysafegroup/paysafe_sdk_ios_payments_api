@@ -7,13 +7,14 @@
 
 @testable import PaysafeCore
 import XCTest
+import SwiftUI
 
 final class PSCardNumberInputSwiftUIViewTests: XCTestCase {
     var sut: PSCardNumberInputSwiftUIView!
 
     override func setUp() {
         super.setUp()
-        sut = PSCardNumberInputSwiftUIView()
+        sut = PSCardNumberInputSwiftUIView(separatorType: .whitespace, animateTopPlaceholderLabel: true, hint: "hint")
     }
 
     override func tearDown() {
@@ -34,6 +35,10 @@ final class PSCardNumberInputSwiftUIViewTests: XCTestCase {
 
         // Then
         XCTAssertEqual(sut.theme, theme)
+
+        sut.resetTheme()
+        // Then
+        XCTAssertEqual(sut.theme, PaysafeSDK.shared.psTheme)
     }
 
     func test_onEventSetter() {
@@ -45,6 +50,14 @@ final class PSCardNumberInputSwiftUIViewTests: XCTestCase {
 
         // Then
         XCTAssertNotNil(sut.onEvent)
+    }
+
+    func test_placeholder() {
+        // Given
+        let hint = "Card number"
+
+        // Then
+        XCTAssertEqual(sut.getPlaceholder(), hint)
     }
 
     func test_isEmpty() {

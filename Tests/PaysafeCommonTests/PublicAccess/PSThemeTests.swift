@@ -25,5 +25,21 @@ final class PSThemeTests: XCTestCase {
         XCTAssertNotNil(theme.placeholderFont)
         XCTAssertNotNil(theme.hintFont)
         XCTAssertEqual(theme.borderCornerRadius, 0.0)
+
+        let view = UIView()
+        view.backgroundColor = UIColor.defaultBackgroundColor
+        XCTAssertTrue(view.backgroundColor != .white)
+        view.backgroundColor = UIColor.defaultBorderColor
+        XCTAssertTrue(view.backgroundColor != .white)
+        view.backgroundColor = UIColor.defaultFocusedBorderColor
+        XCTAssertTrue(view.backgroundColor != .white)
+        view.backgroundColor = UIColor.defaultErrorColor
+        XCTAssertTrue(view.backgroundColor != .white)
+        view.backgroundColor = UIColor.defaultTextInputColor
+        XCTAssertTrue(view.backgroundColor != .white)
+        view.backgroundColor = UIColor.defaultPlaceholderColor
+        XCTAssertTrue(view.backgroundColor != .white)
+        view.backgroundColor = UIColor.defaultHintColor
+        XCTAssertTrue(view.backgroundColor != .white)
     }
 }

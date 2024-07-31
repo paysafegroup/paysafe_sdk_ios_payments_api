@@ -110,7 +110,7 @@ final class PSVenmoTests: XCTestCase {
         
         wait(for: [expectation], timeout: 2.0)
     }
-    
+
     func test_venmoCanceledRequest() {
         // Given
         let expectation = expectation(description: "Call Venmo canceled Request.")

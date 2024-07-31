@@ -54,8 +54,7 @@ public class PSVenmo {
         return tokenizeVenmoAccount(profileId: profileId, amount: amount)
     }
     
-    func tokenizeVenmoAccount(profileId: String, amount: Int) -> AnyPublisher<PSVenmoBraintreeResult, PSError> {
-        let request = BTVenmoRequest(paymentMethodUsage: .multiUse)
+    func tokenizeVenmoAccount(profileId: String, amount: Int, request: BTVenmoRequest = BTVenmoRequest(paymentMethodUsage: .multiUse)) -> AnyPublisher<PSVenmoBraintreeResult, PSError> {
         request.profileID = profileId
         request.totalAmount = String(amount)
         request.collectCustomerBillingAddress = true

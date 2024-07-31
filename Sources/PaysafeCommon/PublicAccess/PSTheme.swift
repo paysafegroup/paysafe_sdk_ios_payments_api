@@ -71,7 +71,7 @@ public struct PSTheme: Equatable {
 }
 
 // MARK: - Default theme colors
-private extension UIColor {
+extension UIColor {
     /// Default background color
     static let defaultBackgroundColor = UIColor(
         dynamicProvider: { traitCollection in

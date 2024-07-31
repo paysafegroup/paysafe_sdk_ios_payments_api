@@ -63,6 +63,8 @@ final class PSCardCVVInputViewTests: XCTestCase {
 
         // When
         sut.updateInput(with: validCardCVV)
+        sut.isMasked = false
+        sut.cardBrand = .mastercard
 
         // Then
         XCTAssertEqual(events.count, 2)
@@ -79,11 +81,14 @@ final class PSCardCVVInputViewTests: XCTestCase {
         }
 
         // When
+        sut.didUpdateCardCVVInputFocusedState(isFocused: false)
+        sut.didUpdateCardCVVInputWithInvalidCharacter()
         sut.updateInput(with: invalidCardCVV)
 
         // Then
-        XCTAssertEqual(events.count, 2)
-        XCTAssertEqual(events.first, .fieldValueChange)
+        XCTAssertEqual(events.count, 3)
+        XCTAssertEqual(events.first, .invalidCharacter)
+        XCTAssertEqual(events[1], .fieldValueChange)
         XCTAssertEqual(events.last, .invalid)
     }
 
@@ -145,6 +150,19 @@ final class PSCardCVVInputViewTests: XCTestCase {
         // Then
         XCTAssertTrue(sut.isEmpty())
         XCTAssertFalse(sut.isValid())
+    }
+
+    func testInitWithCoder() {
+        // Given
+        let object = PSCardCVVInputView()
+        let data = try! NSKeyedArchiver.archivedData(withRootObject: object, requiringSecureCoding: false)
+        let coder = try! NSKeyedUnarchiver(forReadingFrom: data)
+
+        // When
+        let sut = PSCardCVVInputView(coder: coder)
+
+        // Then
+        XCTAssertNotNil(sut)
     }
 }
 
