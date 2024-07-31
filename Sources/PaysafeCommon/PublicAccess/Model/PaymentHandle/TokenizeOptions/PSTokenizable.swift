@@ -26,4 +26,6 @@ public protocol PSTokenizable: Encodable {
     var merchantDescriptor: MerchantDescriptor? { get }
     /// Shipping details
     var shippingDetails: ShippingDetails? { get }
+    /// Simulator additional data
+    var simulator: SimulatorType { get }
 }

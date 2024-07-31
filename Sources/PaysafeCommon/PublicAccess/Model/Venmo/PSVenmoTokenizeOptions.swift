@@ -31,7 +31,9 @@ public struct PSVenmoTokenizeOptions: PSTokenizable {
     public var deviceFingerprinting: DeviceFingerprinting?
     /// SingleUseCustomerToken
     public var singleUseCustomerToken: String?
-    /// Venmol additional data
+    /// Simulator additional data
+    public var simulator: SimulatorType
+    /// Venmo additional data
     public let venmo: VenmoAdditionalData?
 
     /// - Parameters:
@@ -60,6 +62,7 @@ public struct PSVenmoTokenizeOptions: PSTokenizable {
         shippingDetails: ShippingDetails? = nil,
         deviceFingerprinting: DeviceFingerprinting? = nil,
         singleUseCustomerToken: String? = nil,
+        simulator: SimulatorType = .externalSimulator,
         venmo: VenmoAdditionalData? = nil
     ) {
         self.amount = amount
@@ -74,6 +77,7 @@ public struct PSVenmoTokenizeOptions: PSTokenizable {
         self.deviceFingerprinting = deviceFingerprinting
         self.merchantDescriptor = merchantDescriptor
         self.shippingDetails = shippingDetails
+        self.simulator = simulator
         self.venmo = venmo
     }
 }

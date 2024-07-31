@@ -34,6 +34,17 @@ final class PSCardExpiryInputViewTests: XCTestCase {
         XCTAssertEqual(sut.theme, PaysafeSDK.shared.psTheme)
     }
 
+    func test_inputType() {
+        // Given
+        let sut = PSCardExpiryInputView(inputType: .datePicker)
+        
+        // When
+        sut.inputType = PSCardExpiryInputType.text
+        
+        // Then
+        XCTAssertEqual(sut.cardExpiryTextField.inputType, .text)
+    }
+    
     func test_textInput() {
         // Given
         let inputType: PSCardExpiryInputType = .text

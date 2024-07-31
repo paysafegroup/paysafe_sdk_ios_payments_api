@@ -33,6 +33,8 @@ public struct PSCardTokenizeOptions: PSTokenizable {
     public let paymentTokenFrom: String?
     /// Render type
     public let renderType: RenderType?
+    /// Simulator additional data
+    public var simulator: SimulatorType
 
     /// - Parameters:
     ///   - amount: Payment amount in minor units
@@ -61,6 +63,7 @@ public struct PSCardTokenizeOptions: PSTokenizable {
         threeDS: ThreeDS? = nil,
         singleUseCustomerToken: String? = nil,
         paymentTokenFrom: String? = nil,
+        simulator: SimulatorType = .externalSimulator,
         renderType: RenderType? = nil
     ) {
         self.amount = amount
@@ -75,6 +78,7 @@ public struct PSCardTokenizeOptions: PSTokenizable {
         self.threeDS = threeDS
         self.singleUseCustomerToken = singleUseCustomerToken
         self.paymentTokenFrom = paymentTokenFrom
+        self.simulator = simulator
         self.renderType = renderType
     }
 }

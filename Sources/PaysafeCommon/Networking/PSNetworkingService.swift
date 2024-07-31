@@ -14,6 +14,7 @@ public protocol RequestPerforming {
         httpMethod: HTTPMethod,
         payload: RequestType,
         invocationId: String?,
+        simulator: SimulatorType,
         transactionSource: String
     ) -> AnyPublisher<ResponseType, APIError>
 }
@@ -25,7 +26,7 @@ public protocol URLSessionProtocol {
 extension URLSession: URLSessionProtocol {
     public func psDataTaskPublisher(for request: URLRequest) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
         dataTaskPublisher(for: request)
-            .map { 
+            .map {
                 ($0.data, $0.response)
             }
             .eraseToAnyPublisher()
@@ -82,6 +83,7 @@ public class PSNetworkingService: NSObject, RequestPerforming {
         httpMethod: HTTPMethod,
         payload: RequestType,
         invocationId: String? = nil,
+        simulator: SimulatorType = .externalSimulator,
         transactionSource: String = "IosSDKV2"
     ) -> AnyPublisher<ResponseType, APIError> {
         guard let requestURL = URL(string: url) else {
@@ -102,8 +104,9 @@ public class PSNetworkingService: NSObject, RequestPerforming {
         ]
         if let invocationId {
             request.addValue(invocationId, forHTTPHeaderField: "Invocationid")
-            request.addValue("EXTERNAL", forHTTPHeaderField: "Simulator")
         }
+        
+        request.addValue(simulator.rawValue, forHTTPHeaderField: "Simulator")
         
         if case .post = httpMethod {
             do {
@@ -114,7 +117,7 @@ public class PSNetworkingService: NSObject, RequestPerforming {
                 return Fail(error: .encodingError).eraseToAnyPublisher()
             }
         }
-
+        
         return session.psDataTaskPublisher(for: request)
             .tryMap { [weak self] data, response in
                 guard let httpResponse = response as? HTTPURLResponse else {

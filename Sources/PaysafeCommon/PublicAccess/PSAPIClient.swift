@@ -230,14 +230,14 @@ private extension PSAPIClient {
         let invocationId = UUID().uuidString.lowercased()
         logEvent("Options object passed on tokenize: \(options.jsonString()), invocationId: \(invocationId)")
         let tokenizeUrl = environment.baseURL + "/paymenthub/v1/singleusepaymenthandles"
-        let transactionSource = "IosSDKV2"
         
         return networkingService.request(
             url: tokenizeUrl,
             httpMethod: .post,
             payload: paymentRequest,
             invocationId: invocationId,
-            transactionSource: transactionSource
+            simulator: options.simulator,
+            transactionSource: "IosSDKV2"
         )
         .mapError {
             $0.toPSError(PaysafeSDK.shared.correlationId)

@@ -31,6 +31,8 @@ public struct PSApplePayTokenizeOptions: PSTokenizable {
     public var psApplePay: PSApplePayItem
     /// Requires billing address from apple pay
     public var requestBillingAddress: Bool
+    /// Simulator additional data
+    public var simulator: SimulatorType
 
     /// - Parameters:
     ///   - amount: Payment amount in minor units
@@ -54,6 +56,7 @@ public struct PSApplePayTokenizeOptions: PSTokenizable {
         accountId: String,
         merchantDescriptor: MerchantDescriptor? = nil,
         shippingDetails: ShippingDetails? = nil,
+        simulator: SimulatorType = .externalSimulator,
         psApplePay: PSApplePayItem,
         requestBillingAddress: Bool = false
     ) {
@@ -68,5 +71,6 @@ public struct PSApplePayTokenizeOptions: PSTokenizable {
         self.merchantDescriptor = merchantDescriptor
         self.shippingDetails = shippingDetails
         self.requestBillingAddress = requestBillingAddress
+        self.simulator = simulator
     }
 }

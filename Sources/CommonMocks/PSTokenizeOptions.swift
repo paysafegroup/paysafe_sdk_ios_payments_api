@@ -322,6 +322,7 @@ public extension PSCardTokenizeOptions {
             ),
             singleUseCustomerToken: "testSingleuseCustomerToken",
             paymentTokenFrom: "testPaymentTokenFrom",
+            simulator: .internalSimulator,
             renderType: .both
         )
     }
@@ -365,6 +366,7 @@ public extension PSCardTokenizeOptions {
                 country: nil,
                 zip: "400234"
             ),
+            simulator: .externalSimulator,
             psApplePay: PSApplePayItem(
                 label: "Customer Store",
                 requestBillingAddress: false
