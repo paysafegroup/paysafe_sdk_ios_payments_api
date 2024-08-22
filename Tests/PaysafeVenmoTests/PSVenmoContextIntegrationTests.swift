@@ -457,9 +457,14 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
         // Given
         let scheme = "SchemeText"
         PSVenmoContext.setURLScheme(scheme: scheme)
-        
+        guard let url = URL(string: "SchemeText://someurl.com") else {
+            return
+        }
+
         XCTAssertEqual(BTAppContextSwitcher.sharedInstance.returnURLScheme, scheme)
         XCTAssertEqual(PSVenmoContext.returnURLScheme, scheme)
+        XCTAssertTrue(PSVenmoContext.canOpenURL(url: url))
+        PSVenmoContext.openURL(url: url)
     }
 }
 

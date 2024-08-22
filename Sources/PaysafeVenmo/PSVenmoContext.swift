@@ -65,12 +65,22 @@ public class PSVenmoContext {
     
     public static func setURLContexts(contexts urlContexts: Set<UIOpenURLContext>) {
         urlContexts.forEach { context in
-            if context.url.scheme?.localizedCaseInsensitiveCompare(returnURLScheme) == .orderedSame {
+            if canOpenURL(url: context.url) {
                 _ = BTAppContextSwitcher.sharedInstance.handleOpenURL(context: context)
             }
         }
     }
-    
+
+    public static func canOpenURL(url: URL) -> Bool {
+        return !returnURLScheme.isEmpty && url.scheme?.localizedCaseInsensitiveCompare(returnURLScheme) == .orderedSame
+    }
+
+    public static func openURL(url: URL) {
+        if canOpenURL(url: url) {
+            _ = BTAppContextSwitcher.sharedInstance.handleOpen(url)
+        }
+    }
+
     ///
     /// - Parameters:
     ///   - clientId: Venmo client id
