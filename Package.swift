@@ -8,16 +8,12 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "PaysafeCore",
-            targets: ["PaysafeCore"]
+            name: "PaysafeCardPayments",
+            targets: ["PaysafeCardPayments"]
         ),
         .library(
             name: "Paysafe3DS",
             targets: ["Paysafe3DS"]
-        ),
-        .library(
-            name: "PaysafeCommon",
-            targets: ["PaysafeCommon"]
         ),
         .library(
             name: "PaysafeApplePay",
@@ -34,10 +30,10 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "PSCardinalMobile",
-            path: "./Frameworks/CardinalMobile.xcframework"
+            path: "./Frameworks/PSCardinalMobile.xcframework"
         ),
         .target(
-            name: "PaysafeCore",
+            name: "PaysafeCardPayments",
             dependencies: ["Paysafe3DS", "PaysafeCommon"],
             resources: [.process("PrivacyInfo.xcprivacy")]
         ),
@@ -47,7 +43,7 @@ let package = Package(
         ),
         .target(
             name: "CommonMocks",
-            dependencies: ["PaysafeCommon", "Paysafe3DS", "PaysafeCore"]
+            dependencies: ["PaysafeCommon", "Paysafe3DS", "PaysafeCardPayments"]
         ),
         .target(
             name: "Paysafe3DS",
@@ -67,8 +63,8 @@ let package = Package(
             resources: [.process("PrivacyInfo.xcprivacy")]
         ),
         .testTarget(
-            name: "PaysafeCoreTests",
-            dependencies: ["PaysafeCore", "CommonMocks"]
+            name: "PaysafeCardPaymentsTests",
+            dependencies: ["PaysafeCardPayments", "CommonMocks"]
         ),
         .testTarget(
             name: "PaysafeVenmoTests",

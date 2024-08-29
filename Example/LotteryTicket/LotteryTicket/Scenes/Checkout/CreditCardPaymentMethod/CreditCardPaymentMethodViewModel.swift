@@ -5,7 +5,7 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-import PaysafeCore
+import PaysafeCardPayments
 import SwiftUI
 
 final class CreditCardPaymentMethodViewModel: ObservableObject {

@@ -1,5 +1,5 @@
 //
-//  PaysafeCore+String+Extensions.swift
+//  PaysafeCardPayments+String+Extensions.swift
 //
 //
 //  Copyright (c) 2024 Paysafe Group

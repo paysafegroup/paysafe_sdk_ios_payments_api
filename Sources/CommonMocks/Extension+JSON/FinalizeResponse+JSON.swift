@@ -5,7 +5,7 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-@testable import PaysafeCore
+@testable import PaysafeCardPayments
 
 extension FinalizeResponse {
     public static func jsonMock() -> String {

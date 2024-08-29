@@ -5,7 +5,7 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-import PaysafeCore
+import PaysafeCardPayments
 import SwiftUI
 
 struct SavedCreditCardPaymentMethodView<ViewModel: SavedCreditCardPaymentMethodViewModel>: View {

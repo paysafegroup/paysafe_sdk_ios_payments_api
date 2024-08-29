@@ -1,5 +1,5 @@
 //
-//  APIError+PaysafeCore.swift
+//  APIError+PaysafeCardPayments.swift
 //
 //
 //  Copyright (c) 2024 Paysafe Group

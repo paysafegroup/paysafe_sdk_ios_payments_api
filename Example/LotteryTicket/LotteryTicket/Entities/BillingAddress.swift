@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import PaysafeCore
+import PaysafeCardPayments
 
 struct BillingAddress {
     /// Billing address id

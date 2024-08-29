@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1540"
-   version = "1.7">
+   version = "2.2">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
-      buildArchitectures = "Automatic">
+      buildArchitectures = "All">
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
             buildForProfiling = "YES"
-            buildForArchiving = "YES"
+            buildForArchiving = "NO"
             buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Paysafe3DS"
-               BuildableName = "Paysafe3DS"
-               BlueprintName = "Paysafe3DS"
-               ReferencedContainer = "container:">
-            </BuildableReference>
+            <AutocreatedTestPlanReference>
+            </AutocreatedTestPlanReference>
          </BuildActionEntry>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -43,23 +38,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PaysafeCommon"
-               BuildableName = "PaysafeCommon"
-               BlueprintName = "PaysafeCommon"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PaysafeCore"
-               BuildableName = "PaysafeCore"
-               BlueprintName = "PaysafeCore"
+               BlueprintIdentifier = "PaysafeCardPayments"
+               BuildableName = "PaysafeCardPayments"
+               BlueprintName = "PaysafeCardPayments"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -146,6 +127,16 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PaysafeCardPaymentsTests"
+               BuildableName = "PaysafeCardPaymentsTests"
+               BlueprintName = "PaysafeCardPaymentsTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -168,9 +159,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "Paysafe3DS"
-            BuildableName = "Paysafe3DS"
-            BlueprintName = "Paysafe3DS"
+            BlueprintIdentifier = "Paysafe3DSTests"
+            BuildableName = "Paysafe3DSTests"
+            BlueprintName = "Paysafe3DSTests"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>

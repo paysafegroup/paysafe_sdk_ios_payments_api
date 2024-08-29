@@ -71,7 +71,7 @@ public class PSApplePayContext {
         )
     }
 
-    /// PaysafeCore ApplePay tokenize method.
+    /// PaysafeCardPayments ApplePay tokenize method.
     ///
     /// - Parameters:
     ///   - options: PSApplePayTokenizeOptions
@@ -283,7 +283,7 @@ private extension PSApplePayContext {
         )
     }
 
-    /// PaysafeCore ApplePay tokenize method.
+    /// PaysafeCardPayments ApplePay tokenize method.
     ///
     /// - Parameters:
     ///   - options: PSApplePayTokenizeOptions

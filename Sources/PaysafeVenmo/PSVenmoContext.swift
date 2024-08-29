@@ -144,7 +144,7 @@ public class PSVenmoContext {
         }
         .eraseToAnyPublisher()
     }
-    /// PaysafeCore Venmo tokenize method.
+    /// PaysafeCardPayments Venmo tokenize method.
     ///
     /// - Parameters:
     ///   - options: PSVenmoTokenizeOptions
@@ -202,7 +202,7 @@ public class PSVenmoContext {
 //// MARK: - Private
 private extension PSVenmoContext {
     
-    /// PaysafeCore Venmo tokenize method.
+    /// PaysafeCardPayments Venmo tokenize method.
     ///
     /// - Parameters:
     ///   - options: PSVenmoTokenizeOptions

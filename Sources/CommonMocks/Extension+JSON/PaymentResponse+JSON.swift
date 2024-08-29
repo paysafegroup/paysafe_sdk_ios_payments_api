@@ -5,7 +5,7 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-@testable import PaysafeCore
+@testable import PaysafeCardPayments
 
 extension PaymentResponse {
     public static func jsonMock(paymentHandleId: String) -> String {

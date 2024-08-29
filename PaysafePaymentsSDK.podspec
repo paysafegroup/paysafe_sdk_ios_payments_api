@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'PaysafePaymentsSDK'
-  s.version          = '0.0.25'
+  s.version          = '0.0.26'
   s.summary          = 'Paysafe iOS SDK that implements the Payments APIs.'
   
   s.homepage         = 'https://github.com/paysafegroup/paysafe_sdk_ios_payments_api.git'
@@ -33,15 +33,15 @@ Pod::Spec.new do |s|
   s.subspec "Paysafe3DS" do |tds|
     tds.source_files = "Sources/Paysafe3DS/**/*.swift"
     tds.dependency "PaysafePaymentsSDK/PaysafeCommon"
-    tds.vendored_frameworks = 'Frameworks/CardinalMobile.xcframework'
+    tds.vendored_frameworks = 'Frameworks/PSCardinalMobile.xcframework'
     tds.resource_bundles = { "Paysafe3DS_PrivacyInfo" => "Sources/Paysafe3DS/PrivacyInfo.xcprivacy" }
   end
   
-  s.subspec "PaysafeCore" do |core|
-    core.source_files = "Sources/PaysafeCore/**/*.swift"
-    core.dependency "PaysafePaymentsSDK/PaysafeCommon"
-    core.dependency "PaysafePaymentsSDK/Paysafe3DS"
-    core.resource_bundles = { "PaysafeCore_PrivacyInfo" => "Sources/PaysafeCore/PrivacyInfo.xcprivacy" }
+  s.subspec "PaysafeCardPayments" do |cardPayments|
+    cardPayments.source_files = "Sources/PaysafeCardPayments/**/*.swift"
+    cardPayments.dependency "PaysafePaymentsSDK/PaysafeCommon"
+    cardPayments.dependency "PaysafePaymentsSDK/Paysafe3DS"
+    cardPayments.resource_bundles = { "PaysafeCardPayments_PrivacyInfo" => "Sources/PaysafeCardPayments/PrivacyInfo.xcprivacy" }
   end
 
 end

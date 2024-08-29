@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0F681CD12C4F9B650075C393 /* PaysafeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0F681CD02C4F9B650075C393 /* PaysafeCore */; };
+		01183B9F2C7F1CCB00091537 /* Paysafe3DS in Frameworks */ = {isa = PBXBuildFile; productRef = 01183B9E2C7F1CCB00091537 /* Paysafe3DS */; };
+		01DF6FEF2C7F2173000211B5 /* PaysafeCardPayments in Frameworks */ = {isa = PBXBuildFile; productRef = 01DF6FEE2C7F2173000211B5 /* PaysafeCardPayments */; };
 		0F681CD32C4F9B690075C393 /* PaysafeVenmo in Frameworks */ = {isa = PBXBuildFile; productRef = 0F681CD22C4F9B690075C393 /* PaysafeVenmo */; };
 		0F681CD52C4F9B6C0075C393 /* PaysafeApplePay in Frameworks */ = {isa = PBXBuildFile; productRef = 0F681CD42C4F9B6C0075C393 /* PaysafeApplePay */; };
 		7CCB43222B6394A400F1A7EC /* MerchantBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB43212B6394A400F1A7EC /* MerchantBackend.swift */; };
@@ -197,8 +198,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				0F681CD52C4F9B6C0075C393 /* PaysafeApplePay in Frameworks */,
+				01183B9F2C7F1CCB00091537 /* Paysafe3DS in Frameworks */,
 				0F681CD32C4F9B690075C393 /* PaysafeVenmo in Frameworks */,
-				0F681CD12C4F9B650075C393 /* PaysafeCore in Frameworks */,
+				01DF6FEF2C7F2173000211B5 /* PaysafeCardPayments in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -687,9 +689,10 @@
 			);
 			name = LotteryTicket;
 			packageProductDependencies = (
-				0F681CD02C4F9B650075C393 /* PaysafeCore */,
 				0F681CD22C4F9B690075C393 /* PaysafeVenmo */,
 				0F681CD42C4F9B6C0075C393 /* PaysafeApplePay */,
+				01183B9E2C7F1CCB00091537 /* Paysafe3DS */,
+				01DF6FEE2C7F2173000211B5 /* PaysafeCardPayments */,
 			);
 			productName = LotteryTicket;
 			productReference = D3EA1F642A97AEF100012F38 /* LotteryTicket.app */;
@@ -1057,9 +1060,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0F681CD02C4F9B650075C393 /* PaysafeCore */ = {
+		01183B9E2C7F1CCB00091537 /* Paysafe3DS */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = PaysafeCore;
+			productName = Paysafe3DS;
+		};
+		01DF6FEE2C7F2173000211B5 /* PaysafeCardPayments */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PaysafeCardPayments;
 		};
 		0F681CD22C4F9B690075C393 /* PaysafeVenmo */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 // swiftlint:disable file_length
-/// PaysafeCore module. The PaysafeCore module is responsable for initialising the PSAPIClient class and handle payment flows.
+/// PaysafeCardPayments module. The PaysafeCardPayments module is responsable for initialising the PSAPIClient class and handle payment flows.
 ///
 /// - Note: The apiKey is provided by the Paysafe Team representing a base64 encoded string.
 /// - Parameters:
@@ -94,7 +94,7 @@ public class PSAPIClient {
         .store(in: &cancellables)
     }
     
-    /// PaysafeCore tokenize method.
+    /// PaysafeCardPayments tokenize method.
     ///
     /// - Parameters:
     ///   - options: PSTokenizeOptions
