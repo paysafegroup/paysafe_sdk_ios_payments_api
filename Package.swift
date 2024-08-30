@@ -30,7 +30,7 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "PSCardinalMobile",
-            path: "./Frameworks/PSCardinalMobile.xcframework"
+            path: "./Frameworks/CardinalMobile.xcframework"
         ),
         .target(
             name: "PaysafeCardPayments",

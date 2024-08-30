@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'PaysafePaymentsSDK'
-  s.version          = '0.0.28'
+  s.version          = '0.0.29'
   s.summary          = 'Paysafe iOS SDK that implements the Payments APIs.'
   
   s.homepage         = 'https://github.com/paysafegroup/paysafe_sdk_ios_payments_api.git'
@@ -33,7 +33,7 @@ Pod::Spec.new do |s|
   s.subspec "Paysafe3DS" do |tds|
     tds.source_files = "Sources/Paysafe3DS/**/*.swift"
     tds.dependency "PaysafePaymentsSDK/PaysafeCommon"
-    tds.vendored_frameworks = 'Frameworks/PSCardinalMobile.xcframework'
+    tds.vendored_frameworks = 'Frameworks/CardinalMobile.xcframework'
     tds.resource_bundles = { "Paysafe3DS_PrivacyInfo" => "Sources/Paysafe3DS/PrivacyInfo.xcprivacy" }
   end
   
