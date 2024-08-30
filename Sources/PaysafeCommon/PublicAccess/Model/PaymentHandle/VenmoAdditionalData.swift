@@ -10,11 +10,11 @@ import Foundation
 /// VenmoAdditionalData
 public struct VenmoAdditionalData: Encodable {
     /// Consumer id
-    let consumerId: String
+    public let consumerId: String
     /// MerchantAccountId
-    let merchantAccountId: String?
+    public let merchantAccountId: String?
     /// ProfileId
-    let profileId: String?
+    public let profileId: String?
 
     /// Public initializer required in order to be used in a different module.
     public init(consumerId: String, merchantAccountId: String? = nil, profileId: String? = nil) {

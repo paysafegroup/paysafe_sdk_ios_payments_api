@@ -225,6 +225,47 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
         )
     }
     
+    func test_tokenizeOptions_correctly_passedTo_venmo() throws {
+        // Given
+        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
+        try setupNetworkLayerForSuccessfulContextInitialization()
+        try setupNetworkLayerForSuccessfulTokenization()
+        setupNetworkServiceAndAPIClient()
+        
+        var sut: PSVenmoContext?
+        PSVenmoContext.initialize(
+            currencyCode: "USD",
+            accountId: "acc789") { result in
+                switch result {
+                case .success(let successfulContext):
+                    sut = successfulContext
+                    expectation.fulfill()
+                case .failure(_):
+                    XCTFail("Expected success, received failure.")
+                }
+            }
+        
+        wait(for: [expectation], timeout: 1.0)
+        
+        // When
+        let internalVenmoMock = PSVenmoMock()
+        sut?.psVenmo = internalVenmoMock
+        let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789", amount: 1234)
+        sut?.tokenize(
+            using: tokenizeOptions,
+            completion: { result in
+                switch result {
+                case .success(_):
+                    // Then
+                    XCTAssertEqual(internalVenmoMock.profileIdPassed, tokenizeOptions.venmo?.profileId)
+                    XCTAssertEqual(internalVenmoMock.amountPassed, "12.34")
+                case .failure(_):
+                    XCTFail("Expected success, received failure.")
+                }
+            }
+        )
+    }
+    
     func test_failed_tokenize_invalidAmount() throws {
         // Given
         let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
@@ -759,7 +800,12 @@ extension PSCardTokenizeOptions {
                 country: nil,
                 zip: "400234"
             ),
-            deviceFingerprinting: DeviceFingerprinting(threatMetrixSessionId: "")
+            deviceFingerprinting: DeviceFingerprinting(threatMetrixSessionId: ""),
+            venmo: VenmoAdditionalData(
+                consumerId: email,
+                merchantAccountId: "venmo-merchant-account-id",
+                profileId: "venmo-profileId"
+            )
         )
     }
 }

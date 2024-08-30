@@ -94,6 +94,7 @@ public class PSVenmoContext {
     ///   - paymentHandle: PaymentHandle
     func handleTokenizeResponse(
         using paymentHandle: PaymentHandle,
+        profileId: String?,
         amount: Int
     ) -> AnyPublisher<(PaymentHandle, PSVenmoResult), PSError> {
         switch paymentHandle.status {
@@ -104,7 +105,7 @@ public class PSVenmoContext {
                     return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
                 }
                 psVenmo.configureClient(clientId: clientToken)
-                return venmoFlow(using: sessionToken, amount: amount).map { result in
+                return venmoFlow(using: sessionToken, profileId: profileId, amount: amount).map { result in
                     if result {
                         return (paymentHandle, PSVenmoResult.success)
                     } else {
@@ -122,13 +123,16 @@ public class PSVenmoContext {
         return Just((paymentHandle, .failed)).setFailureType(to: PSError.self).eraseToAnyPublisher()
     }
     
-    func venmoFlow(using jwtToken: String, amount: Int) -> AnyPublisher<Bool, PSError> {
+    func venmoFlow(using jwtToken: String, profileId: String?, amount: Int) -> AnyPublisher<Bool, PSError> {
         guard let psAPIClient = PaysafeSDK.shared.psAPIClient else {
             return Fail(error: .coreSDKInitializeError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
         }
+
+        let amountString = String(currencyConverter.convert(amount: amount, forCurrency: "USD"))
+        
         return psVenmo.initiateVenmoFlow(
-            profileId: jwtToken,
-            amount: amount
+            profileId: profileId,
+            amount: amountString
         )
         .flatMap { venmoResult -> AnyPublisher<Bool, PSError> in
             switch venmoResult {
@@ -221,7 +225,7 @@ private extension PSVenmoContext {
             guard let self else {
                 return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId)).eraseToAnyPublisher()
             }
-            return handleTokenizeResponse(using: paymentHandle, amount: options.amount)
+            return handleTokenizeResponse(using: paymentHandle, profileId: options.venmo?.profileId, amount: options.amount)
         }
         .flatMap { result -> AnyPublisher<String, PSError> in
             let (paymentHandle, _) = result

@@ -42,8 +42,8 @@ public class PSVenmo {
     /// - Parameters:
     ///   - orderId: Venmo order id
     public func initiateVenmoFlow(
-        profileId: String,
-        amount: Int
+        profileId: String?,
+        amount: String
     ) -> AnyPublisher<PSVenmoBraintreeResult, PSError> {
         guard venmoClient?.isVenmoAppInstalled() ?? false else {
             venmoClient?.openVenmoAppPageInAppStore()
@@ -54,9 +54,9 @@ public class PSVenmo {
         return tokenizeVenmoAccount(profileId: profileId, amount: amount)
     }
     
-    func tokenizeVenmoAccount(profileId: String, amount: Int, request: BTVenmoRequest = BTVenmoRequest(paymentMethodUsage: .multiUse)) -> AnyPublisher<PSVenmoBraintreeResult, PSError> {
+    func tokenizeVenmoAccount(profileId: String?, amount: String, request: BTVenmoRequest = BTVenmoRequest(paymentMethodUsage: .multiUse)) -> AnyPublisher<PSVenmoBraintreeResult, PSError> {
         request.profileID = profileId
-        request.totalAmount = String(amount)
+        request.totalAmount = amount
         request.collectCustomerBillingAddress = true
         request.collectCustomerShippingAddress = true
         

@@ -55,7 +55,7 @@ final class PSVenmoTests: XCTestCase {
         let expectation = expectation(description: "Initiate Venmo flow expectation.")
         
         //When
-        sut.initiateVenmoFlow(profileId: "20", amount: 30)
+        sut.initiateVenmoFlow(profileId: "20", amount: "30")
         
         // Then
         
@@ -89,7 +89,7 @@ final class PSVenmoTests: XCTestCase {
         //When
         
         sut.configureClient(clientId: "development_tokenization_key")
-        sut.tokenizeVenmoAccount(profileId: "20", amount: 30)
+        sut.tokenizeVenmoAccount(profileId: "20", amount: "30")
             .sink { completion in
                 XCTFail("tokenizeVenmoAccount should receive failed Value")
                 expectation.fulfill()

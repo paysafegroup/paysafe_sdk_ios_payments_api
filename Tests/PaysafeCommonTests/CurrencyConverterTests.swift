@@ -25,7 +25,55 @@ final class CurrencyConverterTests: XCTestCase {
     func test_init_withDefaultCurrenciesMap() {
         XCTAssertNotNil(sut, "The CurrencyConverter should be initialized.")
     }
+    
+    func test_convert_10_USD_returnsCorrectValue() {
+        // Given
+        let amount = 1000 // Example amount in minor units
+        let currency = "USD" // Example currency with 0 decimal places
 
+        // When
+        let result = sut.convert(amount: amount, forCurrency: currency)
+
+        // Then
+        XCTAssertEqual(result, 10.00, "Conversion for USD should correctly apply the 2 decimal place conversion.")
+    }
+    
+    func test_convert_15_USD_returnsCorrectValue() {
+        // Given
+        let amount = 1500 // Example amount in minor units
+        let currency = "USD" // Example currency with 0 decimal places
+
+        // When
+        let result = sut.convert(amount: amount, forCurrency: currency)
+
+        // Then
+        XCTAssertEqual(result, 15.0, "Conversion for USD should correctly apply the 2 decimal place conversion.")
+    }
+
+    func test_convert_15_10_USD_returnsCorrectValue() {
+        // Given
+        let amount = 1510 // Example amount in minor units
+        let currency = "USD" // Example currency with 0 decimal places
+
+        // When
+        let result = sut.convert(amount: amount, forCurrency: currency)
+
+        // Then
+        XCTAssertEqual(result, 15.10, "Conversion for USD should correctly apply the 2 decimal place conversion.")
+    }
+
+    func test_convert_15_01_USD_returnsCorrectValue() {
+        // Given
+        let amount = 1501 // Example amount in minor units
+        let currency = "USD" // Example currency with 0 decimal places
+
+        // When
+        let result = sut.convert(amount: amount, forCurrency: currency)
+
+        // Then
+        XCTAssertEqual(result, 15.01, "Conversion for USD should correctly apply the 2 decimal place conversion.")
+    }
+    
     func test_convert_withSupportedCurrency_returnsCorrectValue() {
         // Given
         let amount = 1000 // Example amount in minor units
