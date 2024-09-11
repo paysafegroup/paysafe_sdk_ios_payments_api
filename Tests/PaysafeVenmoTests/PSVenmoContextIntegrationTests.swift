@@ -332,7 +332,7 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
         
         // When
         sut?.psVenmo = PSVenmoMock()
-        let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789", email: "abc@def")
+        let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789", email: "a@b.c")
         let receivedError: PSError? = sut?.validateTokenizeOptions(tokenizeOptions)
         
         let expectedError = PSError.invalidEmail(PaysafeSDK.shared.correlationId)

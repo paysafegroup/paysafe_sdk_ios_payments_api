@@ -59,6 +59,6 @@ public enum PSTokenizeOptionsUtils {
     ///   - email: Email
     public static func isValidEmail(_ email: String?) -> Bool {
         guard let email else { return true }
-        return PSRegexValidator.evaluate(string: email, pattern: #"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"#)
+        return email.count >= 6 && email.count <= 255
     }
 }

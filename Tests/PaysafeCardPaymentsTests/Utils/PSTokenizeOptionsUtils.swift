@@ -130,9 +130,9 @@ final class PSTokenizeOptionsUtilsTests: XCTestCase {
         XCTAssertFalse(isValid)
     }
 
-    func test_isValidEmail_valid() {
+    func test_isValidEmail_valid_nilEmail() {
         // Given
-        let email = "test@paysafe.com"
+        let email: String? = nil
 
         // When
         let isValid = PSTokenizeOptionsUtils.isValidEmail(email)
@@ -140,8 +140,30 @@ final class PSTokenizeOptionsUtilsTests: XCTestCase {
         // Then
         XCTAssertTrue(isValid)
     }
+    
+    func test_isValidEmail_valid_containingDot() {
+        // Given
+        let email = "test.testing@paysafe.com"
 
-    func test_isValidEmail_invalid() {
+        // When
+        let isValid = PSTokenizeOptionsUtils.isValidEmail(email)
+
+        // Then
+        XCTAssertTrue(isValid)
+    }
+    
+    func test_isValidEmail_invalid_emptyString() {
+        // Given
+        let email = ""
+
+        // When
+        let isValid = PSTokenizeOptionsUtils.isValidEmail(email)
+
+        // Then
+        XCTAssertFalse(isValid)
+    }
+    
+    func test_isValidEmail_valid_noDomain() {
         // Given
         let email = "test@paysafe"
 
@@ -149,6 +171,61 @@ final class PSTokenizeOptionsUtilsTests: XCTestCase {
         let isValid = PSTokenizeOptionsUtils.isValidEmail(email)
 
         // Then
-        XCTAssertFalse(isValid)
+        XCTAssertTrue(isValid)
+    }
+    
+    func test_isValidEmail_valid_oneLetterDomain() {
+        // Given
+        let email = "test@paysafe.c"
+
+        // When
+        let isValid = PSTokenizeOptionsUtils.isValidEmail(email)
+
+        // Then
+        XCTAssertTrue(isValid)
+    }
+    
+    func test_isValidEmail_valid_longDomain() {
+        // Given
+        let email = "test@paysafe.photography"
+
+        // When
+        let isValid = PSTokenizeOptionsUtils.isValidEmail(email)
+
+        // Then
+        XCTAssertTrue(isValid)
+    }
+    
+    func test_isValidEmail_valid_emailContainingPlusSign_numbers() {
+        // Given
+        let email = "test+123@paysafe.com"
+
+        // When
+        let isValid = PSTokenizeOptionsUtils.isValidEmail(email)
+
+        // Then
+        XCTAssertTrue(isValid)
+    }
+    
+    func test_isValidEmail_valid_emailContainingPlusSign_letters() {
+        // Given
+        let email = "test+testing@paysafe.com"
+
+        // When
+        let isValid = PSTokenizeOptionsUtils.isValidEmail(email)
+
+        // Then
+        XCTAssertTrue(isValid)
+    }
+    
+    func test_isValidEmail_valid_emailContainingPlusSign_lettersAndNumbers() {
+        // Given
+        let email = "test+testing123@paysafe.com"
+
+        // When
+        let isValid = PSTokenizeOptionsUtils.isValidEmail(email)
+
+        // Then
+        XCTAssertTrue(isValid)
     }
 }
