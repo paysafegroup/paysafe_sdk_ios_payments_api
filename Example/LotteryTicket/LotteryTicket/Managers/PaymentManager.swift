@@ -11,11 +11,11 @@ import SwiftUI
 /// PaymentManager
 final class PaymentManager {
     /// Paysafe API key
-    let apiKey = ""
+    let apiKey = "T1QtOTE0MzAwOkItcWEyLTAtNjNjODRkYjktMS0zMDJjMDIxNDQ5NzM5NTI4YmIyMWM4NWFjZWRjZWJkMmI0ODI2MjIzZjEzODcxZWEwMjE0MmE0NjQxYTU4Zjk5OTFlZDlmMDRlMDY5OTRkNTViYzk2MTBiYmZkOQ=="
     /// Paysafe Card payments account id
     let cardAccountId = ""
     /// Paysafe Venmo payments account id
-    let venmoAccountId = ""
+    let venmoAccountId = "1002723680"
 
     /// Setup Paysafe SDK.
     func setupPaysafeSDK() {

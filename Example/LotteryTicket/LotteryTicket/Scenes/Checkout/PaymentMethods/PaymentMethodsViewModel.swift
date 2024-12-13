@@ -174,10 +174,24 @@ final class PaymentMethodsViewModel: ObservableObject {
             transactionType: .payment,
             merchantRefNum: PaysafeSDK.shared.getMerchantReferenceNumber(),
             billingDetails: billingAddress.toBillingDetails(),
+            profile: Profile(
+                firstName: "Robert",
+                lastName: "Furious",
+                locale: .en_US,
+                merchantCustomerId: nil,
+                dateOfBirth: nil,
+                email: "name.name@mail.com",
+                phone: nil,
+                mobile: nil,
+                gender: nil,
+                nationality: nil,
+                identityDocuments: nil
+            ),
             accountId: paymentManager.venmoAccountId,
             dupCheck: false,
             venmo: VenmoAdditionalData(
-                consumerId: "consumer+166@gmail.com"
+                consumerId: "consumerId+\(UUID().uuidString)",
+                profileId: "4013002571644081777"
             )
         )
         asyncMain { [weak self] in self?.isloading = true }

@@ -3,9 +3,6 @@
 <plist version="1.0">
 <dict>
 	<key>com.apple.developer.in-app-payments</key>
-	<array>
-		<string>merchant.com.blankfactor.paysafe</string>
-		<string>merchant.com.paysafe.app</string>
-	</array>
+	<array/>
 </dict>
 </plist>

@@ -16,7 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
         let window = UIWindow(windowScene: windowScene)
         self.window = window
-        PSVenmoContext.setURLScheme(scheme: "com.paysafe.LotteryTicket-dev.payments")
+        PSVenmoContext.setURLScheme(scheme: "com.paysafe.payments.MobileSDK-demo.payments")
         appCoordinator = AppCoordinator(window: window)
         appCoordinator?.start()
     }
