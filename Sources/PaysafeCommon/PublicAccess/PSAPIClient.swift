@@ -425,10 +425,10 @@ private extension PSAPIClient {
     ) -> AnyPublisher<String, PSError> {
         print("[Payment token refresh] STATUS \(response.status.rawValue)")
         switch response.status {
-        case .payable:
+        case .payable, .completed:
             logEvent("Payment Handle Tokenize function call.")
             return Just(response.paymentHandleToken).setFailureType(to: PSError.self).eraseToAnyPublisher()
-        case .completed, .initiated, .processing:
+        case .initiated, .processing:
             guard retryCount > 0 else {
                 let error = PSError.corePaymentHandleCreationFailed(
                     PaysafeSDK.shared.correlationId,

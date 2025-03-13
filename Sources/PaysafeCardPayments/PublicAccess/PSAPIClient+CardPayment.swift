@@ -23,6 +23,28 @@ extension PSAPIClient {
         process: Bool?,
         paysafe3DS: Paysafe3DS
     ) -> AnyPublisher<String, PSError> {
+        switch paymentHandle.status {
+        case .payable, .completed:
+            return Just(paymentHandle.paymentHandleToken).setFailureType(to: PSError.self).eraseToAnyPublisher()
+        case .initiated where paymentHandle.action == "REDIRECT",
+             .processing where paymentHandle.action == "REDIRECT":
+            return initiate3DSFlow(using: paymentHandle,
+                                   process: process,
+                                   paysafe3DS: paysafe3DS)
+        case .expired, .failed, .processing, .initiated:
+            let error = PSError.corePaymentHandleCreationFailed(
+                PaysafeSDK.shared.correlationId,
+                message: "Status of the payment handle is \(paymentHandle.status)"
+            )
+            return Fail(error: error).eraseToAnyPublisher()
+        }
+    }
+
+    private func initiate3DSFlow(
+        using paymentHandle: PaymentHandle,
+        process: Bool?,
+        paysafe3DS: Paysafe3DS
+    ) -> AnyPublisher<String, PSError> {
         guard let cardBin = paymentHandle.card?.networkToken?.bin ?? paymentHandle.card?.cardBin else {
             return Fail(error: .genericAPIError(PaysafeSDK.shared.correlationId))
                 .eraseToAnyPublisher()
