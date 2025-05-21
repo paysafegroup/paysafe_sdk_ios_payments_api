@@ -204,6 +204,11 @@ extension PSNetworkingService: URLSessionTaskDelegate {
         newRequest request: URLRequest,
         completionHandler: @escaping (URLRequest?) -> Void
     ) {
+        /// When we have an expo module with react native bridge we need to add parameter to pass the result back.
+     if let urlString = request.url?.absoluteString, urlString.contains("expoalternatepayments") {
+        completionHandler(request)
+     } else {
         completionHandler(nil)
+     }
     }
 }
