@@ -143,7 +143,101 @@ final class SimulatorTests: XCTestCase {
         
         // Then
         waitForExpectations(timeout: 1)
-        XCTAssertNil(completionResult, "Should not allow redirect for mixed case expoalternatepayments URL")
+        XCTAssertNotNil(completionResult, "Should allow redirect for mixed case expoalternatepayments URL with case-insensitive check")
+        XCTAssertEqual(completionResult, request)
+    }
+
+    func test_urlSession_redirectionBlocked_whenShouldExpoAlternatePaymentsFalse() {
+        // Given
+        let expectation = expectation(description: "HTTP redirection is blocked")
+        let service = PSNetworkingService(
+            overrideSessionToBlockRedirects: true,
+            authorizationKey: "authKey",
+            correlationId: "correlationId",
+            sdkVersion: "sdkVersion"
+        )
+        
+        guard let url = URL(string: "https://www.example.com/regular-path") else {
+            XCTFail("Failed to create URL")
+            return
+        }
+        let request = URLRequest(url: url)
+        
+        // When
+        service.urlSession(
+            URLSession.shared,
+            task: URLSessionTask(),
+            willPerformHTTPRedirection: HTTPURLResponse(),
+            newRequest: request
+        ) { redirectRequest in
+            // Then
+            XCTAssertNil(redirectRequest, "Redirection request should be nil when shouldExpoAlternatePayments is false and URL doesn't contain 'expoalternatepayments'")
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func test_urlSession_handlesNilURLGracefully() {
+        // Given
+        let expectation = expectation(description: "Handle nil URL gracefully")
+        let service = PSNetworkingService(
+            overrideSessionToBlockRedirects: true,
+            authorizationKey: "authKey",
+            correlationId: "correlationId",
+            sdkVersion: "sdkVersion"
+        )
+        
+        // Create a request with nil URL
+        _ = URLRequest(url: URL(string: "https://example.com")!)
+        let requestWithNilURL = NSMutableURLRequest(url: URL(string: "https://example.com")!)
+        requestWithNilURL.url = nil
+        
+        // When
+        service.urlSession(
+            URLSession.shared,
+            task: URLSessionTask(),
+            willPerformHTTPRedirection: HTTPURLResponse(),
+            newRequest: requestWithNilURL as URLRequest
+        ) { redirectRequest in
+            // Then
+            XCTAssertNil(redirectRequest, "Redirection request should be nil when request URL is nil")
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func test_urlSession_redirection_handlesCaseInsensitivity() {
+        // Given
+        let expectation = expectation(description: "HTTP redirection handles case sensitivity correctly")
+        let service = PSNetworkingService(
+            overrideSessionToBlockRedirects: true,
+            authorizationKey: "authKey",
+            correlationId: "correlationId",
+            sdkVersion: "sdkVersion"
+        )
+        
+        guard let url = URL(string: "https://www.example.com/ExPoAlTeRnAtEpAyMeNtS/callback") else {
+            XCTFail("Failed to create URL")
+            return
+        }
+        let request = URLRequest(url: url)
+        
+        // When
+        service.urlSession(
+            URLSession.shared,
+            task: URLSessionTask(),
+            willPerformHTTPRedirection: HTTPURLResponse(),
+            newRequest: request
+        ) { redirectRequest in
+            // Then
+            XCTAssertNotNil(redirectRequest, "Redirection request should be allowed when URL contains 'expoalternatepayments' in any case")
+            XCTAssertEqual(redirectRequest, request, "Redirect request should match original request")
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 0.1)
     }
 }
 

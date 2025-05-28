@@ -15,7 +15,8 @@ public protocol RequestPerforming {
         payload: RequestType,
         invocationId: String?,
         simulator: SimulatorType,
-        transactionSource: String
+        transactionSource: String,
+        expoAlternatePayments: Bool?
     ) -> AnyPublisher<ResponseType, APIError>
 }
 
@@ -44,6 +45,8 @@ public class PSNetworkingService: NSObject, RequestPerforming {
     private let sdkVersion: String
     /// Timeout interval, configured at 15 seconds.
     private let timeoutInterval: TimeInterval = 15
+    /// Store the expoAlternatePayments value for use in the delegate method
+    private var shouldExpoAlternatePayments: Bool = false
     
     /// - Parameters:
     ///   - session: URLSessionProtocol
@@ -78,14 +81,21 @@ public class PSNetworkingService: NSObject, RequestPerforming {
     ///   - url: Request URL
     ///   - httpMethod: Request HTTP method
     ///   - payload: Request payload
+    ///   - invocationId: Optional invocation ID
+    ///   - simulator: Simulator type
+    ///   - transactionSource: Transaction source
+    ///   - expoAlternatePayments: Optional. When true, allows HTTP redirections
     public func request<RequestType: Encodable, ResponseType: Decodable>(
         url: String,
         httpMethod: HTTPMethod,
         payload: RequestType,
         invocationId: String? = nil,
         simulator: SimulatorType = .externalSimulator,
-        transactionSource: String = "IosSDKV2"
+        transactionSource: String = "IosSDKV2",
+        expoAlternatePayments: Bool? = nil
     ) -> AnyPublisher<ResponseType, APIError> {
+        // Set the shouldExpoAlternatePayments property for use in the delegate method
+        shouldExpoAlternatePayments = expoAlternatePayments ?? false
         guard let requestURL = URL(string: url) else {
             return Fail(error: .invalidURL).eraseToAnyPublisher()
         }
@@ -205,10 +215,13 @@ extension PSNetworkingService: URLSessionTaskDelegate {
         completionHandler: @escaping (URLRequest?) -> Void
     ) {
         /// When we have an expo module with react native bridge we need to add parameter to pass the result back.
-     if let urlString = request.url?.absoluteString, urlString.contains("expoalternatepayments") {
-        completionHandler(request)
-     } else {
-        completionHandler(nil)
-     }
+        /// Using case-insensitive check to handle URLs with mixed case for better compatibility
+        if let urlString = request.url?.absoluteString, urlString.lowercased().contains("expoalternatepayments") {
+            completionHandler(request)
+        } else if shouldExpoAlternatePayments {
+            completionHandler(request)
+        } else {
+            completionHandler(nil)
+        }
     }
 }

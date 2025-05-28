@@ -2,7 +2,7 @@
 //  PSNetworkingServiceTests.swift
 //
 //
-//  Copyright (c) 2024 Paysafe Group
+//  Copyright (c) 2025 Paysafe Group
 //
 
 import Combine
@@ -10,6 +10,13 @@ import Foundation
 @testable import CommonMocks
 @testable import PaysafeCommon
 import XCTest
+
+// Mock URLSessionTask for testing
+private class MockURLSessionTask: URLSessionTask {
+    override init() {
+        super.init()
+    }
+}
 
 final class PSNetworkingServiceTests: XCTestCase {
     var sut: PSNetworkingService!
@@ -415,20 +422,172 @@ final class PSNetworkingServiceTests: XCTestCase {
         wait(for: [expectation], timeout: 0.1)
     }
     
-    func test_urlSession_performRedirection() {
-        let expectation = expectation(description: "Handle redirection")
+    // MARK: - URLSessionTaskDelegate Tests
+
+    func test_urlSession_willPerformHTTPRedirection_noExpoUrl_shouldExpoAlternatePaymentsFalse_blocksRedirect() {
+        // Given
+        let expectation = expectation(description: "HTTP redirection is blocked for non-expo URL when shouldExpoAlternatePayments is false")
+        let service = PSNetworkingService(
+            overrideSessionToBlockRedirects: true,
+            authorizationKey: "authKey",
+            correlationId: "correlationId",
+            sdkVersion: "sdkVersion"
+        )
+        // shouldExpoAlternatePayments is false by default after init
         
-        let service = PSNetworkingService(overrideSessionToBlockRedirects: true,authorizationKey: "authKey", correlationId: "correlationId", sdkVersion: "sdkVersion")
-        
-        guard let url = URL(string: "https://www.google.com") else {
-            XCTFail("Expected URL")
+        guard let url = URL(string: "https://www.example.com/some/path") else {
+            XCTFail("Failed to create URL for newRequest")
             return
         }
+        let newRequest = URLRequest(url: url)
         
-        service.urlSession(URLSession.shared, task: URLSessionTask(), willPerformHTTPRedirection: HTTPURLResponse(), newRequest: URLRequest(url: url)) { request in
+        // When
+        service.urlSession(
+            URLSession.shared, // Mocked session, not directly used by delegate logic
+            task: MockURLSessionTask(),
+            willPerformHTTPRedirection: HTTPURLResponse(), // Mocked response, not directly used
+            newRequest: newRequest
+        ) { redirectedRequest in
+            // Then
             expectation.fulfill()
-            XCTAssertNil(request, "Redirection Request should be nil")
+            XCTAssertNil(redirectedRequest, "Redirection request should be nil for non-expo URL when shouldExpoAlternatePayments is false.")
         }
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func test_urlSession_willPerformHTTPRedirection_expoUrl_shouldExpoAlternatePaymentsFalse_allowsRedirect() {
+        // Given
+        let expectation = expectation(description: "HTTP redirection is allowed for expo URL even if shouldExpoAlternatePayments is false")
+        let service = PSNetworkingService(
+            overrideSessionToBlockRedirects: true,
+            authorizationKey: "authKey",
+            correlationId: "correlationId",
+            sdkVersion: "sdkVersion"
+        )
+        // shouldExpoAlternatePayments is false by default after init
+        
+        guard let url = URL(string: "https://www.example.com/expoalternatepayments/callback") else {
+            XCTFail("Failed to create URL for newRequest")
+            return
+        }
+        let newRequest = URLRequest(url: url)
+        
+        // When
+        service.urlSession(
+            URLSession.shared,
+            task: MockURLSessionTask(),
+            willPerformHTTPRedirection: HTTPURLResponse(),
+            newRequest: newRequest
+        ) { redirectedRequest in
+            // Then
+            expectation.fulfill()
+            XCTAssertEqual(redirectedRequest, newRequest, "Redirection should be allowed for URLs containing 'expoalternatepayments'.")
+        }
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func test_urlSession_willPerformHTTPRedirection_expoUrlMixedCase_shouldExpoAlternatePaymentsFalse_allowsRedirect() {
+        // Given
+        let expectation = expectation(description: "HTTP redirection is allowed for mixed-case expo URL when shouldExpoAlternatePayments is false with case-insensitive check")
+        let service = PSNetworkingService(
+            overrideSessionToBlockRedirects: true,
+            authorizationKey: "authKey",
+            correlationId: "correlationId",
+            sdkVersion: "sdkVersion"
+        )
+        // shouldExpoAlternatePayments is false by default after init
+        
+        guard let url = URL(string: "https://www.example.com/ExPoAlTeRnAtEpAyMeNtS/callback") else {
+            XCTFail("Failed to create URL for newRequest")
+            return
+        }
+        let newRequest = URLRequest(url: url)
+        
+        // When
+        service.urlSession(
+            URLSession.shared,
+            task: MockURLSessionTask(),
+            willPerformHTTPRedirection: HTTPURLResponse(),
+            newRequest: newRequest
+        ) { redirectedRequest in
+            // Then
+            expectation.fulfill()
+            XCTAssertEqual(redirectedRequest, newRequest, "Redirection request should be allowed for mixed-case 'expoalternatepayments' URL with case-insensitive check.")
+        }
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func test_urlSession_willPerformHTTPRedirection_nilNewUrl_shouldExpoAlternatePaymentsFalse_blocksRedirect() {
+        // This test is similar to test_urlSession_handlesNilURLGracefully from SimulatorTests
+        // Given
+        let expectation = expectation(description: "HTTP redirection is blocked when newRequest URL is nil")
+        let service = PSNetworkingService(
+            overrideSessionToBlockRedirects: true,
+            authorizationKey: "authKey",
+            correlationId: "correlationId",
+            sdkVersion: "sdkVersion"
+        )
+        // shouldExpoAlternatePayments is false by default after init
+
+        // Create a request with a valid URL first, then set its URL to nil
+        guard let validURL = URL(string: "https://example.com") else {
+            XCTFail("Failed to create valid URL.")
+            return
+        }
+        var newRequestWithNilURL = URLRequest(url: validURL)
+        newRequestWithNilURL.url = nil
+        
+        // When
+        service.urlSession(
+            URLSession.shared,
+            task: MockURLSessionTask(),
+            willPerformHTTPRedirection: HTTPURLResponse(),
+            newRequest: newRequestWithNilURL
+        ) { redirectedRequest in
+            // Then
+            expectation.fulfill()
+            XCTAssertNil(redirectedRequest, "Redirection request should be nil when the new request's URL is nil.")
+        }
+        wait(for: [expectation], timeout: 0.1)
+    }
+    
+    func test_urlSession_willPerformHTTPRedirection_whenShouldExpoAlternatePaymentsIsTrue_allowsRedirect() {
+        // Given
+        let expectation = expectation(description: "HTTP redirection is allowed when shouldExpoAlternatePayments is true")
+        let service = PSNetworkingService(
+            overrideSessionToBlockRedirects: true,
+            authorizationKey: "authKey",
+            correlationId: "correlationId",
+            sdkVersion: "sdkVersion"
+        )
+        
+        // Set shouldExpoAlternatePayments to true via the request method
+        let _: AnyPublisher<EmptyResponse, APIError> = service.request(
+            url: "https://example.com",
+            httpMethod: .get,
+            payload: EmptyRequest(),
+            expoAlternatePayments: true
+        )
+        
+        // Create a regular URL that doesn't contain "expoalternatepayments"
+        guard let url = URL(string: "https://www.example.com/regular/path") else {
+            XCTFail("Failed to create URL for newRequest")
+            return
+        }
+        let newRequest = URLRequest(url: url)
+        
+        // When
+        service.urlSession(
+            URLSession.shared,
+            task: MockURLSessionTask(),
+            willPerformHTTPRedirection: HTTPURLResponse(),
+            newRequest: newRequest
+        ) { redirectedRequest in
+            // Then
+            expectation.fulfill()
+            XCTAssertEqual(redirectedRequest, newRequest, "Redirection request should be allowed when shouldExpoAlternatePayments is true")
+        }
+        
         wait(for: [expectation], timeout: 0.1)
     }
 }

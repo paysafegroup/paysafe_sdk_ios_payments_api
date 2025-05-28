@@ -35,6 +35,8 @@ public struct PSVenmoTokenizeOptions: PSTokenizable {
     public var simulator: SimulatorType
     /// Venmo additional data
     public let venmo: VenmoAdditionalData?
+    /// ExpoAlternatePayments parameter
+    public var expoAlternatePayments: Bool?
 
     /// - Parameters:
     ///   - amount: Payment amount in minor units
@@ -49,6 +51,7 @@ public struct PSVenmoTokenizeOptions: PSTokenizable {
     ///   - shippingDetails: Shipping details
     ///   - deviceFingerprinting: Device finger printing
     ///   - venmo: Venmo additional data
+    ///   - expoAlternatePayments: Optional. When true, returns result of the action not as nil
     public init(
         amount: Int,
         currencyCode: String,
@@ -63,7 +66,8 @@ public struct PSVenmoTokenizeOptions: PSTokenizable {
         deviceFingerprinting: DeviceFingerprinting? = nil,
         singleUseCustomerToken: String? = nil,
         simulator: SimulatorType = .externalSimulator,
-        venmo: VenmoAdditionalData? = nil
+        venmo: VenmoAdditionalData? = nil,
+        expoAlternatePayments: Bool? = nil
     ) {
         self.amount = amount
         self.currencyCode = currencyCode
@@ -79,5 +83,6 @@ public struct PSVenmoTokenizeOptions: PSTokenizable {
         self.shippingDetails = shippingDetails
         self.simulator = simulator
         self.venmo = venmo
+        self.expoAlternatePayments = expoAlternatePayments
     }
 }

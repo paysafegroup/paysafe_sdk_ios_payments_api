@@ -231,13 +231,16 @@ private extension PSAPIClient {
         logEvent("Options object passed on tokenize: \(options.jsonString()), invocationId: \(invocationId)")
         let tokenizeUrl = environment.baseURL + "/paymenthub/v1/singleusepaymenthandles"
         
+        // Only use expoAlternatePayments for Venmo payment type
+        let expoAlternatePayments = paymentType == .venmo ? (options as? PSVenmoTokenizeOptions)?.expoAlternatePayments : nil
         return networkingService.request(
             url: tokenizeUrl,
             httpMethod: .post,
             payload: paymentRequest,
             invocationId: invocationId,
             simulator: options.simulator,
-            transactionSource: "IosSDKV2"
+            transactionSource: "IosSDKV2",
+            expoAlternatePayments: expoAlternatePayments
         )
         .mapError {
             $0.toPSError(PaysafeSDK.shared.correlationId)
