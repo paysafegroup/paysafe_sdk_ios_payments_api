@@ -65,6 +65,7 @@ public class PSAPIClient {
         getAvailablePaymentMethods(
             for: currencyCode
         )
+        .receive(on: DispatchQueue.main)
         .sink { [weak self] publisherCompletion in
             switch publisherCompletion {
             case .finished:

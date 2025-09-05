@@ -1,7 +1,7 @@
 projectKey=com.paysafe.psp:paysafe-ph-mobile-sdk-ios
 serverUrl=https://sonar.neterra.paysafe.com
-serverVersion=9.9.0.65466
+serverVersion=2025.1.2.108896
 branch=master
 dashboardUrl=https://sonar.neterra.paysafe.com/dashboard?id=com.paysafe.psp%3Apaysafe-ph-mobile-sdk-ios&branch=master
-ceTaskId=AZcXPdCZureL2L3IzjNX
-ceTaskUrl=https://sonar.neterra.paysafe.com/api/ce/task?id=AZcXPdCZureL2L3IzjNX
+ceTaskId=9d450949-a2e3-4ecf-81df-688f6505dc6c
+ceTaskUrl=https://sonar.neterra.paysafe.com/api/ce/task?id=9d450949-a2e3-4ecf-81df-688f6505dc6c
