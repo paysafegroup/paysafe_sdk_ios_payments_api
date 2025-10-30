@@ -41,7 +41,11 @@ public class PSApplePay: NSObject {
     ) {
         paymentRequest = PKPaymentRequest()
         paymentRequest.merchantIdentifier = merchantIdentifier
-        paymentRequest.supportedNetworks = supportedNetworks.map(\.network)
+        if !supportedNetworks.isEmpty {
+            paymentRequest.supportedNetworks = supportedNetworks.map(\.network)
+        } else {
+            paymentRequest.supportedNetworks = PKPaymentRequest.availableNetworks()
+        }
         paymentRequest.countryCode = countryCode.uppercased()
         super.init()
         configureMerchantCapabilities(supportedNetworks)
@@ -143,6 +147,10 @@ private extension PSApplePay {
     /// - Parameters:
     ///   - networks: Supported payment networks
     func configureMerchantCapabilities(_ supportedNetworks: Set<SupportedNetwork>) {
+        guard !supportedNetworks.isEmpty else {
+            paymentRequest.merchantCapabilities = [.debit]
+            return
+        }
         paymentRequest.merchantCapabilities = supportedNetworks.reduce(into: []) { result, network in
             result.formUnion(.threeDSecure)
             switch network.capability {

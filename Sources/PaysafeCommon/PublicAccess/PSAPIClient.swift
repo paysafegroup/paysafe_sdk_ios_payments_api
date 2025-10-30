@@ -360,7 +360,7 @@ private extension PSAPIClient {
         isNewCard: Bool
     ) -> CardRequest? {
         guard let card else { return nil }
-        return isNewCard ? card : CardRequest(cvv: card.cvv, holderName: card.holderName)
+        return isNewCard ? card : CardRequest(cardExpiry: card.cardExpiry, cvv: card.cvv,  holderName: card.holderName)
     }
     
     /// Handle payment response.

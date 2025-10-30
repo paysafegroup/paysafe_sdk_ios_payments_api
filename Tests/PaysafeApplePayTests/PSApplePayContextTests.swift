@@ -24,6 +24,19 @@ final class PSApplePayContextTests: XCTestCase {
             XCTAssertNotNil(sut)
         }
     }
+    
+    func test_initialize_no_supportedNetworks_success() {
+        // When
+        PSApplePayContext.createSUT(
+            getSupportedNetworksShouldBeEmpty: true
+        ) { result in
+            guard case let .success(sut) = result else {
+                return XCTFail("Expected a success PSApplePayContext result.")
+            }
+            // Then
+            XCTAssertNotNil(sut)
+        }
+    }
 
     func test_initialize_failure_invalidCurrencyCode() {
         // When
@@ -196,6 +209,7 @@ private extension PSApplePayContext {
         getPaymentMethodShouldFail: Bool = false,
         getPaymentMethodShouldSucceedApplePayValidation: Bool = true,
         getPaymentMethodShouldFailApplePayValidation: Bool = false,
+        getSupportedNetworksShouldBeEmpty: Bool = false,
         completion: @escaping PSApplePayContextInitializeBlock
     ) {
         let mockAPIClient = PSAPIClientMock(
@@ -211,6 +225,25 @@ private extension PSApplePayContext {
         let accountId = !accountIdValidationShouldFail ? "1001456390" : "INVALID"
         let merchantIdentifier = "merchantIdentifier"
         let countryCode = "US"
+        
+        let supportedNetworks:Set<SupportedNetwork>  = !getSupportedNetworksShouldBeEmpty ? [
+            SupportedNetwork(
+                network: .amex,
+                capability: .both
+            ),
+            SupportedNetwork(
+                network: .visa,
+                capability: .credit
+            ),
+            SupportedNetwork(
+                network: .masterCard,
+                capability: .both
+            ),
+            SupportedNetwork(
+                network: .discover,
+                capability: .both
+            )
+        ] : []
 
         PSApplePayContext.initialize(
             currencyCode: currencyCode,
@@ -223,24 +256,7 @@ private extension PSApplePayContext {
                 applePayContext.psApplePay = PSApplePayMock(
                     merchantIdentifier: merchantIdentifier,
                     countryCode: countryCode,
-                    supportedNetworks: [
-                        SupportedNetwork(
-                            network: .amex,
-                            capability: .both
-                        ),
-                        SupportedNetwork(
-                            network: .visa,
-                            capability: .credit
-                        ),
-                        SupportedNetwork(
-                            network: .masterCard,
-                            capability: .both
-                        ),
-                        SupportedNetwork(
-                            network: .discover,
-                            capability: .both
-                        )
-                    ]
+                    supportedNetworks: supportedNetworks
                 )
                 completion(.success(applePayContext))
             case let .failure(error):
