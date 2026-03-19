@@ -43,6 +43,7 @@ public extension Paysafe3DS {
             configuration.requestTimeout = requestTimeout
             configuration.challengeTimeout = challengeTimeout
             configuration.uiType = supportedUI.cardinalSessionUIType
+            configuration.cardinalDatacenter = Visa
             switch supportedUI {
             case .native:
                 configuration.renderType = [

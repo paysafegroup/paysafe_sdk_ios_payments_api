@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.0] - 20256-03-10
+* Update Cardinal version to 2.2.6-2
+* Add `dataCenter` parameter to `Paysafe3DS.Configuration`  
+
 ## [1.0.0] - 2025-11-13
 
 _Major release_

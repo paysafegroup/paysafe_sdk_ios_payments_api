@@ -36,6 +36,17 @@ typedef NS_ENUM(NSUInteger, CardinalSessionUIType) {
 };
 
 /*!
+ * @typedef CardinalDatacenter
+ * @brief List of Cardinal Datacenter URL's
+ * @constant CARDINAL CCAUrls
+ * @constant VISA VisaUrls
+ */
+typedef enum CardinalDatacenter {
+    Cardinal,
+    Visa
+} CardinalDatacenter;
+
+/*!
  * @typedef CardinalSessionRenderType
  * @brief NSString that represents different RenderTypes
  */
@@ -197,6 +208,9 @@ extern NSUInteger const CardinalSessionTimeoutDEFAULT;
  * Default value is true.
  */
 @property (nonatomic) BOOL collectLogs;
+
+@property (nonatomic, assign) CardinalDatacenter cardinalDatacenter;
+
 @end
 
 NS_ASSUME_NONNULL_END
