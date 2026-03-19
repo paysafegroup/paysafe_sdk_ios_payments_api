@@ -26,6 +26,7 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
         textField.cardBrand = cardBrand
         textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
         textField.selectedPlaceholder = selectedPlaceholder
+        textField.customLabel = customLabel
         textField.psCardCVVInputTextFieldDelegate = self
         return textField
     }()
@@ -40,6 +41,8 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
     private var animateTopPlaceholderLabel: Bool = true
     /// Placeholder for the selected state
     private var selectedPlaceholder: String = "xxx"
+    /// Custom label for normal/error state (e.g. for localization). When nil, SDK default is used.
+    private var customLabel: String?
     /// PSCardBrand
     public var cardBrand: PSCardBrand = .unknown {
         didSet {
@@ -68,17 +71,20 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
     ///   - isMasked: Boolean indicating if the text should be of type .isSecureTextEntry, default as `false`
     ///   - cardBrand: PSCardBrand, default as `unknown`
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("CVV") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
     public init(
         isMasked: Bool = false,
         cardBrand: PSCardBrand = .unknown,
         animateTopPlaceholderLabel: Bool = true,
+        label: String? = nil,
         hint: String = "xxx"
     ) {
         super.init(frame: .zero)
         self.isMasked = isMasked
         self.cardBrand = cardBrand
         self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
+        self.customLabel = label
         selectedPlaceholder = hint
         configure()
     }

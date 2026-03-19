@@ -18,15 +18,18 @@ public struct PSCardNumberInputSwiftUIView: UIViewRepresentable, PSCardInputView
     /// - Parameters:
     ///   - separatorType: PSCardNumberInputSeparatorType, default as `whitespace`
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("Card number") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
     public init(
         separatorType: PSCardNumberInputSeparatorType = .whitespace,
         animateTopPlaceholderLabel: Bool = true,
+        label: String? = nil,
         hint: String? = nil
     ) {
         cardNumberView = PSCardNumberInputView(
             separatorType: separatorType,
             animateTopPlaceholderLabel: animateTopPlaceholderLabel,
+            label: label,
             hint: hint
         )
     }

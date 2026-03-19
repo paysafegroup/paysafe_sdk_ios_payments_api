@@ -179,6 +179,27 @@ final class PSCardExpiryInputViewTests: XCTestCase {
         XCTAssertTrue(sut.isEmpty())
         XCTAssertFalse(sut.isValid())
     }
+
+    func test_label_customizesNormalAndErrorPlaceholders() {
+        // Given
+        let localized = "Date d'expiration"
+
+        // When
+        let sut = PSCardExpiryInputView(label: localized)
+
+        // Then
+        XCTAssertEqual(sut.cardExpiryTextField.placeholders[.normal], localized)
+        XCTAssertEqual(sut.cardExpiryTextField.placeholders[.error], localized)
+    }
+
+    func test_label_nil_usesSDKDefaultForNormalAndErrorPlaceholders() {
+        // When
+        let sut = PSCardExpiryInputView()
+
+        // Then
+        XCTAssertEqual(sut.cardExpiryTextField.placeholders[.normal], "Expiry Date")
+        XCTAssertEqual(sut.cardExpiryTextField.placeholders[.error], "Expiry Date")
+    }
 }
 
 private extension PSCardExpiryInputViewTests {

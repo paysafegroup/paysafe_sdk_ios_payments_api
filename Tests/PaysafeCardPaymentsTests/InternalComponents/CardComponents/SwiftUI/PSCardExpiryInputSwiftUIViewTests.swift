@@ -89,6 +89,18 @@ final class PSCardExpiryInputSwiftUIViewTests: XCTestCase {
         XCTAssertTrue(sut.isEmpty())
         XCTAssertFalse(sut.isValid())
     }
+
+    func test_label_forwardsToUnderlyingTextField() {
+        // Given
+        let localized = "Date d'expiration"
+
+        // When
+        let sut = PSCardExpiryInputSwiftUIView(label: localized)
+
+        // Then
+        XCTAssertEqual(sut.cardExpiryView.cardExpiryTextField.placeholders[.normal], localized)
+        XCTAssertEqual(sut.cardExpiryView.cardExpiryTextField.placeholders[.error], localized)
+    }
 }
 
 private extension PSCardExpiryInputSwiftUIViewTests {

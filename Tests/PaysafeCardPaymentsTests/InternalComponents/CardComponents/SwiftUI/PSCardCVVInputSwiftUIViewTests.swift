@@ -95,6 +95,18 @@ final class PSCardCVVInputSwiftUIViewTests: XCTestCase {
         XCTAssertTrue(sut.isEmpty())
         XCTAssertFalse(sut.isValid())
     }
+
+    func test_label_forwardsToUnderlyingTextField() {
+        // Given
+        let localized = "Cryptogramme visuel"
+
+        // When
+        let sut = PSCardCVVInputSwiftUIView(label: localized)
+
+        // Then
+        XCTAssertEqual(sut.cardCVVView.cardCVVTextField.placeholders[.normal], localized)
+        XCTAssertEqual(sut.cardCVVView.cardCVVTextField.placeholders[.error], localized)
+    }
 }
 
 private extension PSCardCVVInputSwiftUIView {

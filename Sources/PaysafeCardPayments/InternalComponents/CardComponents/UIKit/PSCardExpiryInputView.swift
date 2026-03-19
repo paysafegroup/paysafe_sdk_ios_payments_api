@@ -24,6 +24,7 @@ public class PSCardExpiryInputView: UIView, PSCardInputView {
         textField.inputType = inputType
         textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
         textField.selectedPlaceholder = selectedPlaceholder
+        textField.customLabel = customLabel
         textField.psCardExpiryInputTextFieldDelegate = self
         return textField
     }()
@@ -46,6 +47,8 @@ public class PSCardExpiryInputView: UIView, PSCardInputView {
     private var storedTheme: PSTheme = PaysafeSDK.shared.psTheme
     /// Placeholder for the selected state
     private var selectedPlaceholder: String = "MM YY"
+    /// Custom label for normal/error state (e.g. for localization). When nil, SDK default is used.
+    private var customLabel: String?
 
     public var theme: PSTheme {
         get {
@@ -60,15 +63,18 @@ public class PSCardExpiryInputView: UIView, PSCardInputView {
     /// - Parameters:
     ///   - inputType: PSCardExpiryInputType, default as `datePicker`
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("Expiry Date") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
     public init(
         inputType: PSCardExpiryInputType = .datePicker,
         animateTopPlaceholderLabel: Bool = true,
+        label: String? = nil,
         hint: String = "MM YY"
     ) {
         super.init(frame: .zero)
         self.inputType = inputType
         self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
+        self.customLabel = label
         selectedPlaceholder = hint
         configure()
     }

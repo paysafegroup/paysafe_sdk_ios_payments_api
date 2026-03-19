@@ -35,6 +35,13 @@ class PSCardholderNameInputTextField: PSTextField {
         }
     }
 
+    /// Custom label/placeholder for normal and error state (e.g. for localization). When nil, SDK default is used.
+    var customLabel: String? {
+        didSet {
+            configurePlaceholders()
+        }
+    }
+
     /// PSCardholderNameInputTextFieldDelegate
     weak var psCardholderNameInputTextFieldDelegate: PSCardholderNameInputTextFieldDelegate?
 
@@ -75,9 +82,10 @@ class PSCardholderNameInputTextField: PSTextField {
     /// Configures placeholders for normal, selected and error state
     private func configurePlaceholders() {
         let defaultPlaceholder = "Cardholder Name"
-        placeholders[PSTextField.PSTextFieldState.normal] = defaultPlaceholder
+        let labelText = customLabel ?? defaultPlaceholder
+        placeholders[PSTextField.PSTextFieldState.normal] = labelText
         placeholders[PSTextField.PSTextFieldState.selected] = selectedPlaceholder
-        placeholders[PSTextField.PSTextFieldState.error] = defaultPlaceholder
+        placeholders[PSTextField.PSTextFieldState.error] = labelText
     }
 
     private func updateSelectedPlaceholder(_ value: String) {

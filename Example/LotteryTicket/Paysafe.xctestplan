@@ -14,30 +14,9 @@
   "testTargets" : [
     {
       "target" : {
-        "containerPath" : "container:",
-        "identifier" : "Paysafe3DSTests",
-        "name" : "Paysafe3DSTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:",
+        "containerPath" : "container:..\/..",
         "identifier" : "PaysafeApplePayTests",
         "name" : "PaysafeApplePayTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:",
-        "identifier" : "PaysafeCommonTests",
-        "name" : "PaysafeCommonTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:",
-        "identifier" : "PaysafeCoreTests",
-        "name" : "PaysafeCoreTests"
       }
     }
   ],

@@ -26,6 +26,7 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
         textField.separatorType = separatorType
         textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
         textField.selectedPlaceholder = selectedPlaceholder
+        textField.customLabel = customLabel
         textField.psCardNumberInputTextFieldDelegate = self
         return textField
     }()
@@ -48,6 +49,8 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
     private var storedTheme: PSTheme = PaysafeSDK.shared.psTheme
     /// Placeholder for the selected state
     private var selectedPlaceholder: String?
+    /// Custom label for normal/error state (e.g. for localization). When nil, SDK default is used.
+    private var customLabel: String?
     /// Theme
     public var theme: PSTheme {
         get {
@@ -62,15 +65,18 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
     /// - Parameters:
     ///   - separatorType: PSCardNumberInputSeparatorType, default as `whitespace`
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("Card number") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
     public init(
         separatorType: PSCardNumberInputSeparatorType = .whitespace,
         animateTopPlaceholderLabel: Bool = true,
+        label: String? = nil,
         hint: String? = nil
     ) {
         super.init(frame: .zero)
         self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
         self.separatorType = separatorType
+        self.customLabel = label
         selectedPlaceholder = hint
         configure()
     }

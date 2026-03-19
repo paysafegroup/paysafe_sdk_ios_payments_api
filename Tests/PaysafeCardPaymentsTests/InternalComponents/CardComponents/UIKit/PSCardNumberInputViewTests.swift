@@ -193,6 +193,27 @@ final class PSCardNumberInputViewTests: XCTestCase {
         XCTAssertTrue(sut.isEmpty())
         XCTAssertFalse(sut.isValid())
     }
+
+    func test_label_customizesNormalAndErrorPlaceholders() {
+        // Given
+        let localized = "Numéro de carte"
+
+        // When
+        let sut = PSCardNumberInputView(label: localized)
+
+        // Then
+        XCTAssertEqual(sut.cardNumberTextField.placeholders[.normal], localized)
+        XCTAssertEqual(sut.cardNumberTextField.placeholders[.error], localized)
+    }
+
+    func test_label_nil_usesSDKDefaultForNormalAndErrorPlaceholders() {
+        // When
+        let sut = PSCardNumberInputView()
+
+        // Then
+        XCTAssertEqual(sut.cardNumberTextField.placeholders[.normal], "Card number")
+        XCTAssertEqual(sut.cardNumberTextField.placeholders[.error], "Card number")
+    }
 }
 
 private extension PSCardNumberInputView {

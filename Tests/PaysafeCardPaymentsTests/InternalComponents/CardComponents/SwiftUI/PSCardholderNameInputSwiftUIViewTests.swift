@@ -90,6 +90,18 @@ final class PSCardholderNameInputSwiftUIViewTests: XCTestCase {
         XCTAssertTrue(sut.isEmpty())
         XCTAssertFalse(sut.isValid())
     }
+
+    func test_label_forwardsToUnderlyingTextField() {
+        // Given
+        let localized = "Nom du titulaire"
+
+        // When
+        let sut = PSCardholderNameInputSwiftUIView(label: localized)
+
+        // Then
+        XCTAssertEqual(sut.cardholderNameView.cardholderNameTextField.placeholders[.normal], localized)
+        XCTAssertEqual(sut.cardholderNameView.cardholderNameTextField.placeholders[.error], localized)
+    }
 }
 
 private extension PSCardholderNameInputSwiftUIView {

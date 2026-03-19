@@ -24,6 +24,7 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
         textField.psCardholderNameInputTextFieldDelegate = self
         textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
         textField.selectedPlaceholder = selectedPlaceholder
+        textField.customLabel = customLabel
         return textField
     }()
 
@@ -33,6 +34,8 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
     public var onEvent: PSCardFieldInputEventBlock?
     /// Placeholder for the selected state
     private var selectedPlaceholder: String = "Cardholder Name"
+    /// Custom label for normal/error state (e.g. for localization). When nil, SDK default is used.
+    private var customLabel: String?
     /// PSTheme
     private var storedTheme: PSTheme = PaysafeSDK.shared.psTheme
     public var theme: PSTheme {
@@ -50,14 +53,17 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
     /// - Parameters:
     ///   - cardholderName: Cardholder name
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("Cardholder Name") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
     public init(
         cardholderName: String? = nil,
         animateTopPlaceholderLabel: Bool = true,
+        label: String? = nil,
         hint: String = "Cardholder Name"
     ) {
         super.init(frame: .zero)
         self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
+        self.customLabel = label
         selectedPlaceholder = hint
         cardholderNameTextField.cardholderNameValue = cardholderName
         configure()

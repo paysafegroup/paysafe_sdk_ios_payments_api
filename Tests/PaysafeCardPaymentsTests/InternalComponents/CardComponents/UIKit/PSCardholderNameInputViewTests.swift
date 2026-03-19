@@ -144,6 +144,27 @@ final class PSCardholderNameInputViewTests: XCTestCase {
         XCTAssertTrue(sut.isEmpty())
         XCTAssertFalse(sut.isValid())
     }
+
+    func test_label_customizesNormalAndErrorPlaceholders() {
+        // Given
+        let localized = "Nom du titulaire"
+
+        // When
+        let sut = PSCardholderNameInputView(label: localized)
+
+        // Then
+        XCTAssertEqual(sut.cardholderNameTextField.placeholders[.normal], localized)
+        XCTAssertEqual(sut.cardholderNameTextField.placeholders[.error], localized)
+    }
+
+    func test_label_nil_usesSDKDefaultForNormalAndErrorPlaceholders() {
+        // When
+        let sut = PSCardholderNameInputView()
+
+        // Then
+        XCTAssertEqual(sut.cardholderNameTextField.placeholders[.normal], "Cardholder Name")
+        XCTAssertEqual(sut.cardholderNameTextField.placeholders[.error], "Cardholder Name")
+    }
 }
 
 private extension PSCardholderNameInputView {

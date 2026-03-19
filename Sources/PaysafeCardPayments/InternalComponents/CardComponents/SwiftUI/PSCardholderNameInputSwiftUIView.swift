@@ -19,15 +19,18 @@ public struct PSCardholderNameInputSwiftUIView: UIViewRepresentable, PSCardInput
     /// - Parameters:
     ///   - cardholderName: Cardholder name
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("Cardholder Name") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
     public init(
         cardholderName: String? = nil,
         animateTopPlaceholderLabel: Bool = true,
+        label: String? = nil,
         hint: String = "Cardholder Name"
     ) {
         cardholderNameView = PSCardholderNameInputView(
             cardholderName: cardholderName,
             animateTopPlaceholderLabel: animateTopPlaceholderLabel,
+            label: label,
             hint: hint
         )
     }

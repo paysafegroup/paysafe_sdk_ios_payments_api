@@ -19,15 +19,18 @@ public struct PSCardExpiryInputSwiftUIView: UIViewRepresentable, PSCardInputView
     /// - Parameters:
     ///   - inputType: PSCardExpiryInputType, default as `datePicker`
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
+    ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("Expiry Date") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
     public init(
         inputType: PSCardExpiryInputType = .datePicker,
         animateTopPlaceholderLabel: Bool = true,
+        label: String? = nil,
         hint: String = "MM YY"
     ) {
         cardExpiryView = PSCardExpiryInputView(
             inputType: inputType,
             animateTopPlaceholderLabel: animateTopPlaceholderLabel,
+            label: label,
             hint: hint
         )
     }

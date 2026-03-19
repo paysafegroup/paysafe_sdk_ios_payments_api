@@ -97,6 +97,18 @@ final class PSCardNumberInputSwiftUIViewTests: XCTestCase {
         XCTAssertTrue(sut.isEmpty())
         XCTAssertFalse(sut.isValid())
     }
+
+    func test_label_forwardsToUnderlyingTextField() {
+        // Given
+        let localized = "Numéro de carte"
+
+        // When
+        let sut = PSCardNumberInputSwiftUIView(label: localized)
+
+        // Then
+        XCTAssertEqual(sut.cardNumberView.cardNumberTextField.placeholders[.normal], localized)
+        XCTAssertEqual(sut.cardNumberView.cardNumberTextField.placeholders[.error], localized)
+    }
 }
 
 private extension PSCardNumberInputSwiftUIView {

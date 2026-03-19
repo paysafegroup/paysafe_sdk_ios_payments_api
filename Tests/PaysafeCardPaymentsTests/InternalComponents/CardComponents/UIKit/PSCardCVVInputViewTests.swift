@@ -152,6 +152,27 @@ final class PSCardCVVInputViewTests: XCTestCase {
         XCTAssertFalse(sut.isValid())
     }
 
+    func test_label_customizesNormalAndErrorPlaceholders() {
+        // Given
+        let localized = "Cryptogramme visuel"
+
+        // When
+        let sut = PSCardCVVInputView(label: localized)
+
+        // Then
+        XCTAssertEqual(sut.cardCVVTextField.placeholders[.normal], localized)
+        XCTAssertEqual(sut.cardCVVTextField.placeholders[.error], localized)
+    }
+
+    func test_label_nil_usesSDKDefaultForNormalAndErrorPlaceholders() {
+        // When
+        let sut = PSCardCVVInputView()
+
+        // Then
+        XCTAssertEqual(sut.cardCVVTextField.placeholders[.normal], "CVV")
+        XCTAssertEqual(sut.cardCVVTextField.placeholders[.error], "CVV")
+    }
+
     func testInitWithCoder() {
         // Given
         let object = PSCardCVVInputView()
