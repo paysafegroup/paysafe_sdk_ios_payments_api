@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.2.1] - 2026-03-20
+* Align Apple Pay `PaymentResponse` decoding with Payment Hub: `ApplePaymentDataResponse` now only models `header` (`publicKeyHash`, `transactionId`); removed fields (`signature`, `data`, `version`, `decryptedData`, `ephemeralPublicKey`) are no longer decoded. Extra keys in older responses are ignored.
+
 ## [1.2.0] - 2026-03-19
 * Add optional custom `label` on card input components (card number, cardholder name, expiry, CVV) for localized top label and placeholder text in UIKit and SwiftUI.
 

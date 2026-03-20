@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'PaysafePaymentsSDK'
-  s.version          = '1.2.0'
+  s.version          = '1.2.1'
   s.summary          = 'Paysafe iOS SDK that implements the Payments APIs.'
   
   s.homepage         = 'https://github.com/paysafegroup/paysafe_sdk_ios_payments_api.git'
