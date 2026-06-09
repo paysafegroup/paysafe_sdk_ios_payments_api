@@ -23,8 +23,9 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
         let textField = PSCardholderNameInputTextField()
         textField.psCardholderNameInputTextFieldDelegate = self
         textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
-        textField.selectedPlaceholder = selectedPlaceholder
         textField.customLabel = customLabel
+        textField.selectedPlaceholder = selectedPlaceholder
+        textField.toolbarView = toolbarView
         return textField
     }()
 
@@ -32,10 +33,14 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
     weak var psDelegate: PSCardholderNameInputViewDelegate?
     /// PSCardFieldInputEventBlock
     public var onEvent: PSCardFieldInputEventBlock?
-    /// Placeholder for the selected state
-    private var selectedPlaceholder: String = "Cardholder Name"
     /// Custom label for normal/error state (e.g. for localization). When nil, SDK default is used.
     private var customLabel: String?
+    /// Placeholder for the selected state
+    private var selectedPlaceholder: String = "Cardholder Name"
+    /// Keyboard toolbar view. When not provided defaults to `UIToolbar` with `Done` button dismissing the keyboard.
+    private var toolbarView: UIView?
+    /// When `false`, empty fields skip validation on blur (see `PSTextField.validatesOnBlurWhenEmpty`).
+    private var validatesOnBlurWhenEmpty: Bool = true
     /// PSTheme
     private var storedTheme: PSTheme = PaysafeSDK.shared.psTheme
     public var theme: PSTheme {
@@ -55,17 +60,23 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
     ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("Cardholder Name") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
+    ///   - validatesOnBlurWhenEmpty: When `false`, an empty field shows the normal border on blur instead of validating.
     public init(
         cardholderName: String? = nil,
         animateTopPlaceholderLabel: Bool = true,
         label: String? = nil,
-        hint: String = "Cardholder Name"
+        hint: String = "Cardholder Name",
+        toolbarView: UIView? = nil,
+        validatesOnBlurWhenEmpty: Bool = true
     ) {
         super.init(frame: .zero)
         self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
         self.customLabel = label
         selectedPlaceholder = hint
+        self.toolbarView = toolbarView
+        self.validatesOnBlurWhenEmpty = validatesOnBlurWhenEmpty
         cardholderNameTextField.cardholderNameValue = cardholderName
+
         configure()
     }
 
@@ -77,6 +88,11 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
     /// Method that verifies if the cardholder name input is empty
     public func isEmpty() -> Bool {
         cardholderNameTextField.cardholderNameValue == nil
+    }
+
+    /// Whether the field contains any raw input (including invalid partial entry).
+    public func hasText() -> Bool {
+        !(cardholderNameTextField.text?.isEmpty ?? true)
     }
 
     /// Method that verifies if the cardholder name input is valid
@@ -107,6 +123,7 @@ public class PSCardholderNameInputView: UIView, PSCardInputView {
         cardholderNameTextField.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         cardholderNameTextField.topAnchor.constraint(equalTo: topAnchor).isActive = true
         cardholderNameTextField.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        cardholderNameTextField.validatesOnBlurWhenEmpty = validatesOnBlurWhenEmpty
     }
 }
 
@@ -118,7 +135,7 @@ extension PSCardholderNameInputView: PSCardholderNameInputTextFieldDelegate {
     }
 
     func didUpdateCardholderNameInputFocusedState(isFocused: Bool) {
-        isFocused ? onEvent?(.focus) : nil
+        onEvent?(isFocused ? .focus : .blur)
     }
 
     func didUpdateCardholderNameInputWithInvalidCharacter() {

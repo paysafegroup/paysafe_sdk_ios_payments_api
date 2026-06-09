@@ -14,7 +14,7 @@ public struct CardRequest: Encodable {
     /// CVV
     let cvv: String
     /// Cardholder name
-    let holderName: String
+    let holderName: String?
     /// Card type
     let cardType: String?
     /// Nickname
@@ -31,7 +31,7 @@ public struct CardRequest: Encodable {
         cardNum: String? = nil,
         cardExpiry: CardExpiryRequest? = nil,
         cvv: String,
-        holderName: String,
+        holderName: String? = nil,
         cardType: String? = nil,
         nickName: String? = nil
     ) {

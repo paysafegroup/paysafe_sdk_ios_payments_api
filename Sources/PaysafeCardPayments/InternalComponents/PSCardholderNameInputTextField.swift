@@ -62,8 +62,8 @@ class PSCardholderNameInputTextField: PSTextField {
             return false
         }
         let potentialString = currentString.replacingCharacters(in: range, with: string)
-        let maxLenghtCheck = potentialString.count <= 24
-        return maxLenghtCheck
+        let maxLengthCheck = potentialString.count <= 24
+        return maxLengthCheck
     }
 
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {

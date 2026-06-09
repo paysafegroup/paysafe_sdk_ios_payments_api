@@ -78,8 +78,16 @@ class PSTextField: UITextField {
         }
     }
 
+    var toolbarView: UIView? {
+        didSet {
+            updateToolbar()
+        }
+    }
+
     /// PSTextFieldValidator
     var validator: PSTextFieldValidator?
+    /// When `false`, empty fields skip validation on blur and return to the normal border.
+    var validatesOnBlurWhenEmpty: Bool = true
     /// PSTextFieldDelegate
     weak var psDelegate: PSTextFieldDelegate?
 
@@ -195,7 +203,6 @@ private extension PSTextField {
             configureTopPlaceholderLabel()
         }
         configureTextField()
-        configureToolbarButton()
         applyTheme()
         layer.borderWidth = 1
     }
@@ -291,7 +298,15 @@ private extension PSTextField {
         )
     }
 
-    func configureToolbarButton() {
+    func updateToolbar() {
+        if let toolbarView {
+            inputAccessoryView = toolbarView
+            return
+        }
+        configureDefaultToolbar()
+    }
+
+    func configureDefaultToolbar() {
         let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 50))
         toolbar.barStyle = .default
         toolbar.items = [
@@ -337,8 +352,11 @@ extension PSTextField: UITextFieldDelegate {
     }
 
     func textFieldDidEndEditing(_ textField: UITextField) {
-        guard let text else { return }
-        isValid = validator?.validate(field: text) ?? false
+        if let text = textField.text, !text.isEmpty || validatesOnBlurWhenEmpty {
+            isValid = validator?.validate(field: text) ?? false
+        } else {
+            psState = .normal
+        }
         psDelegate?.textField(self, isFocused: false)
     }
 }

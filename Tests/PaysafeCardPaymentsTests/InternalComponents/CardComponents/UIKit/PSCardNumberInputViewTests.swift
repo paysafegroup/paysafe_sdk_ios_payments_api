@@ -214,6 +214,24 @@ final class PSCardNumberInputViewTests: XCTestCase {
         XCTAssertEqual(sut.cardNumberTextField.placeholders[.normal], "Card number")
         XCTAssertEqual(sut.cardNumberTextField.placeholders[.error], "Card number")
     }
+
+    func test_hasText() {
+        let sut = PSCardNumberInputView()
+        XCTAssertFalse(sut.hasText())
+        sut.updateInput(with: "4")
+        XCTAssertTrue(sut.hasText())
+        sut.reset()
+        XCTAssertFalse(sut.hasText())
+    }
+
+    func test_validatesOnBlurWhenEmpty_false_emptyBlur_staysValid() {
+        let sut = PSCardNumberInputView(validatesOnBlurWhenEmpty: false)
+        let tf = sut.cardNumberTextField
+        tf.text = ""
+        tf.textFieldDidBeginEditing(tf)
+        tf.textFieldDidEndEditing(tf)
+        XCTAssertTrue(tf.isValid)
+    }
 }
 
 private extension PSCardNumberInputView {

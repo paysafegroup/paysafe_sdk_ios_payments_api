@@ -133,6 +133,12 @@ class PSCardNumberInputTextField: PSTextField {
     private func setupAccessibility() {
         accessibilityIdentifier = "cardNumberInputTextField"
     }
+
+    override func resetTextField() {
+        cardBrand = .unknown
+        super.resetTextField()
+        configureRightView(iconName: nil)
+    }
 }
 
 // MARK: - PSTextFieldDelegate

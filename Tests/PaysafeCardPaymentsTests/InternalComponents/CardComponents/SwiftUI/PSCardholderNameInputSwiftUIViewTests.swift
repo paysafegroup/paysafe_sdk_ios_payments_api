@@ -6,6 +6,8 @@
 //
 
 @testable import PaysafeCardPayments
+import SwiftUI
+import UIKit
 import XCTest
 
 final class PSCardholderNameInputSwiftUIViewTests: XCTestCase {
@@ -35,10 +37,9 @@ final class PSCardholderNameInputSwiftUIViewTests: XCTestCase {
         // Then
         XCTAssertEqual(sut.theme, theme)
         XCTAssertEqual(sut.getPlaceholder(), "Cardholder Name")
-        XCTAssertEqual(sut.theme, PaysafeSDK.shared.psTheme)
-        
+
         sut.resetTheme()
-        
+
         XCTAssertEqual(sut.theme, PaysafeSDK.shared.psTheme)
     }
 
@@ -101,6 +102,27 @@ final class PSCardholderNameInputSwiftUIViewTests: XCTestCase {
         // Then
         XCTAssertEqual(sut.cardholderNameView.cardholderNameTextField.placeholders[.normal], localized)
         XCTAssertEqual(sut.cardholderNameView.cardholderNameTextField.placeholders[.error], localized)
+    }
+
+    func test_hasText_reflectsUnderlyingField() {
+        XCTAssertFalse(sut.hasText())
+        sut.updateInput(with: "J")
+        XCTAssertTrue(sut.hasText())
+        sut.reset()
+        XCTAssertFalse(sut.hasText())
+    }
+
+    func test_hostingController_invokesRepresentableLifecycle() {
+        let exp = expectation(description: "hosting")
+        DispatchQueue.main.async {
+            let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 320, height: 56))
+            window.rootViewController = UIHostingController(rootView: PSCardholderNameInputSwiftUIView())
+            window.isHidden = false
+            window.layoutIfNeeded()
+            XCTAssertNotNil(window.rootViewController?.view)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 2.0)
     }
 }
 

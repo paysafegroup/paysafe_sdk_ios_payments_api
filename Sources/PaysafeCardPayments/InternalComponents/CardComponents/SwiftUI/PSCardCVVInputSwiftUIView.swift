@@ -22,19 +22,25 @@ public struct PSCardCVVInputSwiftUIView: UIViewRepresentable, PSCardInputView {
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
     ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("CVV") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
+    ///   - toolbarView: Keyboard toolbar view. When not provided defaults to `UIToolbar` with `Done` button dismissing the keyboard.
+    ///   - validatesOnBlurWhenEmpty: When `false`, an empty field shows the normal border on blur instead of validating.
     public init(
         isMasked: Bool = false,
         cardBrand: PSCardBrand = .unknown,
         animateTopPlaceholderLabel: Bool = true,
         label: String? = nil,
-        hint: String = "xxx"
+        hint: String = "xxx",
+        toolbarView: UIView? = nil,
+        validatesOnBlurWhenEmpty: Bool = true
     ) {
         cardCVVView = PSCardCVVInputView(
             isMasked: isMasked,
             cardBrand: cardBrand,
             animateTopPlaceholderLabel: animateTopPlaceholderLabel,
             label: label,
-            hint: hint
+            hint: hint,
+            toolbarView: toolbarView,
+            validatesOnBlurWhenEmpty: validatesOnBlurWhenEmpty
         )
     }
 
@@ -60,6 +66,11 @@ public struct PSCardCVVInputSwiftUIView: UIViewRepresentable, PSCardInputView {
     /// Method that verifies if the card CVV input is empty
     public func isEmpty() -> Bool {
         cardCVVView.isEmpty()
+    }
+
+    /// Whether the field contains any raw input (including invalid partial entry).
+    public func hasText() -> Bool {
+        cardCVVView.hasText()
     }
 
     /// Method that verifies if the card CVV input is valid

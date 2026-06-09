@@ -6,6 +6,8 @@
 //
 
 @testable import PaysafeCardPayments
+import SwiftUI
+import UIKit
 import XCTest
 
 final class PSCardExpiryInputSwiftUIViewTests: XCTestCase {
@@ -100,6 +102,27 @@ final class PSCardExpiryInputSwiftUIViewTests: XCTestCase {
         // Then
         XCTAssertEqual(sut.cardExpiryView.cardExpiryTextField.placeholders[.normal], localized)
         XCTAssertEqual(sut.cardExpiryView.cardExpiryTextField.placeholders[.error], localized)
+    }
+
+    func test_hasText_reflectsUnderlyingField() {
+        XCTAssertFalse(sut.hasText())
+        sut.updateInput(with: "1")
+        XCTAssertTrue(sut.hasText())
+        sut.reset()
+        XCTAssertFalse(sut.hasText())
+    }
+
+    func test_hostingController_invokesRepresentableLifecycle() {
+        let exp = expectation(description: "hosting")
+        DispatchQueue.main.async {
+            let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 320, height: 56))
+            window.rootViewController = UIHostingController(rootView: PSCardExpiryInputSwiftUIView())
+            window.isHidden = false
+            window.layoutIfNeeded()
+            XCTAssertNotNil(window.rootViewController?.view)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 2.0)
     }
 }
 

@@ -86,9 +86,10 @@ final class PSCardCVVInputViewTests: XCTestCase {
         sut.updateInput(with: invalidCardCVV)
 
         // Then
-        XCTAssertEqual(events.count, 3)
-        XCTAssertEqual(events.first, .invalidCharacter)
-        XCTAssertEqual(events[1], .fieldValueChange)
+        XCTAssertEqual(events.count, 4)
+        XCTAssertEqual(events[0], .blur)
+        XCTAssertEqual(events[1], .invalidCharacter)
+        XCTAssertEqual(events[2], .fieldValueChange)
         XCTAssertEqual(events.last, .invalid)
     }
 
@@ -184,6 +185,23 @@ final class PSCardCVVInputViewTests: XCTestCase {
 
         // Then
         XCTAssertNotNil(sut)
+    }
+
+    func test_hasText() {
+        XCTAssertFalse(sut.hasText())
+        sut.updateInput(with: "1")
+        XCTAssertTrue(sut.hasText())
+        sut.reset()
+        XCTAssertFalse(sut.hasText())
+    }
+
+    func test_validatesOnBlurWhenEmpty_false_emptyBlur_staysValid() {
+        let sut = PSCardCVVInputView(validatesOnBlurWhenEmpty: false)
+        let tf = sut.cardCVVTextField
+        tf.text = ""
+        tf.textFieldDidBeginEditing(tf)
+        tf.textFieldDidEndEditing(tf)
+        XCTAssertTrue(tf.isValid)
     }
 }
 

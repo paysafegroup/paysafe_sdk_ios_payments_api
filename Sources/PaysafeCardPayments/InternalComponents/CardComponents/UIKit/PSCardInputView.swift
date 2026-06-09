@@ -14,6 +14,8 @@ import UIKit
 protocol PSCardInputView: PSCardFieldInputEvents {
     /// Is empty
     func isEmpty() -> Bool
+    /// Whether the field contains any raw text (including invalid partial input).
+    func hasText() -> Bool
     /// Is valid
     func isValid() -> Bool
     /// Reset theme
@@ -34,6 +36,8 @@ protocol PSCardFieldInputEvents {
 public enum PSCardFieldInputEvent {
     /// Focus event
     case focus
+    /// Blur event (field lost focus)
+    case blur
     /// Valid event
     case valid
     /// Invalid event

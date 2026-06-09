@@ -200,6 +200,24 @@ final class PSCardExpiryInputViewTests: XCTestCase {
         XCTAssertEqual(sut.cardExpiryTextField.placeholders[.normal], "Expiry Date")
         XCTAssertEqual(sut.cardExpiryTextField.placeholders[.error], "Expiry Date")
     }
+
+    func test_hasText() {
+        let sut = PSCardExpiryInputView()
+        XCTAssertFalse(sut.hasText())
+        sut.updateInput(with: "1")
+        XCTAssertTrue(sut.hasText())
+        sut.reset()
+        XCTAssertFalse(sut.hasText())
+    }
+
+    func test_validatesOnBlurWhenEmpty_false_emptyBlur_staysValid() {
+        let sut = PSCardExpiryInputView(validatesOnBlurWhenEmpty: false)
+        let tf = sut.cardExpiryTextField
+        tf.text = ""
+        tf.textFieldDidBeginEditing(tf)
+        tf.textFieldDidEndEditing(tf)
+        XCTAssertTrue(tf.isValid)
+    }
 }
 
 private extension PSCardExpiryInputViewTests {

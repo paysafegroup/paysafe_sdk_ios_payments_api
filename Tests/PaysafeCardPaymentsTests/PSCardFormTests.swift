@@ -259,6 +259,58 @@ final class PSCardFormTests: XCTestCase {
         wait(for: [expectation], timeout: 2.0)
     }
 
+    func test_tokenize_success_resetOnTokenizeFalse_preservesCardFields() throws {
+        let expectation = expectation(description: "Tokenize success without clearing fields.")
+
+        let paymentHandleId = "test_id1234"
+        let apiKey = "am9objpkb2UK"
+        let env: PaysafeEnvironment = .test
+        guard let mockTokenizeData = PaymentResponse.jsonMockWith3DS(paymentHandleId: paymentHandleId).data(using: .utf8) else {
+            return XCTFail("Unable to convert mock JSON to Data")
+        }
+        let tokenizeURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles"))
+        let mockResponse = HTTPURLResponse(url: tokenizeURL, statusCode: 200, httpVersion: nil, headerFields: nil)
+
+        mockSession = URLSessionMock()
+        mockSession.stubRequest(url: tokenizeURL, data: mockTokenizeData, response: mockResponse, error: nil)
+
+        mockNetworkingService = PSNetworkingService(
+            session: self.mockSession,
+            authorizationKey: "testing-auth-key",
+            correlationId: "123-123-123",
+            sdkVersion: "1.0.0"
+        )
+
+        mockAPIClient = PSAPIClientMock(
+            apiKey: apiKey,
+            environment: env
+        )
+        mockAPIClient.paymentHandleId = paymentHandleId
+        self.mockAPIClient.networkingService = self.mockNetworkingService
+
+        PSCardForm.createSUT(mockAPIClient: mockAPIClient) { result in
+            guard case let .success(sut) = result else {
+                return XCTFail("Expected a success cardForm result.")
+            }
+            let options = PSCardTokenizeOptions.createMockHtml()
+            sut.populateFields()
+            sut.cardNumberView?.cardNumberTextField.cardBrand = .visa
+            sut.resetOnTokenize = false
+            self.sut = sut
+
+            sut.tokenize(using: options) { tokenizeResult in
+                guard case let .success(token) = tokenizeResult else {
+                    return XCTFail("Expected a successful tokenize response.")
+                }
+                XCTAssertFalse(token.isEmpty)
+                XCTAssertFalse(sut.cardNumberView?.isEmpty() ?? true)
+                expectation.fulfill()
+            }
+        }
+
+        wait(for: [expectation], timeout: 2.0)
+    }
+
     func test_tokenize_success_with_3DS() throws {
         // Given
         let expectation = expectation(description: "Tokenize success.")

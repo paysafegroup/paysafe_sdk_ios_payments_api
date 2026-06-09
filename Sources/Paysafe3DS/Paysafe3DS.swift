@@ -16,7 +16,7 @@ public typealias PaysafeInitiate3DSFlowCompletion = (Result<String, PSError>) ->
 /// Completion typealias used in the `startChallenge` method that contains a result of authenticationId or a PSError.
 public typealias PaysafeStart3DSChallengeCompletion = (Result<String, PSError>) -> Void
 
-/// Paysafe3DS module. The Paysafe3DS module is responsable for handling the 3D Secure authentication in a seamless way.
+/// Paysafe3DS module. The Paysafe3DS module is responsible for handling the 3D Secure authentication in a seamless way.
 /// Paysafe3DS can be used as a standolone module by the merchants.
 ///
 /// - Note: The apiKey is provided by the Paysafe Team representing a base64 encoded string. The Configuration object has the following parameters:

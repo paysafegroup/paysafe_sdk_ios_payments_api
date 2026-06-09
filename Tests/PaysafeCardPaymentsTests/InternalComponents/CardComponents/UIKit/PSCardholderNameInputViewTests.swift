@@ -165,6 +165,24 @@ final class PSCardholderNameInputViewTests: XCTestCase {
         XCTAssertEqual(sut.cardholderNameTextField.placeholders[.normal], "Cardholder Name")
         XCTAssertEqual(sut.cardholderNameTextField.placeholders[.error], "Cardholder Name")
     }
+
+    func test_hasText() {
+        let sut = PSCardholderNameInputView()
+        XCTAssertFalse(sut.hasText())
+        sut.updateInput(with: "J")
+        XCTAssertTrue(sut.hasText())
+        sut.reset()
+        XCTAssertFalse(sut.hasText())
+    }
+
+    func test_validatesOnBlurWhenEmpty_false_emptyBlur_staysValid() {
+        let sut = PSCardholderNameInputView(validatesOnBlurWhenEmpty: false)
+        let tf = sut.cardholderNameTextField
+        tf.text = ""
+        tf.textFieldDidBeginEditing(tf)
+        tf.textFieldDidEndEditing(tf)
+        XCTAssertTrue(tf.isValid)
+    }
 }
 
 private extension PSCardholderNameInputView {

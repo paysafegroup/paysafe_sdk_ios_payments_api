@@ -89,7 +89,7 @@ class PSCardExpiryInputTextField: PSTextField {
     }
 
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-        false
+        super.canPerformAction(action, withSender: sender) && action == #selector(paste(_:))
     }
 
     private func configure() {

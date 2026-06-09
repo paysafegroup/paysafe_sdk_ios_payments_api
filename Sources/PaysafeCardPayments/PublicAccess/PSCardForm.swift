@@ -14,8 +14,8 @@ import SwiftUI
 import Paysafe3DS
 #endif
 
-/// PSCardForm. The PSCardForm class is responsable for handling the 3D Secure authentication in a seamless way.
-/// Its main responsability is to present the UI elements, capture and manipulate card details and tokenizing the card details.
+/// PSCardForm. The PSCardForm class is responsible for handling the 3D Secure authentication in a seamless way.
+/// Its main responsibility is to present the UI elements, capture and manipulate card details and tokenizing the card details.
 ///
 /// - Note: The apiKey is provided by the Paysafe Team representing a base64 encoded string. The Configuration object has the following parameters:
 /// * environment:  Environment used: staging or production
@@ -50,6 +50,8 @@ public class PSCardForm {
     public var onCardFormUpdate: PSCardFormUpdateBlock?
     /// Card brand recognition event
     public var onCardBrandRecognition: PSCardBrandBlock?
+    /// When `true` (default), clears all fields after tokenization completes. Set to `false` to allow retry without re-entering card data.
+    public var resetOnTokenize: Bool = true
     /// Cancellables set
     private var cancellables = Set<AnyCancellable>()
     
@@ -183,29 +185,25 @@ public class PSCardForm {
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] publisherCompletion in
-            self?.resetCardDetails()
+            if self?.resetOnTokenize != false {
+                self?.resetCardDetails()
+            }
             switch publisherCompletion {
             case .finished:
                 break
             case let .failure(error):
                 completion(.failure(error))
             }
-        } receiveValue: { paymentHandleResponse in
-            guard let paysafe3DS = self.paysafe3DS else {
+        } receiveValue: { [weak self] paymentHandle in
+            guard let self else {
                 return completion(.failure(.coreSDKInitializeError(PaysafeSDK.shared.correlationId)))
             }
-            
-            psAPIClient
-                .handleCardPaymentResponse(using: paymentHandleResponse, process: options.threeDS?.process, paysafe3DS: paysafe3DS)
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] publisherCompletion in
-                    self?.resetCardDetails()
-                    switch publisherCompletion {
-                    case .finished: break
-                    case let .failure(error): completion(.failure(error))
-                    }
-                } receiveValue: { paymentHandleResponse in completion(.success(paymentHandleResponse)) }
-                .store(in: &self.cancellables)
+            self.subscribeCardPaymentCompletion(
+                paymentHandle: paymentHandle,
+                options: options,
+                psAPIClient: psAPIClient,
+                completion: completion
+            )
         }
         .store(in: &cancellables)
     }
@@ -384,10 +382,35 @@ private extension PSCardForm {
         )
     }
 
+    /// Subscribes to 3DS / card payment handling after tokenization returns a payment handle.
+    func subscribeCardPaymentCompletion(
+        paymentHandle: PaymentHandle,
+        options: PSCardTokenizeOptions,
+        psAPIClient: PSAPIClient,
+        completion: @escaping PSTokenizeBlock
+    ) {
+        guard let paysafe3DS else {
+            return completion(.failure(.coreSDKInitializeError(PaysafeSDK.shared.correlationId)))
+        }
+        psAPIClient
+            .handleCardPaymentResponse(using: paymentHandle, process: options.threeDS?.process, paysafe3DS: paysafe3DS)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] publisherCompletion in
+                if self?.resetOnTokenize != false {
+                    self?.resetCardDetails()
+                }
+                switch publisherCompletion {
+                case .finished: break
+                case let .failure(error): completion(.failure(error))
+                }
+            } receiveValue: { token in completion(.success(token)) }
+            .store(in: &cancellables)
+    }
+
     /// Retrieves card information from custom textfields
     func retrieveCardInformation() -> CardRequest? {
-        guard let cardholderName = cardholderNameView?.cardholderNameTextField.cardholderNameValue,
-              let cardCVV = cardCVVView?.cardCVVTextField.cardCVVValue else { return nil }
+        guard let cardCVV = cardCVVView?.cardCVVTextField.cardCVVValue else { return nil }
+        let cardholderName = cardholderNameView?.cardholderNameTextField.cardholderNameValue
         let card = CardRequest(
             cardNum: cardNumberView?.cardNumberTextField.cardNumberValue,
             cardExpiry: CardExpiryRequest(

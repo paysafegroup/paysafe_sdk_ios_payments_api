@@ -25,8 +25,9 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
         let textField = PSCardNumberInputTextField()
         textField.separatorType = separatorType
         textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
-        textField.selectedPlaceholder = selectedPlaceholder
         textField.customLabel = customLabel
+        textField.selectedPlaceholder = selectedPlaceholder
+        textField.toolbarView = toolbarView
         textField.psCardNumberInputTextFieldDelegate = self
         return textField
     }()
@@ -47,10 +48,14 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
 
     /// PSTheme
     private var storedTheme: PSTheme = PaysafeSDK.shared.psTheme
-    /// Placeholder for the selected state
-    private var selectedPlaceholder: String?
     /// Custom label for normal/error state (e.g. for localization). When nil, SDK default is used.
     private var customLabel: String?
+    /// Placeholder for the selected state
+    private var selectedPlaceholder: String?
+    /// Keyboard toolbar view. When not provided defaults to `UIToolbar` with `Done` button dismissing the keyboard.
+    private var toolbarView: UIView?
+    /// When `false`, empty fields skip validation on blur (see `PSTextField.validatesOnBlurWhenEmpty`).
+    private var validatesOnBlurWhenEmpty: Bool = true
     /// Theme
     public var theme: PSTheme {
         get {
@@ -67,17 +72,24 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
     ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("Card number") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
+    ///   - toolbarView: Keyboard toolbar view. When not provided defaults to `UIToolbar` with `Done` button dismissing the keyboard.
+    ///   - validatesOnBlurWhenEmpty: When `false`, an empty field shows the normal border on blur instead of validating.
     public init(
         separatorType: PSCardNumberInputSeparatorType = .whitespace,
         animateTopPlaceholderLabel: Bool = true,
         label: String? = nil,
-        hint: String? = nil
+        hint: String? = nil,
+        toolbarView: UIView? = nil,
+        validatesOnBlurWhenEmpty: Bool = true
     ) {
         super.init(frame: .zero)
         self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
         self.separatorType = separatorType
         self.customLabel = label
         selectedPlaceholder = hint
+        self.toolbarView = toolbarView
+        self.validatesOnBlurWhenEmpty = validatesOnBlurWhenEmpty
+
         configure()
     }
 
@@ -91,6 +103,11 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
         cardNumberTextField.cardNumberValue == nil
     }
 
+    /// Whether the field contains any raw input (including invalid partial entry).
+    public func hasText() -> Bool {
+        !(cardNumberTextField.text?.isEmpty ?? true)
+    }
+
     /// Method that verifies if the card number input is valid
     public func isValid() -> Bool {
         cardNumberTextField.cardNumberValue != nil
@@ -101,7 +118,7 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
         theme = PaysafeSDK.shared.psTheme
     }
 
-    /// Method that resets the cardholder name view
+    /// Method that resets the card number view
     func reset() {
         cardNumberTextField.resetTextField()
     }
@@ -119,6 +136,7 @@ public class PSCardNumberInputView: UIView, PSCardInputView {
         cardNumberTextField.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         cardNumberTextField.topAnchor.constraint(equalTo: topAnchor).isActive = true
         cardNumberTextField.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        cardNumberTextField.validatesOnBlurWhenEmpty = validatesOnBlurWhenEmpty
     }
 }
 
@@ -130,7 +148,7 @@ extension PSCardNumberInputView: PSCardNumberInputTextFieldDelegate {
     }
 
     func didUpdateCardNumberInputFocusedState(isFocused: Bool) {
-        isFocused ? onEvent?(.focus) : nil
+        onEvent?(isFocused ? .focus : .blur)
     }
 
     func didUpdateCardNumberInputWithInvalidCharacter() {

@@ -25,8 +25,9 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
         textField.isSecureTextEntry = isMasked
         textField.cardBrand = cardBrand
         textField.shouldAnimateTopPlaceholder = animateTopPlaceholderLabel
-        textField.selectedPlaceholder = selectedPlaceholder
         textField.customLabel = customLabel
+        textField.selectedPlaceholder = selectedPlaceholder
+        textField.toolbarView = toolbarView
         textField.psCardCVVInputTextFieldDelegate = self
         return textField
     }()
@@ -39,10 +40,14 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
     }
     /// Indicates if the textfield should use the top placeholder animation
     private var animateTopPlaceholderLabel: Bool = true
-    /// Placeholder for the selected state
-    private var selectedPlaceholder: String = "xxx"
     /// Custom label for normal/error state (e.g. for localization). When nil, SDK default is used.
     private var customLabel: String?
+    /// Placeholder for the selected state
+    private var selectedPlaceholder: String = "xxx"
+    /// Keyboard toolbar view. When not provided defaults to `UIToolbar` with `Done` button dismissing the keyboard.
+    private var toolbarView: UIView?
+    /// When `false`, empty fields skip validation on blur (see `PSTextField.validatesOnBlurWhenEmpty`).
+    private var validatesOnBlurWhenEmpty: Bool = true
     /// PSCardBrand
     public var cardBrand: PSCardBrand = .unknown {
         didSet {
@@ -73,12 +78,16 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
     ///   - animateTopPlaceholderLabel: Bool, default as `true`
     ///   - label: Top label and placeholder text for normal/error state (e.g. for localization). When nil, SDK default ("CVV") is used.
     ///   - hint: Placeholder for the 'selected' state. If no value is provided the default one will be set
+    ///   - toolbarView: Keyboard toolbar view. When not provided defaults to `UIToolbar` with `Done` button dismissing the keyboard.
+    ///   - validatesOnBlurWhenEmpty: When `false`, an empty field shows the normal border on blur instead of validating.
     public init(
         isMasked: Bool = false,
         cardBrand: PSCardBrand = .unknown,
         animateTopPlaceholderLabel: Bool = true,
         label: String? = nil,
-        hint: String = "xxx"
+        hint: String = "xxx",
+        toolbarView: UIView? = nil,
+        validatesOnBlurWhenEmpty: Bool = true
     ) {
         super.init(frame: .zero)
         self.isMasked = isMasked
@@ -86,6 +95,9 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
         self.animateTopPlaceholderLabel = animateTopPlaceholderLabel
         self.customLabel = label
         selectedPlaceholder = hint
+        self.toolbarView = toolbarView
+        self.validatesOnBlurWhenEmpty = validatesOnBlurWhenEmpty
+
         configure()
     }
 
@@ -97,6 +109,11 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
     /// Method that verifies if the card CVV input is empty
     public func isEmpty() -> Bool {
         cardCVVTextField.cardCVVValue == nil
+    }
+
+    /// Whether the field contains any raw input (including invalid partial entry).
+    public func hasText() -> Bool {
+        !(cardCVVTextField.text?.isEmpty ?? true)
     }
 
     /// Method that verifies if the card CVV input is valid
@@ -127,6 +144,7 @@ public class PSCardCVVInputView: UIView, PSCardInputView {
         cardCVVTextField.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         cardCVVTextField.topAnchor.constraint(equalTo: topAnchor).isActive = true
         cardCVVTextField.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        cardCVVTextField.validatesOnBlurWhenEmpty = validatesOnBlurWhenEmpty
     }
 }
 
@@ -138,7 +156,7 @@ extension PSCardCVVInputView: PSCardCVVInputTextFieldDelegate {
     }
 
     func didUpdateCardCVVInputFocusedState(isFocused: Bool) {
-        isFocused ? onEvent?(.focus) : nil
+        onEvent?(isFocused ? .focus : .blur)
     }
 
     func didUpdateCardCVVInputWithInvalidCharacter() {
