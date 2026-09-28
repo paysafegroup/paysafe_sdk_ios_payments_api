@@ -17,6 +17,11 @@ final class SavedCreditCardPaymentMethodViewModel: ObservableObject {
 
     private var cardForm: PSCardForm?
 
+    private(set) var cardholderNameView: PSCardholderNameInputSwiftUIView
+    private(set) var cardCVVView: PSCardCVVInputSwiftUIView
+
+    private var hasConfiguredCardForm = false
+
     private var alertTexts: (title: String, message: String)?
     var alertTitle: String { alertTexts?.title ?? "" }
     var alertMessage: String { alertTexts?.message ?? "" }
@@ -33,14 +38,13 @@ final class SavedCreditCardPaymentMethodViewModel: ObservableObject {
         self.billingAddress = billingAddress
         self.totalPrice = totalPrice
         self.savedCard = savedCard
+        cardholderNameView = PSCardholderNameInputSwiftUIView(cardholderName: savedCard.holderName)
+        cardCVVView = PSCardCVVInputSwiftUIView(cardBrand: savedCard.cardBrand)
     }
 
-    func configureCardForm(
-        paymentManager: PaymentManager,
-        cardholderNameView: PSCardholderNameInputSwiftUIView,
-        cardCVVView: PSCardCVVInputSwiftUIView
-    ) {
-        guard isInitializing else { return }
+    func configureCardForm(paymentManager: PaymentManager) {
+        guard !hasConfiguredCardForm else { return }
+        hasConfiguredCardForm = true
         PSCardForm.initialize(
             currencyCode: "USD",
             accountId: paymentManager.cardAccountId,

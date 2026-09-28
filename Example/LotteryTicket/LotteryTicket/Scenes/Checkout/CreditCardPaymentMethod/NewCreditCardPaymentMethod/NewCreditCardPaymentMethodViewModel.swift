@@ -17,6 +17,13 @@ final class NewCreditCardPaymentMethodViewModel: ObservableObject {
 
     private var cardForm: PSCardForm?
 
+    private(set) var cardNumberView = PSCardNumberInputSwiftUIView()
+    private(set) var cardholderNameView = PSCardholderNameInputSwiftUIView()
+    private(set) var cardExpiryView = PSCardExpiryInputSwiftUIView()
+    private(set) var cardCVVView = PSCardCVVInputSwiftUIView()
+
+    private var hasConfiguredCardForm = false
+
     private var alertTexts: (title: String, message: String)?
     var alertTitle: String { alertTexts?.title ?? "" }
     var alertMessage: String { alertTexts?.message ?? "" }
@@ -32,14 +39,9 @@ final class NewCreditCardPaymentMethodViewModel: ObservableObject {
         self.totalPrice = totalPrice
     }
 
-    func configureCardForm(
-        paymentManager: PaymentManager,
-        cardNumberView: PSCardNumberInputSwiftUIView,
-        cardholderNameView: PSCardholderNameInputSwiftUIView,
-        cardExpiryView: PSCardExpiryInputSwiftUIView,
-        cardCVVView: PSCardCVVInputSwiftUIView
-    ) {
-        guard isInitializing else { return }
+    func configureCardForm(paymentManager: PaymentManager) {
+        guard !hasConfiguredCardForm else { return }
+        hasConfiguredCardForm = true
         PSCardForm.initialize(
             currencyCode: "USD",
             accountId: paymentManager.cardAccountId,
@@ -116,5 +118,52 @@ final class NewCreditCardPaymentMethodViewModel: ObservableObject {
         guard let cardForm else { return }
         alertTexts = ("Are all fields valid", "\(cardForm.areAllFieldsValid())")
         presentAlert = true
+    }
+
+    /// Demo purposes: highlights the fields that fail validation.
+    func configureFieldEvents() {
+        cardNumberView.onEvent = { [weak self] event in
+            switch event {
+            case .invalid:
+                self?.cardNumberView.theme.backgroundColor = .red
+            case .valid:
+                self?.cardNumberView.resetTheme()
+            default:
+                break
+            }
+        }
+
+        cardholderNameView.onEvent = { [weak self] event in
+            switch event {
+            case .invalid:
+                self?.cardholderNameView.theme.backgroundColor = .red
+            case .valid:
+                self?.cardholderNameView.resetTheme()
+            default:
+                break
+            }
+        }
+
+        cardExpiryView.onEvent = { [weak self] event in
+            switch event {
+            case .invalid:
+                self?.cardExpiryView.theme.backgroundColor = .red
+            case .valid:
+                self?.cardExpiryView.resetTheme()
+            default:
+                break
+            }
+        }
+
+        cardCVVView.onEvent = { [weak self] event in
+            switch event {
+            case .invalid:
+                self?.cardCVVView.theme.backgroundColor = .red
+            case .fieldValueChange:
+                self?.cardCVVView.resetTheme()
+            default:
+                break
+            }
+        }
     }
 }

@@ -8,15 +8,17 @@
 import SwiftUI
 
 struct CreditCardPaymentMethodView<ViewModel: CreditCardPaymentMethodViewModel>: View {
-    @ObservedObject var viewModel: ViewModel
+    @StateObject var viewModel: ViewModel
 
     init(
         billingAddress: BillingAddress?,
         totalPrice: Double
     ) {
-        viewModel = ViewModel(
-            billingAddress: billingAddress,
-            totalPrice: totalPrice
+        _viewModel = StateObject(
+            wrappedValue: ViewModel(
+                billingAddress: billingAddress,
+                totalPrice: totalPrice
+            )
         )
     }
 

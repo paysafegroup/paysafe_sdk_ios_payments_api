@@ -9,31 +9,20 @@ import PaysafeCardPayments
 import SwiftUI
 
 struct NewCreditCardPaymentMethodView<ViewModel: NewCreditCardPaymentMethodViewModel>: View {
-    @ObservedObject var viewModel: ViewModel
+    @StateObject var viewModel: ViewModel
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject var appCoordinator: AppCoordinator
-
-    /// PSCardNumberInputSwiftUIView
-    private var cardNumberView: PSCardNumberInputSwiftUIView
-    /// PSCardholderNameInputSwiftUIView
-    private var cardholderNameView: PSCardholderNameInputSwiftUIView
-    /// PSCardExpiryInputSwiftUIView
-    private var cardExpiryView: PSCardExpiryInputSwiftUIView
-    /// PSCardCVVInputSwiftUIView
-    private var cardCVVView: PSCardCVVInputSwiftUIView
 
     init(
         billingAddress: BillingAddress?,
         totalPrice: Double
     ) {
-        viewModel = ViewModel(
-            billingAddress: billingAddress,
-            totalPrice: totalPrice
+        _viewModel = StateObject(
+            wrappedValue: ViewModel(
+                billingAddress: billingAddress,
+                totalPrice: totalPrice
+            )
         )
-        cardNumberView = PSCardNumberInputSwiftUIView()
-        cardholderNameView = PSCardholderNameInputSwiftUIView()
-        cardExpiryView = PSCardExpiryInputSwiftUIView()
-        cardCVVView = PSCardCVVInputSwiftUIView()
     }
 
     var body: some View {
@@ -64,13 +53,7 @@ struct NewCreditCardPaymentMethodView<ViewModel: NewCreditCardPaymentMethodViewM
             )
         }
         .onAppear {
-            viewModel.configureCardForm(
-                paymentManager: appCoordinator.paymentManager,
-                cardNumberView: cardNumberView,
-                cardholderNameView: cardholderNameView,
-                cardExpiryView: cardExpiryView,
-                cardCVVView: cardCVVView
-            )
+            viewModel.configureCardForm(paymentManager: appCoordinator.paymentManager)
         }
         .fullScreenCover(item: $viewModel.orderConfirmationDetails) { orderConfirmationDetails in
             OrderConfirmationView(orderConfirmationDetails: orderConfirmationDetails)
@@ -81,10 +64,10 @@ struct NewCreditCardPaymentMethodView<ViewModel: NewCreditCardPaymentMethodViewM
     private var newCreditCardPaymentMethodFormView: some View {
         VStack(spacing: 16) {
             Group {
-                cardNumberView
-                cardholderNameView
-                cardExpiryView
-                cardCVVView
+                viewModel.cardNumberView
+                viewModel.cardholderNameView
+                viewModel.cardExpiryView
+                viewModel.cardCVVView
             }
             .frame(height: 80)
         }
@@ -117,55 +100,6 @@ struct NewCreditCardPaymentMethodView<ViewModel: NewCreditCardPaymentMethodViewM
             .progressViewStyle(CircularProgressViewStyle(tint: .ltPurple))
             .scaleEffect(1.5)
             .padding(.vertical, 100)
-    }
-
-    /// Demo purposes
-    private mutating func configureEvents() {
-        var mutableSelf = self
-
-        cardNumberView.onEvent = { event in
-            switch event {
-            case .invalid:
-                mutableSelf.cardNumberView.theme.backgroundColor = .red
-            case .valid:
-                mutableSelf.cardNumberView.resetTheme()
-            default:
-                break
-            }
-        }
-
-        cardholderNameView.onEvent = { event in
-            switch event {
-            case .invalid:
-                mutableSelf.cardholderNameView.theme.backgroundColor = .red
-            case .valid:
-                mutableSelf.cardholderNameView.resetTheme()
-            default:
-                break
-            }
-        }
-
-        cardExpiryView.onEvent = { event in
-            switch event {
-            case .invalid:
-                mutableSelf.cardExpiryView.theme.backgroundColor = .red
-            case .valid:
-                mutableSelf.cardExpiryView.resetTheme()
-            default:
-                break
-            }
-        }
-
-        cardCVVView.onEvent = { event in
-            switch event {
-            case .invalid:
-                mutableSelf.cardCVVView.theme.backgroundColor = .red
-            case .fieldValueChange:
-                mutableSelf.cardCVVView.resetTheme()
-            default:
-                break
-            }
-        }
     }
 }
 

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PaymentMethodsView<ViewModel: PaymentMethodsViewModel>: View {
-    @ObservedObject var viewModel: ViewModel
+    @StateObject var viewModel: ViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
 
     init(
@@ -16,10 +16,12 @@ struct PaymentMethodsView<ViewModel: PaymentMethodsViewModel>: View {
         item: ShopItem?,
         totalPrice: Double
     ) {
-        viewModel = ViewModel(
-            billingAddress: billingAddress,
-            item: item,
-            totalPrice: totalPrice
+        _viewModel = StateObject(
+            wrappedValue: ViewModel(
+                billingAddress: billingAddress,
+                item: item,
+                totalPrice: totalPrice
+            )
         )
     }
 

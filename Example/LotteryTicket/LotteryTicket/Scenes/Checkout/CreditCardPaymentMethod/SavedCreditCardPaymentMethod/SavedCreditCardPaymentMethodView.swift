@@ -9,27 +9,22 @@ import PaysafeCardPayments
 import SwiftUI
 
 struct SavedCreditCardPaymentMethodView<ViewModel: SavedCreditCardPaymentMethodViewModel>: View {
-    @ObservedObject var viewModel: ViewModel
+    @StateObject var viewModel: ViewModel
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject var appCoordinator: AppCoordinator
-
-    /// PSCardholderNameInputSwiftUIView
-    private var cardholderNameView: PSCardholderNameInputSwiftUIView
-    /// PSCardCVVInputSwiftUIView
-    private var cardCVVView: PSCardCVVInputSwiftUIView
 
     init(
         billingAddress: BillingAddress?,
         totalPrice: Double,
         savedCard: SavedCard
     ) {
-        viewModel = ViewModel(
-            billingAddress: billingAddress,
-            totalPrice: totalPrice,
-            savedCard: savedCard
+        _viewModel = StateObject(
+            wrappedValue: ViewModel(
+                billingAddress: billingAddress,
+                totalPrice: totalPrice,
+                savedCard: savedCard
+            )
         )
-        cardholderNameView = PSCardholderNameInputSwiftUIView(cardholderName: savedCard.holderName)
-        cardCVVView = PSCardCVVInputSwiftUIView(cardBrand: savedCard.cardBrand)
     }
 
     var body: some View {
@@ -58,11 +53,7 @@ struct SavedCreditCardPaymentMethodView<ViewModel: SavedCreditCardPaymentMethodV
                 )
             }
             .onAppear {
-                viewModel.configureCardForm(
-                    paymentManager: appCoordinator.paymentManager,
-                    cardholderNameView: cardholderNameView,
-                    cardCVVView: cardCVVView
-                )
+                viewModel.configureCardForm(paymentManager: appCoordinator.paymentManager)
             }
             .fullScreenCover(item: $viewModel.orderConfirmationDetails) { orderConfirmationDetails in
                 OrderConfirmationView(orderConfirmationDetails: orderConfirmationDetails)
@@ -78,7 +69,7 @@ struct SavedCreditCardPaymentMethodView<ViewModel: SavedCreditCardPaymentMethodV
                     savedCard: viewModel.savedCard,
                     style: .secondary
                 )
-                cardCVVView
+                viewModel.cardCVVView
             }
             .frame(height: 80)
         }
