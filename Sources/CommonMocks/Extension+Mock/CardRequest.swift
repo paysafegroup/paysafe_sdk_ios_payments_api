@@ -5,7 +5,7 @@
 //  Copyright (c) 2024 Paysafe Group
 //
 
-@testable import PaysafeCardPayments
+@testable import PaysafeCommon
 
 extension CardRequest {
     public static func mock() -> CardRequest {

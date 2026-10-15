@@ -35,6 +35,9 @@ public struct PSCardTokenizeOptions: PSTokenizable {
     public let renderType: RenderType?
     /// Simulator additional data
     public var simulator: SimulatorType
+    /// When `true` on a saved-card transaction, CVV is not required and is omitted from the request if not collected.
+    /// Defaults to `false` (CVV required). Ignored for new-card payments.
+    public let optional: Bool
 
     /// - Parameters:
     ///   - amount: Payment amount in minor units
@@ -50,6 +53,7 @@ public struct PSCardTokenizeOptions: PSTokenizable {
     ///   - singleUseCustomerToken: Single use customer token
     ///   - paymentTokenFrom: Payment token from
     ///   - renderType: Render type
+    ///   - optional: Whether CVV is optional for saved-card tokenization. Defaults to `false`.
     public init(
         amount: Int,
         currencyCode: String,
@@ -64,7 +68,8 @@ public struct PSCardTokenizeOptions: PSTokenizable {
         singleUseCustomerToken: String? = nil,
         paymentTokenFrom: String? = nil,
         simulator: SimulatorType = .externalSimulator,
-        renderType: RenderType? = nil
+        renderType: RenderType? = nil,
+        optional: Bool = false
     ) {
         self.amount = amount
         self.currencyCode = currencyCode
@@ -80,5 +85,6 @@ public struct PSCardTokenizeOptions: PSTokenizable {
         self.paymentTokenFrom = paymentTokenFrom
         self.simulator = simulator
         self.renderType = renderType
+        self.optional = optional
     }
 }

@@ -160,6 +160,29 @@ Collecting card payments in your iPhone app involves creating an object to colle
 
 More details related to card payments integration can be referenced at our [Developer Guide](https://developer.paysafe.com/en/api-docs/mobile-sdks-payments-api/paysafe-ios-sdk/card-payments/overview/)
 
+### Optional CVV (saved cards)
+
+For **saved-card** payments, you can skip collecting CVV when your Paysafe configuration allows it. Pass **`optional: true`** on **`PSCardTokenizeOptions`** together with **`singleUseCustomerToken`** and **`paymentTokenFrom`**. If the user does not enter a CVV, the SDK does not send a **`cvv`** field on the tokenize request.
+
+- Default is **`optional: false`** (CVV required); existing integrations are unchanged.
+- **`optional`** is **ignored** for new-card tokenization (PAN entry); CVV is still required.
+- Set **`PSCardForm.cvvOptional = true`** before checkout (it is also set from **`optional`** when you **`tokenize`**) so **`onCardFormUpdate`** can enable your pay button without CVV.
+
+```swift
+let options = PSCardTokenizeOptions(
+    amount: amount,
+    currencyCode: "USD",
+    transactionType: .payment,
+    merchantRefNum: merchantRefNum,
+    billingDetails: billingDetails,
+    accountId: accountId,
+    singleUseCustomerToken: savedCard.singleUseCustomerToken,
+    paymentTokenFrom: savedCard.paymentTokenFrom,
+    optional: true
+)
+cardForm.tokenize(using: options, completion: completion)
+```
+
 ## Apple Pay
 Paysafe iOS SDK allows you to take payments via your iPhone apps using mobile-based payment methods, such as Apple Pay, that rely on card payments made through the Paysafe Payments API.
 

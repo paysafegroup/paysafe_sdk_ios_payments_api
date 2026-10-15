@@ -29,6 +29,8 @@ final class SavedCreditCardPaymentMethodViewModel: ObservableObject {
     let billingAddress: BillingAddress?
     let totalPrice: Double
     let savedCard: SavedCard
+    /// Demo toggle: `true` hides CVV and sets `PSCardTokenizeOptions.optional` / `PSCardForm.cvvOptional`. CVV field stays on the form for card brand only.
+    let isCVVOptional = true
 
     init(
         billingAddress: BillingAddress?,
@@ -57,7 +59,9 @@ final class SavedCreditCardPaymentMethodViewModel: ObservableObject {
                 switch result {
                 case let .success(cardForm):
                     self.cardForm = cardForm
-                    cardForm.onCardFormUpdate = { isValid in
+                    cardForm.cvvOptional = isCVVOptional
+                    placeOrderEnabled = cardForm.areAllFieldsValid(cvvOptional: isCVVOptional)
+                    cardForm.onCardFormUpdate = { [weak self] isValid in
                         asyncMain { [weak self] in self?.placeOrderEnabled = isValid }
                     }
                 case let .failure(error):
@@ -86,7 +90,8 @@ final class SavedCreditCardPaymentMethodViewModel: ObservableObject {
                 process: true
             ),
             singleUseCustomerToken: savedCard.singleUseCustomerToken,
-            paymentTokenFrom: savedCard.paymentTokenFrom
+            paymentTokenFrom: savedCard.paymentTokenFrom,
+            optional: isCVVOptional
         )
         let completion: PSTokenizeBlock = { [weak self] tokenizeResult in
             asyncMain { [weak self] in

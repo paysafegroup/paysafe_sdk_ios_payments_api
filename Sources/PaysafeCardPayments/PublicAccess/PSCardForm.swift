@@ -52,6 +52,8 @@ public class PSCardForm {
     public var onCardBrandRecognition: PSCardBrandBlock?
     /// When `true` (default), clears all fields after tokenization completes. Set to `false` to allow retry without re-entering card data.
     public var resetOnTokenize: Bool = true
+    /// When `true`, `onCardFormUpdate` treats an empty CVV as valid (saved-card optional CVV). Align with `PSCardTokenizeOptions.optional`; also set from tokenize options when calling `tokenize`.
+    public var cvvOptional: Bool = false
     /// Cancellables set
     private var cancellables = Set<AnyCancellable>()
     
@@ -153,6 +155,7 @@ public class PSCardForm {
     /// * applePay: Apple Pay additional data
     /// * singleUseCustomerToken: Single use customer token
     /// * paymentTokenFrom: Payment token from
+    /// * optional: For saved-card payments, `true` skips CVV collection and omits it from the request. Defaults to `false` (required).
     /// - Parameters:
     ///   - options: PSTokenizeOptions
     ///   - completion: PSTokenizeBlock
@@ -164,14 +167,17 @@ public class PSCardForm {
             assertionFailure(.uninitializedSDKMessage)
             return completion(.failure(.coreSDKInitializeError(PaysafeSDK.shared.correlationId)))
         }
-        guard let card = retrieveCardInformation() else {
+        let isCVVOptional = isCVVOptional(for: options)
+        cvvOptional = isCVVOptional
+        guard areAllFieldsValid(cvvOptional: isCVVOptional) else {
             let error = PSError.invalidCardFields(
                 PaysafeSDK.shared.correlationId,
-                message: "Invalid fields: \(getInvalidFields())"
+                message: "Invalid fields: \(getInvalidFields(cvvOptional: isCVVOptional))"
             )
             psAPIClient.logEvent(error)
             return completion(.failure(error))
         }
+        let card = retrieveCardInformation()
         
         /// Validate tokenize options
         if let error = validateTokenizeOptions(options) {
@@ -220,11 +226,14 @@ extension PSCardForm {
     }
 
     /// Checks form validation state.
-    public func areAllFieldsValid() -> Bool {
+    ///
+    /// - Parameters:
+    ///   - cvvOptional: When `true`, an empty CVV field is treated as valid. Invalid (partial) CVV input is still rejected.
+    public func areAllFieldsValid(cvvOptional: Bool = false) -> Bool {
         let isCardNumberValid = cardNumberView?.isValid() ?? true
         let isCardholderNameValid = cardholderNameView?.isValid() ?? true
         let isCardExpiryValid = cardExpiryView?.isValid() ?? true
-        let isCardCVVValid = cardCVVView?.isValid() ?? true
+        let isCardCVVValid = isCardCVVValid(cvvOptional: cvvOptional)
         return isCardNumberValid && isCardholderNameValid && isCardExpiryValid && isCardCVVValid
     }
 
@@ -407,22 +416,36 @@ private extension PSCardForm {
             .store(in: &cancellables)
     }
 
-    /// Retrieves card information from custom textfields
-    func retrieveCardInformation() -> CardRequest? {
-        guard let cardCVV = cardCVVView?.cardCVVTextField.cardCVVValue else { return nil }
-        let cardholderName = cardholderNameView?.cardholderNameTextField.cardholderNameValue
-        let card = CardRequest(
+    /// `optional` is honored only for saved-card tokenize (both customer + payment tokens required).
+    func isCVVOptional(for options: PSCardTokenizeOptions) -> Bool {
+        guard options.optional else { return false }
+        return options.singleUseCustomerToken != nil && options.paymentTokenFrom != nil
+    }
+
+    /// Retrieves card information from custom textfields (encodes whatever values are present).
+    func retrieveCardInformation() -> CardRequest {
+        CardRequest(
             cardNum: cardNumberView?.cardNumberTextField.cardNumberValue,
             cardExpiry: CardExpiryRequest(
                 month: cardExpiryView?.cardExpiryTextField.cardExpiryDateValue?.month,
                 year: cardExpiryView?.cardExpiryTextField.cardExpiryDateValue?.year
             ),
-            cvv: cardCVV,
-            holderName: cardholderName,
+            cvv: cardCVVView?.cardCVVTextField.cardCVVValue,
+            holderName: cardholderNameView?.cardholderNameTextField.cardholderNameValue,
             cardType: nil,
             nickName: nil
         )
-        return card
+    }
+
+    /// Empty/missing CVV is allowed only when optional; otherwise the field must be valid.
+    func isCardCVVValid(cvvOptional: Bool) -> Bool {
+        guard let cardCVVView else {
+            return cvvOptional
+        }
+        if cvvOptional, cardCVVView.isEmpty() {
+            return true
+        }
+        return cardCVVView.isValid()
     }
 
     /// Configures component delegates
@@ -454,12 +477,12 @@ private extension PSCardForm {
     }
 
     /// Get invalid fields
-    func getInvalidFields() -> String {
+    func getInvalidFields(cvvOptional: Bool) -> String {
         let fields: [String: PSCardInputView?] = [
             "cardNumber": cardNumberView,
             "cardHolderName": cardholderNameView,
             "expiryDate": cardExpiryView,
-            "security(CVV/CVC)": cardCVVView
+            "security(CVV/CVC)": isCardCVVValid(cvvOptional: cvvOptional) ? nil : cardCVVView
         ]
         let fieldDetails = fields
             .compactMap { key, customView in
@@ -502,7 +525,7 @@ private extension PSCardForm {
 // MARK: - PSCardNumberInputViewDelegate
 extension PSCardForm: PSCardNumberInputViewDelegate {
     func didUpdateCardNumberInputValidationState(isValid: Bool) {
-        onCardFormUpdate?(isValid ? areAllFieldsValid() : false)
+        publishCardFormValidationState(triggerFieldValid: isValid)
     }
 
     func didUpdateCardBrand(with cardBrand: PSCardBrand) {
@@ -514,20 +537,26 @@ extension PSCardForm: PSCardNumberInputViewDelegate {
 // MARK: - PSCardholderNameInputViewDelegate
 extension PSCardForm: PSCardholderNameInputViewDelegate {
     func didUpdateCardholderNameInputValidationState(isValid: Bool) {
-        onCardFormUpdate?(isValid ? areAllFieldsValid() : false)
+        publishCardFormValidationState(triggerFieldValid: isValid)
     }
 }
 
 // MARK: - PSCardExpiryInputViewDelegate
 extension PSCardForm: PSCardExpiryInputViewDelegate {
     func didUpdateCardExpiryInputValidationState(isValid: Bool) {
-        onCardFormUpdate?(isValid ? areAllFieldsValid() : false)
+        publishCardFormValidationState(triggerFieldValid: isValid)
     }
 }
 
 // MARK: - PSCardCVVInputViewDelegate
 extension PSCardForm: PSCardCVVInputViewDelegate {
     func didUpdateCardCVVInputValidationState(isValid: Bool) {
-        onCardFormUpdate?(isValid ? areAllFieldsValid() : false)
+        publishCardFormValidationState(triggerFieldValid: isValid)
+    }
+}
+
+private extension PSCardForm {
+    func publishCardFormValidationState(triggerFieldValid: Bool) {
+        onCardFormUpdate?(triggerFieldValid && areAllFieldsValid(cvvOptional: cvvOptional))
     }
 }

@@ -52,7 +52,7 @@ final class PaymentMethodsViewModel: ObservableObject {
         PSApplePayContext.initialize(
             currencyCode: "USD",
             accountId: paymentManager.cardAccountId,
-            merchantIdentifier: "merchant.com.paysafe.app",
+            merchantIdentifier: DemoConfig.applePayMerchantIdentifier,
             countryCode: "US"
         ) { [weak self] result in
             asyncMain { [weak self] in
@@ -191,7 +191,7 @@ final class PaymentMethodsViewModel: ObservableObject {
             dupCheck: false,
             venmo: VenmoAdditionalData(
                 consumerId: "consumerId+\(UUID().uuidString)",
-                profileId: "4013002571644081777"
+                profileId: DemoConfig.venmoProfileId
             )
         )
         asyncMain { [weak self] in self?.isloading = true }

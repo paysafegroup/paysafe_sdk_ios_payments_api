@@ -567,6 +567,103 @@ final class PSCardFormTests: XCTestCase {
             XCTAssertEqual(cardBrand, .visa)
         }
     }
+
+    func test_onCardFormUpdate_cvvOptional_allowsEmptyCVV() {
+        PSCardForm.createSavedCardSUT { result in
+            guard case let .success(sut) = result else {
+                return XCTFail("Expected a success cardForm result.")
+            }
+            sut.cvvOptional = true
+            var validationStates: [Bool] = []
+            sut.onCardFormUpdate = { isValid in
+                validationStates.append(isValid)
+            }
+            sut.populateSavedCardFields(includeCVV: false)
+            XCTAssertEqual(validationStates.last, true)
+        }
+    }
+
+    func test_areAllFieldsValid_cvvOptional_success() {
+        // Given
+        PSCardForm.createSavedCardSUT { result in
+            guard case let .success(sut) = result else {
+                return XCTFail("Expected a success cardForm result.")
+            }
+            sut.populateSavedCardFields(includeCVV: false)
+            self.sut = sut
+
+            // When
+            let areAllFieldsValid = sut.areAllFieldsValid(cvvOptional: true)
+
+            // Then
+            XCTAssertTrue(areAllFieldsValid)
+        }
+    }
+
+    func test_areAllFieldsValid_cvvOptional_failed() {
+        // Given
+        PSCardForm.createSavedCardSUT { result in
+            guard case let .success(sut) = result else {
+                return XCTFail("Expected a success cardForm result.")
+            }
+            sut.populateSavedCardFields(includeCVV: false)
+            self.sut = sut
+
+            // When
+            let areAllFieldsValid = sut.areAllFieldsValid(cvvOptional: false)
+
+            // Then
+            XCTAssertFalse(areAllFieldsValid)
+        }
+    }
+
+    func test_tokenize_savedCard_optionalCVV_withoutCVV_success() {
+        // Given
+        let expectation = expectation(description: "Saved-card tokenize succeeds without CVV when optional.")
+        PSCardForm.createSavedCardSUT { result in
+            guard case let .success(sut) = result else {
+                return XCTFail("Expected a success cardForm result.")
+            }
+            sut.populateSavedCardFields(includeCVV: false)
+            let options = PSCardTokenizeOptions.createMockSavedCardOptional()
+            self.sut = sut
+
+            // When
+            sut.tokenize(using: options) { tokenizeResult in
+                guard case let .success(paymentHandleToken) = tokenizeResult else {
+                    return XCTFail("Expected a successful tokenize response.")
+                }
+                // Then
+                XCTAssertFalse(paymentHandleToken.isEmpty)
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 2.0)
+    }
+
+    func test_tokenize_optionalWithoutSavedCardTokens_invalidCardFields() {
+        // Given
+        let expectation = expectation(description: "Tokenize fails when optional is set without saved-card tokens.")
+        PSCardForm.createSavedCardSUT { result in
+            guard case let .success(sut) = result else {
+                return XCTFail("Expected a success cardForm result.")
+            }
+            sut.populateSavedCardFields(includeCVV: false)
+            let options = PSCardTokenizeOptions.createMockHtml(optional: true)
+            self.sut = sut
+
+            // When
+            sut.tokenize(using: options) { tokenizeResult in
+                guard case let .failure(error) = tokenizeResult else {
+                    return XCTFail("Expected a failed tokenize response.")
+                }
+                // Then
+                XCTAssertEqual(error.errorCode, .invalidCardFields)
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
 }
 
 fileprivate extension PSCardForm {
@@ -636,6 +733,32 @@ fileprivate extension PSCardForm {
         }
     }
 
+    static func createSavedCardSUT(
+        mockAPIClient: PSAPIClientMock = PSAPIClientMock(
+            apiKey: "am9objpkb2UK",
+            environment: .test
+        ),
+        completion: @escaping PSCardFormInitializeBlock
+    ) {
+        mockAPIClient.getPaymentMethodShouldSucceedCardPaymentValidation = true
+        PaysafeSDK.shared.psAPIClient = mockAPIClient
+
+        PSCardForm.initialize(
+            currencyCode: "USD",
+            accountId: "1001456390",
+            cardholderNameView: PSCardholderNameInputView(),
+            cardExpiryView: PSCardExpiryInputView(),
+            cardCVVView: PSCardCVVInputView()
+        ) { result in
+            switch result {
+            case let .success(cardForm):
+                completion(.success(cardForm))
+            case let .failure(error):
+                completion(.failure(error))
+            }
+        }
+    }
+
     func populateFields() {
         // Card number
         cardNumberView?.cardNumberTextField.text = "4242424242424242"
@@ -657,6 +780,25 @@ fileprivate extension PSCardForm {
         cardCVVView?.cardCVVTextField.text = "123"
         cardCVVView?.cardCVVTextField.textDidChange()
     }
+
+    func populateSavedCardFields(includeCVV: Bool) {
+        cardCVVView?.cardCVVTextField.cardBrand = .visa
+
+        cardholderNameView?.cardholderNameTextField.text = "John Doe"
+        cardholderNameView?.cardholderNameTextField.textDidChange()
+
+        let currentMonth = Calendar.current.component(.month, from: Date())
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let validMonth = String(format: "%02d", currentMonth)
+        let validYear = String(currentYear).suffix(2)
+        cardExpiryView?.cardExpiryTextField.text = "\(validMonth) / \(validYear)"
+        cardExpiryView?.cardExpiryTextField.textDidChange()
+
+        if includeCVV {
+            cardCVVView?.cardCVVTextField.text = "123"
+            cardCVVView?.cardCVVTextField.textDidChange()
+        }
+    }
 }
 
 private extension PSCardTokenizeOptions {
@@ -671,14 +813,31 @@ private extension PSCardTokenizeOptions {
         )
     }
     
-    static func createMockHtml() -> PSCardTokenizeOptions {
+    static func createMockHtml(optional: Bool = false) -> PSCardTokenizeOptions {
         PSCardTokenizeOptions(
             amount: 1000,
             currencyCode: "USD",
             transactionType: .payment,
             merchantRefNum: UUID().uuidString,
             accountId: "1001456390",
-            threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop"), renderType: .html
+            threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop"),
+            renderType: .html,
+            optional: optional
+        )
+    }
+
+    static func createMockSavedCardOptional() -> PSCardTokenizeOptions {
+        PSCardTokenizeOptions(
+            amount: 1000,
+            currencyCode: "USD",
+            transactionType: .payment,
+            merchantRefNum: UUID().uuidString,
+            accountId: "1001456390",
+            threeDS: ThreeDS(merchantUrl: "https://api.qa.paysafe.com/checkout/v2/index.html#/desktop"),
+            singleUseCustomerToken: "testSingleUseCustomerToken",
+            paymentTokenFrom: "testPaymentTokenFrom",
+            renderType: .html,
+            optional: true
         )
     }
     

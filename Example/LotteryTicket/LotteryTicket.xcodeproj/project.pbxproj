@@ -18,6 +18,7 @@
 		D349CADE2B02374000CC382A /* OrderConfirmationDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = D349CADD2B02374000CC382A /* OrderConfirmationDetails.swift */; };
 		D3655A2F2AFA2AF70097096C /* NavigationLazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3655A2E2AFA2AF70097096C /* NavigationLazyView.swift */; };
 		D367F6382AFE4CFA0079C310 /* PaymentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D367F6372AFE4CFA0079C310 /* PaymentManager.swift */; };
+		D367F63C2AFE4CFB0079C311 /* DemoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D367F63B2AFE4CFB0079C311 /* DemoConfig.swift */; };
 		D367F63A2AFE58EB0079C310 /* DispatchQueue+Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = D367F6392AFE58EA0079C310 /* DispatchQueue+Async.swift */; };
 		D36B49B72B03B69900D2A8A3 /* CreditCardPaymentMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36B49B62B03B69900D2A8A3 /* CreditCardPaymentMethodView.swift */; };
 		D36B49B92B03B6A600D2A8A3 /* CreditCardPaymentMethodViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36B49B82B03B6A600D2A8A3 /* CreditCardPaymentMethodViewModel.swift */; };
@@ -109,6 +110,7 @@
 		D349CADD2B02374000CC382A /* OrderConfirmationDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderConfirmationDetails.swift; sourceTree = "<group>"; };
 		D3655A2E2AFA2AF70097096C /* NavigationLazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationLazyView.swift; sourceTree = "<group>"; };
 		D367F6372AFE4CFA0079C310 /* PaymentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentManager.swift; sourceTree = "<group>"; };
+		D367F63B2AFE4CFB0079C311 /* DemoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoConfig.swift; sourceTree = "<group>"; };
 		D367F6392AFE58EA0079C310 /* DispatchQueue+Async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Async.swift"; sourceTree = "<group>"; };
 		D36B49B62B03B69900D2A8A3 /* CreditCardPaymentMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardPaymentMethodView.swift; sourceTree = "<group>"; };
 		D36B49B82B03B6A600D2A8A3 /* CreditCardPaymentMethodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardPaymentMethodViewModel.swift; sourceTree = "<group>"; };
@@ -237,6 +239,7 @@
 		D367F6362AFE4CEF0079C310 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				D367F63B2AFE4CFB0079C311 /* DemoConfig.swift */,
 				D367F6372AFE4CFA0079C310 /* PaymentManager.swift */,
 			);
 			path = Managers;
@@ -786,6 +789,7 @@
 				D3BB68EB2AB1BBF900CE2E4B /* PaymentMethod.swift in Sources */,
 				D3D81AAC2AB4568C00F554DE /* BillingAddress.swift in Sources */,
 				D367F6382AFE4CFA0079C310 /* PaymentManager.swift in Sources */,
+				D367F63C2AFE4CFB0079C311 /* DemoConfig.swift in Sources */,
 				D395CF402B64047F00612FB7 /* PaymentHandle.swift in Sources */,
 				D3EA1F8D2A97B72B00012F38 /* OptionsView.swift in Sources */,
 				D3CE533D2AA5F7C000FEED82 /* CheckoutView.swift in Sources */,

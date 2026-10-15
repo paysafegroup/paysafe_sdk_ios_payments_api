@@ -64,7 +64,7 @@ let package = Package(
         ),
         .testTarget(
             name: "PaysafeCardPaymentsTests",
-            dependencies: ["PaysafeCardPayments", "CommonMocks"]
+            dependencies: ["PaysafeCardPayments", "CommonMocks", "Paysafe3DS"]
         ),
         .testTarget(
             name: "PaysafeVenmoTests",

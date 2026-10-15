@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.4.0] - 2026-10-12
+
+_Optional CVV for saved-card tokenization._
+
+### Card payments
+
+- **`PSCardTokenizeOptions.optional`** (default **`false`**): on saved-card tokenization (`singleUseCustomerToken` and `paymentTokenFrom`), merchants may omit CVV collection; when not provided, **`cvv`** is omitted from the payment-handle request. Ignored for new-card flows; CVV remains required when **`optional`** is **`false`**.
+- **`PSCardForm.cvvOptional`**: when **`true`**, **`onCardFormUpdate`** treats an empty CVV as valid; set for saved-card optional CVV (also applied from tokenize options when calling **`tokenize`**).
+- **`CardRequest.cvv`**: optional (`String?`); **`nil`** values are not encoded in the JSON payload.
+
 ## [1.3.0] - 2026-06-08
 
 _Card form improvements and related fixes._

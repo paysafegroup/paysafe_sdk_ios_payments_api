@@ -64,14 +64,15 @@ struct SavedCreditCardPaymentMethodView<ViewModel: SavedCreditCardPaymentMethodV
 
     private var savedCreditCardPaymentMethodFormView: some View {
         VStack(spacing: 16) {
-            Group {
-                SavedCreditCardView(
-                    savedCard: viewModel.savedCard,
-                    style: .secondary
-                )
-                viewModel.cardCVVView
-            }
+            SavedCreditCardView(
+                savedCard: viewModel.savedCard,
+                style: .secondary
+            )
             .frame(height: 80)
+            if !viewModel.isCVVOptional {
+                viewModel.cardCVVView
+                    .frame(height: 80)
+            }
         }
     }
 

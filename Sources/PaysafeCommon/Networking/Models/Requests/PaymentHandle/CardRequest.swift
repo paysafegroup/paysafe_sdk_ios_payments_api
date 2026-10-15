@@ -11,8 +11,8 @@ public struct CardRequest: Encodable {
     let cardNum: String?
     /// Card expiry
     let cardExpiry: CardExpiryRequest?
-    /// CVV
-    let cvv: String
+    /// CVV. Omitted from the encoded request when `nil` (saved-card optional CVV).
+    let cvv: String?
     /// Cardholder name
     let holderName: String?
     /// Card type
@@ -30,7 +30,7 @@ public struct CardRequest: Encodable {
     public init(
         cardNum: String? = nil,
         cardExpiry: CardExpiryRequest? = nil,
-        cvv: String,
+        cvv: String? = nil,
         holderName: String? = nil,
         cardType: String? = nil,
         nickName: String? = nil

@@ -166,7 +166,7 @@ final class SimulatorTests: XCTestCase {
         // When
         service.urlSession(
             URLSession.shared,
-            task: URLSessionTask(),
+            task: testURLSessionTask(),
             willPerformHTTPRedirection: HTTPURLResponse(),
             newRequest: request
         ) { redirectRequest in
@@ -196,7 +196,7 @@ final class SimulatorTests: XCTestCase {
         // When
         service.urlSession(
             URLSession.shared,
-            task: URLSessionTask(),
+            task: testURLSessionTask(),
             willPerformHTTPRedirection: HTTPURLResponse(),
             newRequest: requestWithNilURL as URLRequest
         ) { redirectRequest in
@@ -227,7 +227,7 @@ final class SimulatorTests: XCTestCase {
         // When
         service.urlSession(
             URLSession.shared,
-            task: URLSessionTask(),
+            task: testURLSessionTask(),
             willPerformHTTPRedirection: HTTPURLResponse(),
             newRequest: request
         ) { redirectRequest in
@@ -265,4 +265,8 @@ private class MockURLSession: URLSessionProtocol {
             .setFailureType(to: URLError.self)
             .eraseToAnyPublisher()
     }
+}
+
+private func testURLSessionTask() -> URLSessionTask {
+    URLSession.shared.dataTask(with: URL(string: "https://test.paysafe.com")!)
 }

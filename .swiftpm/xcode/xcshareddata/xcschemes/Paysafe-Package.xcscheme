@@ -101,26 +101,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PaysafeCoreTests"
-               BuildableName = "PaysafeCoreTests"
-               BlueprintName = "PaysafeCoreTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PaysafeNetworkingTests"
-               BuildableName = "PaysafeNetworkingTests"
-               BlueprintName = "PaysafeNetworkingTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "PaysafeVenmoTests"
                BuildableName = "PaysafeVenmoTests"
                BlueprintName = "PaysafeVenmoTests"

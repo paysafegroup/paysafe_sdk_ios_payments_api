@@ -11,13 +11,6 @@ import Foundation
 @testable import PaysafeCommon
 import XCTest
 
-// Mock URLSessionTask for testing
-private class MockURLSessionTask: URLSessionTask {
-    override init() {
-        super.init()
-    }
-}
-
 final class PSNetworkingServiceTests: XCTestCase {
     var sut: PSNetworkingService!
     var mockSession: MockURLSession!
@@ -444,7 +437,7 @@ final class PSNetworkingServiceTests: XCTestCase {
         // When
         service.urlSession(
             URLSession.shared, // Mocked session, not directly used by delegate logic
-            task: MockURLSessionTask(),
+            task: testURLSessionTask(),
             willPerformHTTPRedirection: HTTPURLResponse(), // Mocked response, not directly used
             newRequest: newRequest
         ) { redirectedRequest in
@@ -475,7 +468,7 @@ final class PSNetworkingServiceTests: XCTestCase {
         // When
         service.urlSession(
             URLSession.shared,
-            task: MockURLSessionTask(),
+            task: testURLSessionTask(),
             willPerformHTTPRedirection: HTTPURLResponse(),
             newRequest: newRequest
         ) { redirectedRequest in
@@ -506,7 +499,7 @@ final class PSNetworkingServiceTests: XCTestCase {
         // When
         service.urlSession(
             URLSession.shared,
-            task: MockURLSessionTask(),
+            task: testURLSessionTask(),
             willPerformHTTPRedirection: HTTPURLResponse(),
             newRequest: newRequest
         ) { redirectedRequest in
@@ -540,7 +533,7 @@ final class PSNetworkingServiceTests: XCTestCase {
         // When
         service.urlSession(
             URLSession.shared,
-            task: MockURLSessionTask(),
+            task: testURLSessionTask(),
             willPerformHTTPRedirection: HTTPURLResponse(),
             newRequest: newRequestWithNilURL
         ) { redirectedRequest in
@@ -579,7 +572,7 @@ final class PSNetworkingServiceTests: XCTestCase {
         // When
         service.urlSession(
             URLSession.shared,
-            task: MockURLSessionTask(),
+            task: testURLSessionTask(),
             willPerformHTTPRedirection: HTTPURLResponse(),
             newRequest: newRequest
         ) { redirectedRequest in
@@ -590,4 +583,8 @@ final class PSNetworkingServiceTests: XCTestCase {
         
         wait(for: [expectation], timeout: 0.1)
     }
+}
+
+private func testURLSessionTask() -> URLSessionTask {
+    URLSession.shared.dataTask(with: URL(string: "https://test.paysafe.com")!)
 }

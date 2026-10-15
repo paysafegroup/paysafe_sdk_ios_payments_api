@@ -18,22 +18,18 @@ final class CreditCardPaymentMethodViewModel: ObservableObject {
 
     /// MerchantBackend
     private let merchantBackend: MerchantBackend
-    /// API key
-    private let apiKey = ""
-    /// Profile id
-    private let profileId = ""
 
     init(billingAddress: BillingAddress?, totalPrice: Double) {
         self.billingAddress = billingAddress
         self.totalPrice = totalPrice
-        merchantBackend = MerchantBackend(apiKey: apiKey)
+        merchantBackend = MerchantBackend(apiKey: DemoConfig.merchantBackendApiKey)
     }
 
     func onAppear() {
         guard isFirstLaunch, !isloading else { return }
         isFirstLaunch = false
         isloading = true
-        merchantBackend.fetchSavedCards(for: profileId) { [weak self] result in
+        merchantBackend.fetchSavedCards(for: DemoConfig.profileId) { [weak self] result in
             asyncMain { [weak self] in
                 guard let self else { return }
                 isloading = false
