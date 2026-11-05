@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'PaysafePaymentsSDK'
-  s.version          = '1.4.0'
+  s.version          = '3.0.0'
   s.summary          = 'Paysafe iOS SDK that implements the Payments APIs.'
   
   s.homepage         = 'https://github.com/paysafegroup/paysafe_sdk_ios_payments_api.git'
@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.author           = { 'Paysafe Group' => 'paysafe@paysafe.com' }
   s.source           = { :git => 'https://github.com/paysafegroup/paysafe_sdk_ios_payments_api.git', :tag => s.version.to_s }
   
-  s.ios.deployment_target = '14.0'
+  s.ios.deployment_target = '15.0'
   s.swift_version = '5.9'
 
   s.resource_bundles = { "PaysafePaymentsSDK" => "Sources/Resources/PrivacyInfo.xcprivacy" }
@@ -26,7 +26,7 @@ Pod::Spec.new do |s|
   s.subspec "PaysafeVenmo" do |venmo|
     venmo.source_files = "Sources/PaysafeVenmo/**/*.swift"
     venmo.dependency "PaysafePaymentsSDK/PaysafeCommon"
-    venmo.dependency 'Braintree/Venmo', '>= 6.18.2', '< 7.0.0'
+    venmo.dependency 'Braintree/Venmo', '>= 7.13.0', '< 8.0.0'
     venmo.resource_bundles = { "PaysafeVenmo_PrivacyInfo" => "Sources/PaysafeVenmo/PrivacyInfo.xcprivacy" }
   end
   

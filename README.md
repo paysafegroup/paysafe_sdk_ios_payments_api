@@ -51,7 +51,7 @@ Note:
 For more information, see [Authentication](https://developer.paysafe.com/en/support/reference-information/authentication/).
 
 ### Integrating the iOS SDK
-The Paysafe iOS SDK is open source and includes a demo for testing the various functionalities. It is compatible with apps supporting iOS 14 or above.
+The Paysafe iOS SDK is open source and includes a demo for testing the various functionalities. It is compatible with apps supporting iOS 15 or above.
 
 To integrate the Paysafe Payments API iOS SDK:
 

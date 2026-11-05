@@ -16,4 +16,6 @@ public struct AccountConfiguration {
     public let cardTypeConfig: CardTypeConfig?
     /// Client id
     public let clientId: String?
+    /// STC flag used for Braintree device-data collection for Venmo
+    public let stcFlag: Bool
 }

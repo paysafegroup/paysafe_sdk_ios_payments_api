@@ -110,7 +110,8 @@ extension PaymentResponse {
         """
     }
     
-    public static func jsonMockWithVenmo(paymentHandleToken: String, status: String = "INITIATED") -> String {
+    public static func jsonMockWithVenmo(paymentHandleToken: String,
+                                         status: String = "INITIATED") -> String {
         """
         {
             "id": "be39a5e7-29c3-4e37-b96a-673e85a0bc05",
@@ -147,7 +148,8 @@ extension PaymentResponse {
             "gatewayResponse": {
                 "clientToken": "client-token",
                 "sessionToken": "session-token",
-                "processor": "BRAINTREE"
+                "processor": "BRAINTREE",
+                "clientMetadataId": "metadata-id"
             },
             "returnLinks": [
                 {
@@ -178,6 +180,139 @@ extension PaymentResponse {
         """
     }
     
+    public static func jsonMockWithVenmo_existingBraintreeCustomer(
+        paymentHandleToken: String,
+        status: String = "INITIATED",
+        action: String = "REDIRECT"
+    ) -> String {
+        """
+        {
+            "id": "be39a5e7-29c3-4e37-b96a-673e85a0bc05",
+            "paymentType": "VENMO",
+            "paymentHandleToken": "\(paymentHandleToken)",
+            "merchantRefNum": "a1fbaadf-d93c-4d71-ab5a-75a78d2e2391135",
+            "currencyCode": "USD",
+            "txnTime": "2024-06-13T14:09:41Z",
+            "billingDetails": {
+                "street": "100 Queen",
+                "street2": "Unit 201",
+                "city": "Toronto",
+                "zip": "M5H 2N2",
+                "country": "US"
+            },
+            "customerIp": "172.0.0.1",
+            "status": "\(status)",
+            "action": "\(action)",
+            "links": [],
+            "liveMode": false,
+            "usage": "SINGLE_USE",
+            "executionMode": "SYNCHRONOUS",
+            "amount": 500,
+            "merchantDescriptor": {
+                "dynamicDescriptor": "OnlineStore",
+                "phone": "12345678"
+            },
+            "timeToLiveSeconds": 899,
+            "gatewayResponse": {
+                "clientToken": "client-token",
+                "sessionToken": "session-token",
+                "processor": "BRAINTREE",
+                "clientMetadataId": "metadata-id",
+                "brainTreeCustomerId": "braintree-customer-id"
+            },
+            "returnLinks": [
+                {
+                    "rel": "default",
+                    "href": "https://usgaminggamblig.com/payment/return/success"
+                },
+                {
+                    "rel": "on_failed",
+                    "href": "https://usgaminggamblig.com/payment/return/failed"
+                },
+                {
+                    "rel": "on_cancelled",
+                    "href": "https://usgaminggamblig.com/payment/return/cancelled"
+                }
+            ],
+            "transactionType": "PAYMENT",
+            "updatedTime": "2024-06-13T14:09:41Z",
+            "statusTime": "2024-06-13T14:09:41Z",
+            "profile": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john.doe@paysafe.com"
+            },
+            "venmo": {
+                "consumerId": "a@b.com"
+            }
+        }
+        """
+    }
+
+    public static func jsonMockWithVenmo_existingBraintreeCustomer_noClientToken(
+        paymentHandleToken: String,
+        status: String = "PAYABLE"
+    ) -> String {
+        """
+        {
+            "id": "be39a5e7-29c3-4e37-b96a-673e85a0bc05",
+            "paymentType": "VENMO",
+            "paymentHandleToken": "\(paymentHandleToken)",
+            "merchantRefNum": "a1fbaadf-d93c-4d71-ab5a-75a78d2e2391135",
+            "currencyCode": "USD",
+            "txnTime": "2024-06-13T14:09:41Z",
+            "billingDetails": {
+                "street": "100 Queen",
+                "street2": "Unit 201",
+                "city": "Toronto",
+                "zip": "M5H 2N2",
+                "country": "US"
+            },
+            "customerIp": "172.0.0.1",
+            "status": "\(status)",
+            "links": [],
+            "liveMode": false,
+            "usage": "SINGLE_USE",
+            "executionMode": "SYNCHRONOUS",
+            "amount": 500,
+            "merchantDescriptor": {
+                "dynamicDescriptor": "OnlineStore",
+                "phone": "12345678"
+            },
+            "timeToLiveSeconds": 899,
+            "gatewayResponse": {
+                "processor": "BRAINTREE",
+                "brainTreeCustomerId": "braintree-customer-id"
+            },
+            "returnLinks": [
+                {
+                    "rel": "default",
+                    "href": "https://usgaminggamblig.com/payment/return/success"
+                },
+                {
+                    "rel": "on_failed",
+                    "href": "https://usgaminggamblig.com/payment/return/failed"
+                },
+                {
+                    "rel": "on_cancelled",
+                    "href": "https://usgaminggamblig.com/payment/return/cancelled"
+                }
+            ],
+            "transactionType": "PAYMENT",
+            "updatedTime": "2024-06-13T14:09:41Z",
+            "statusTime": "2024-06-13T14:09:41Z",
+            "profile": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john.doe@paysafe.com"
+            },
+            "venmo": {
+                "consumerId": "a@b.com"
+            }
+        }
+        """
+    }
+
     public static func jsonMockWithVenmo_noGatewayResponse(paymentHandleToken: String, status: String = "INITIATED") -> String {
         """
         {

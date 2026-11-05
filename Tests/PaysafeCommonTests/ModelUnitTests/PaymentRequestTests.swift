@@ -69,7 +69,8 @@ class PaymentRequestTests: XCTestCase {
             singleUseCustomerToken: nil,
             paymentHandleTokenFrom: nil,
             applePay: nil,
-            venmo: nil
+            venmo: nil,
+            mobileSdk: nil
         )
 
         // When
@@ -84,6 +85,7 @@ class PaymentRequestTests: XCTestCase {
         XCTAssertEqual(dictionary?["paymentType"] as? String, paymentType.rawValue)
         XCTAssertEqual(dictionary?["amount"] as? Int, amount)
         XCTAssertEqual(dictionary?["currencyCode"] as? String, currencyCode)
+        XCTAssertNil(dictionary?["mobileSdk"])
 
         if let profileDict = dictionary?["profile"] as? [String: Any] {
             XCTAssertEqual(profileDict["firstName"] as? String, "John")
@@ -94,6 +96,55 @@ class PaymentRequestTests: XCTestCase {
                 XCTAssertEqual(identityDocumentDict["documentNumber"] as? String, "123456789", "Document number should match")
                 XCTAssertEqual(identityDocumentDict["type"] as? String, "SOCIAL_SECURITY", "Type should be SOCIAL_SECURITY")
             }
+        }
+    }
+
+    func test_paymentRequest_venmo_encodesMobileSdk() throws {
+        // Given
+        let paymentRequest = PaymentRequest(
+            merchantRefNum: "testMerchantRef",
+            transactionType: .payment,
+            card: nil,
+            accountId: "testAccountId",
+            paymentType: .venmo,
+            amount: 1000,
+            currencyCode: "USD",
+            returnLinks: [
+                ReturnLinkRequest(
+                    rel: .onCompleted,
+                    href: "",
+                    method: ""
+                )
+            ],
+            profile: nil,
+            threeDs: nil,
+            billingDetails: billingDetails.request,
+            merchantDescriptor: nil,
+            shippingDetails: nil,
+            singleUseCustomerToken: nil,
+            paymentHandleTokenFrom: nil,
+            applePay: nil,
+            venmo: VenmoRequest(
+                consumerId: "consumer-1",
+                merchantAccountId: nil,
+                profileId: "profile-1"
+            ),
+            mobileSdk: true
+        )
+
+        // When
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(paymentRequest)
+        let dictionary = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any]
+
+        // Then
+        XCTAssertEqual(dictionary?["paymentType"] as? String, PaymentType.venmo.rawValue)
+        XCTAssertEqual(dictionary?["mobileSdk"] as? Bool, true)
+        if let venmoDict = dictionary?["venmo"] as? [String: Any] {
+            XCTAssertEqual(venmoDict["consumerId"] as? String, "consumer-1")
+            XCTAssertEqual(venmoDict["profileId"] as? String, "profile-1")
+        } else {
+            XCTFail("Expected venmo payload in encoded request")
         }
     }
 }

@@ -29,7 +29,8 @@ extension PaymentMethodResponse {
                     id: configuration.id,
                     isApplePay: configuration.isApplePay,
                     cardTypeConfig: configuration.cardTypeConfig,
-                    clientId: configuration.clientId
+                    clientId: configuration.clientId,
+                    stcFlag: configuration.stcFlag ?? false
                 )
             }
         )

@@ -43,4 +43,6 @@ struct PaymentRequest: Encodable {
     let applePay: ApplePayRequest?
     /// Venmo request
     let venmo: VenmoRequest?
+    /// Indicates the request originated from the mobile SDK
+    let mobileSdk: Bool?
 }

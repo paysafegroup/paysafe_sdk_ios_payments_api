@@ -92,7 +92,8 @@ public class PSAPIClientMock: PSAPIClient {
                             "DI": "BOTH",
                             "AM": "BOTH"
                         ],
-                        clientId: "testClientId"
+                        clientId: "testClientId",
+                        stcFlag: false
                     )
                 )
                 completion(.success(paymentMethod))
@@ -111,7 +112,8 @@ public class PSAPIClientMock: PSAPIClient {
                             "DI": "BOTH",
                             "AM": "BOTH"
                         ],
-                        clientId: "testClientId"
+                        clientId: "testClientId",
+                        stcFlag: false
                     )
                 )
                 completion(.success(paymentMethod))
@@ -124,7 +126,8 @@ public class PSAPIClientMock: PSAPIClient {
                         id: "id",
                         isApplePay: false,
                         cardTypeConfig: nil,
-                        clientId: "clientId"
+                        clientId: "clientId",
+                        stcFlag: false
                     )
                 )
                 completion(.success(paymentMethod))

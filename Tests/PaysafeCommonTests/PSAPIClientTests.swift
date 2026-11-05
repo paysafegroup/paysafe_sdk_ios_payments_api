@@ -50,7 +50,7 @@ final class PSAPIClientTests: XCTestCase {
         let currencyCode = "USD"
         let accountId = "acc123"
         let mockData = try XCTUnwrap(PaymentMethodsResponse.jsonMock().data(using: .utf8))
-        let getAvailablePaymentsURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/paymentmethods?currencyCode=USD"))
+        let getAvailablePaymentsURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/configuration?currencyCode=USD"))
         let mockResponse = try XCTUnwrap(HTTPURLResponse(url: getAvailablePaymentsURL, statusCode: 200, httpVersion: nil, headerFields: nil))
         mockSession.stubRequest(url: getAvailablePaymentsURL, data: mockData, response: mockResponse, error: nil)
 
@@ -82,7 +82,7 @@ final class PSAPIClientTests: XCTestCase {
         let correlationId = PaysafeSDK.shared.correlationId
         let error: PSError = .coreInvalidAccountId(correlationId, message: "Invalid account id for unknown.")
         let mockData = try XCTUnwrap(PaymentMethodsResponse.jsonMock().data(using: .utf8))
-        let getAvailablePaymentsURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/paymentmethods?currencyCode=USD"))
+        let getAvailablePaymentsURL = try XCTUnwrap(URL(string: "https://api.test.paysafe.com/paymenthub/v1/configuration?currencyCode=USD"))
         let mockResponse = try XCTUnwrap(HTTPURLResponse(url: getAvailablePaymentsURL, statusCode: 200, httpVersion: nil, headerFields: nil))
         mockSession.stubRequest(url: getAvailablePaymentsURL, data: mockData, response: mockResponse, error: nil)
 

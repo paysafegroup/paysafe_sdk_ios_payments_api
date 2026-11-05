@@ -18,7 +18,8 @@ class PaymentMethodTests: XCTestCase {
             id: "config1",
             isApplePay: true,
             cardTypeConfig: [:],
-            clientId: "client123"
+            clientId: "client123",
+            stcFlag: true
         )
 
         // When
@@ -36,6 +37,7 @@ class PaymentMethodTests: XCTestCase {
         XCTAssertEqual(paymentMethod.accountConfiguration?.id, accountConfiguration.id)
         XCTAssertEqual(paymentMethod.accountConfiguration?.isApplePay, accountConfiguration.isApplePay)
         XCTAssertEqual(paymentMethod.accountConfiguration?.clientId, accountConfiguration.clientId)
+        XCTAssertEqual(paymentMethod.accountConfiguration?.stcFlag, accountConfiguration.stcFlag)
     }
 
     func testPaymentMethodResponseConversion() {
@@ -48,7 +50,8 @@ class PaymentMethodTests: XCTestCase {
                 id: "config2",
                 isApplePay: false,
                 clientId: "client456",
-                cardTypeConfig: [:]
+                cardTypeConfig: [:],
+                stcFlag: true
             )
         )
 
@@ -62,5 +65,6 @@ class PaymentMethodTests: XCTestCase {
         XCTAssertEqual(paymentMethod.accountConfiguration?.id, paymentMethodResponse.accountConfiguration?.id)
         XCTAssertEqual(paymentMethod.accountConfiguration?.isApplePay, paymentMethodResponse.accountConfiguration?.isApplePay)
         XCTAssertEqual(paymentMethod.accountConfiguration?.clientId, paymentMethodResponse.accountConfiguration?.clientId)
+        XCTAssertEqual(paymentMethod.accountConfiguration?.stcFlag, paymentMethodResponse.accountConfiguration?.stcFlag)
     }
 }

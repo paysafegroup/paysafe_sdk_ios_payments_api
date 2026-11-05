@@ -15,4 +15,8 @@ public struct GatewayResponse: Decodable {
     public let sessionToken: String?
     /// Processor
     public let processor: String?
+    /// Client metadata id
+    public let clientMetadataId: String?
+    /// Braintree customer id
+    public let brainTreeCustomerId: String?
 }

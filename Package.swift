@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "Paysafe",
     platforms: [
-        .iOS(.v14)
+        .iOS(.v15)
     ],
     products: [
         .library(
@@ -25,7 +25,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/braintree/braintree_ios", from: "6.18.2")
+        .package(url: "https://github.com/braintree/braintree_ios", from: "7.13.0")
     ],
     targets: [
         .binaryTarget(
@@ -59,7 +59,8 @@ let package = Package(
             name: "PaysafeVenmo",
             dependencies: ["PaysafeCommon",
                            .product(name: "BraintreeVenmo", package: "braintree_ios"),
-                           .product(name: "BraintreeCore", package: "braintree_ios")],
+                           .product(name: "BraintreeCore", package: "braintree_ios"),
+                           .product(name: "BraintreeDataCollector", package: "braintree_ios")],
             resources: [.process("PrivacyInfo.xcprivacy")]
         ),
         .testTarget(

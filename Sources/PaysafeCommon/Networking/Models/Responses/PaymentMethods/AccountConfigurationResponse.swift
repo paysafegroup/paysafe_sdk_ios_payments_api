@@ -15,4 +15,6 @@ struct AccountConfigurationResponse: Decodable {
     let clientId: String?
     /// Card type config
     let cardTypeConfig: CardTypeConfig?
+    /// STC flag
+    let stcFlag: Bool?
 }

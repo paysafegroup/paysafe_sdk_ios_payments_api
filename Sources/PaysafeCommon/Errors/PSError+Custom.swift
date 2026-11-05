@@ -322,12 +322,12 @@ public extension PSError {
         )
     }
     
-    static func venmoAppNotFound(_ correlationId: String? = nil) -> PSError {
+    static func venmoInvalidUniversalLinkPassed(_ correlationId: String? = nil) -> PSError {
         PSError(
-            errorCode: .venmoAppIsNotInstalled,
+            errorCode: .venmoInvalidUniversalLink,
             correlationId: correlationId ?? "N/A",
-            code: 9197,
-            detailedMessage: "Venmo App Doesn't exist."
+            code: 9292,
+            detailedMessage: "Invalid universal link for Venmo flow."
         )
     }
 }

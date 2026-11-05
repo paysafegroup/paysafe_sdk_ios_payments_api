@@ -21,34 +21,25 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
 
     override func setUpWithError() throws {
         mockSession = URLSessionMock()
+        PSVenmoContext.configureAppSwitchReturn(
+            universalLink: "https://merchant.example.com/venmo",
+            returnURLScheme: "com.example.app.payments"
+        )
     }
 
     override func tearDownWithError() throws {
         mockSession = URLSessionMock()
+        PSVenmoContext.universalLink = nil
+        PSVenmoContext.returnURLScheme = ""
     }
     
     func test_successfull_initialize() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         setupNetworkServiceAndAPIClient()
         
         // When
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        // Then
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         XCTAssertNotNil(sut)
         XCTAssertNotNil(sut!.psVenmo)
@@ -147,27 +138,13 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
         XCTAssertNil(sut)
     }
     
-    func test_successfull_tokenize() throws {
+    func test_successfull_tokenize_newUser() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         try setupNetworkLayerForSuccessfulTokenization()
         setupNetworkServiceAndAPIClient()
         
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         // When
         sut?.psVenmo = PSVenmoMock()
@@ -186,27 +163,13 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
         )
     }
     
-    func test_successfull_tokenize_payableStatus() throws {
+    func test_successfull_tokenize_returningUser_legacyFlow() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         try setupNetworkLayerForSuccessfulTokenization_payableStatus()
         setupNetworkServiceAndAPIClient()
         
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         // When
         sut?.psVenmo = PSVenmoMock()
@@ -224,28 +187,72 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
             }
         )
     }
-    
+
+    func test_tokenize_returningUser_braintreeDetailsUpdateReturnsFalse() throws {
+        // Given
+        let tokenizeExpectation = expectation(description: "Tokenize existing Venmo customer when braintree details returns false.")
+        try setupNetworkLayerForSuccessfulContextInitialization()
+        try setupNetworkLayerForFailedTokenization_existingBraintreeCustomer_braintreeDetailsFalse()
+        setupNetworkServiceAndAPIClient()
+
+        let sut = makeInitializedVenmoContext()
+
+        // When
+        let internalVenmoMock = PSVenmoMock()
+        sut?.psVenmo = internalVenmoMock
+        let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789")
+        sut?.tokenize(
+            using: tokenizeOptions,
+            completion: { result in
+                switch result {
+                case .success(let paymentHandleToken):
+                    // Then
+                    XCTAssertNotNil(paymentHandleToken)
+                    XCTAssertEqual(internalVenmoMock.collectDeviceDataClientMetadataIdPassed, "metadata-id")
+                    tokenizeExpectation.fulfill()
+                case .failure:
+                    XCTFail("Expected success, received failure.")
+                }
+            }
+        )
+
+        wait(for: [tokenizeExpectation], timeout: 1.0)
+    }
+
+    func test_successfull_tokenize_returningUser_collectData() throws {
+        // Given
+        try setupNetworkLayerForSuccessfulContextInitialization()
+        try setupNetworkLayerForSuccessfulTokenization_existingBraintreeCustomer()
+        setupNetworkServiceAndAPIClient()
+
+        let sut = makeInitializedVenmoContext()
+
+        // When
+        let internalVenmoMock = PSVenmoMock()
+        sut?.psVenmo = internalVenmoMock
+        let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789")
+        sut?.tokenize(
+            using: tokenizeOptions,
+            completion: { result in
+                switch result {
+                case .success(let paymentHandleToken):
+                    // Then
+                    XCTAssertNotNil(paymentHandleToken)
+                    XCTAssertEqual(internalVenmoMock.collectDeviceDataClientMetadataIdPassed, "metadata-id")
+                case .failure:
+                    XCTFail("Expected success, received failure.")
+                }
+            }
+        )
+    }
+
     func test_tokenizeOptions_correctly_passedTo_venmo() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         try setupNetworkLayerForSuccessfulTokenization()
         setupNetworkServiceAndAPIClient()
         
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         // When
         let internalVenmoMock = PSVenmoMock()
@@ -268,67 +275,29 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
     
     func test_failed_tokenize_invalidAmount() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         try setupNetworkLayerForSuccessfulTokenization()
         setupNetworkServiceAndAPIClient()
         
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         // When
         sut?.psVenmo = PSVenmoMock()
         let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789", amount: 0)
-        sut?.tokenize(
+        tokenizeExpectingFailure(
+            sut,
             using: tokenizeOptions,
-            completion: { result in
-                switch result {
-                case .success(_):
-                    XCTFail("Expected failure, received success.")
-                case .failure(let receivedError):
-                    // Then
-                    let expectedError = PSError.invalidAmount(PaysafeSDK.shared.correlationId)
-                    XCTAssertEqual(receivedError.errorCode, expectedError.errorCode)
-                    XCTAssertEqual(receivedError.code, expectedError.code)
-                    XCTAssertEqual(receivedError.detailedMessage, expectedError.detailedMessage)
-                }
-            }
+            expectedError: PSError.invalidAmount(PaysafeSDK.shared.correlationId)
         )
     }
     
     func test_failed_tokenize_invalidEmail() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         try setupNetworkLayerForSuccessfulTokenization()
         setupNetworkServiceAndAPIClient()
         
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         // When
         sut?.psVenmo = PSVenmoMock()
@@ -344,25 +313,11 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
     
     func test_failed_tokenize_invalidFirstName() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         try setupNetworkLayerForSuccessfulTokenization()
         setupNetworkServiceAndAPIClient()
         
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         // When
         sut?.psVenmo = PSVenmoMock()
@@ -378,25 +333,11 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
     
     func test_failed_tokenize_invalidLastName() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         try setupNetworkLayerForSuccessfulTokenization()
         setupNetworkServiceAndAPIClient()
         
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         // When
         sut?.psVenmo = PSVenmoMock()
@@ -412,80 +353,179 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
     
     func test_failed_tokenize_token_with_failedStatus() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         try setupNetworkLayerForFailedTokenization_failedStatus()
         setupNetworkServiceAndAPIClient()
         
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         // When
         sut?.psVenmo = PSVenmoMock()
         let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789")
-        sut?.tokenize(
+        tokenizeExpectingFailure(
+            sut,
             using: tokenizeOptions,
-            completion: { result in
-                switch result {
-                case .success(_):
-                    XCTFail("Expected failure, received success.")
-                case .failure(let receivedError):
-                    // Then
-                    let expectedError = PSError.venmoFailedAuthorization(PaysafeSDK.shared.correlationId)
-                    XCTAssertEqual(receivedError.errorCode, expectedError.errorCode)
-                    XCTAssertEqual(receivedError.code, expectedError.code)
-                    XCTAssertEqual(receivedError.detailedMessage, expectedError.detailedMessage)
-                }
-            }
+            expectedError: PSError.venmoFailedAuthorization(PaysafeSDK.shared.correlationId)
         )
     }
-    
+
+    func test_failed_tokenize_token_with__expiredStatus() throws {
+        // Given
+        try setupNetworkLayerForSuccessfulContextInitialization()
+        try setupNetworkLayerForSuccessfulTokenization_noBraintreeTokens(status: "EXPIRED")
+        setupNetworkServiceAndAPIClient()
+
+        let sut = makeInitializedVenmoContext()
+
+        // When
+        sut?.psVenmo = PSVenmoMock()
+        let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789")
+        tokenizeExpectingFailure(
+            sut,
+            using: tokenizeOptions,
+            expectedError: PSError.venmoFailedAuthorization(PaysafeSDK.shared.correlationId)
+        )
+    }
+
     func test_failed_tokenize_noBraintreeTokens() throws {
         // Given
-        let expectation = expectation(description: "Initiate PSVenmoContext expectation.")
         try setupNetworkLayerForSuccessfulContextInitialization()
         try setupNetworkLayerForSuccessfulTokenization_noBraintreeTokens()
         setupNetworkServiceAndAPIClient()
         
-        var sut: PSVenmoContext?
-        PSVenmoContext.initialize(
-            currencyCode: "USD",
-            accountId: "acc789") { result in
-                switch result {
-                case .success(let successfulContext):
-                    sut = successfulContext
-                    expectation.fulfill()
-                case .failure(_):
-                    XCTFail("Expected success, received failure.")
-                }
-            }
-        
-        wait(for: [expectation], timeout: 1.0)
+        let sut = makeInitializedVenmoContext()
         
         // When
         sut?.psVenmo = PSVenmoMock()
         let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789")
-        sut?.tokenize(
+        tokenizeExpectingFailure(
+            sut,
             using: tokenizeOptions,
+            expectedError: PSError.genericAPIError(PaysafeSDK.shared.correlationId)
+        )
+    }
+
+    func test_failed_tokenize_invalidUniversalLink() throws {
+        // Given
+        PSVenmoContext.configureAppSwitchReturn(
+            universalLink: "",
+            returnURLScheme: "com.example.app.payments"
+        )
+        try setupNetworkLayerForSuccessfulContextInitialization()
+        try setupNetworkLayerForSuccessfulTokenization()
+        setupNetworkServiceAndAPIClient()
+
+        let sut = makeInitializedVenmoContext()
+
+        // When
+        sut?.psVenmo = PSVenmoMock()
+        let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789")
+        tokenizeExpectingFailure(
+            sut,
+            using: tokenizeOptions,
+            expectedError: PSError.venmoInvalidUniversalLinkPassed(PaysafeSDK.shared.correlationId)
+        )
+    }
+
+    func test_failed_tokenize_when_venmoFailed() throws {
+        // Given
+        try setupNetworkLayerForSuccessfulContextInitialization()
+        try setupNetworkLayerForSuccessfulTokenization()
+        setupNetworkServiceAndAPIClient()
+
+        let sut = makeInitializedVenmoContext()
+
+        // When
+        let internalVenmoMock = PSVenmoMock()
+        internalVenmoMock.initiateVenmoFlowResult = .failed
+        sut?.psVenmo = internalVenmoMock
+        let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789")
+        tokenizeExpectingFailure(
+            sut,
+            using: tokenizeOptions,
+            expectedError: PSError.venmoFailedAuthorization(PaysafeSDK.shared.correlationId)
+        )
+    }
+
+    func test_failed_tokenize_when_venmoCanceled() throws {
+        // Given
+        try setupNetworkLayerForSuccessfulContextInitialization()
+        try setupNetworkLayerForSuccessfulTokenization()
+        setupNetworkServiceAndAPIClient()
+
+        let sut = makeInitializedVenmoContext()
+
+        // When
+        let internalVenmoMock = PSVenmoMock()
+        internalVenmoMock.initiateVenmoFlowResult = .cancel
+        sut?.psVenmo = internalVenmoMock
+        let tokenizeOptions = PSCardTokenizeOptions.mockForVenmo(accountId: "acc789")
+        tokenizeExpectingFailure(
+            sut,
+            using: tokenizeOptions,
+            expectedError: PSError.venmoFailedAuthorization(PaysafeSDK.shared.correlationId)
+        )
+    }
+
+    func test_PSVenmoContext_configureAppSwitchReturn() {
+        // Given
+        let universalLinkString = "https://merchant.example.com/venmo"
+        let returnURLScheme = "com.example.app.payments"
+        PSVenmoContext.configureAppSwitchReturn(
+            universalLink: universalLinkString,
+            returnURLScheme: returnURLScheme
+        )
+        guard let matchingURL = URL(string: "\(returnURLScheme)://braintree-payments") else {
+            return XCTFail("Expected a valid matching URL.")
+        }
+        guard let nonMatchingURL = URL(string: "https://other-domain.com/venmo") else {
+            return XCTFail("Expected a valid non-matching URL.")
+        }
+
+        // Then
+        XCTAssertEqual(PSVenmoContext.universalLink, URL(string: universalLinkString))
+        XCTAssertEqual(PSVenmoContext.returnURLScheme, returnURLScheme)
+        XCTAssertTrue(PSVenmoContext.canOpenURL(url: matchingURL))
+        XCTAssertFalse(PSVenmoContext.canOpenURL(url: nonMatchingURL))
+        PSVenmoContext.openURL(url: matchingURL)
+    }
+}
+
+private extension PSVenmoContextIntegrationTests {
+    private func makeInitializedVenmoContext(
+        currencyCode: String = "USD",
+        accountId: String = "acc789"
+    ) -> PSVenmoContext? {
+        let initializeExpectation = expectation(description: "Initiate PSVenmoContext expectation.")
+        var sut: PSVenmoContext?
+        PSVenmoContext.initialize(
+            currencyCode: currencyCode,
+            accountId: accountId
+        ) { result in
+            switch result {
+            case .success(let successfulContext):
+                sut = successfulContext
+                initializeExpectation.fulfill()
+            case .failure:
+                XCTFail("Expected success, received failure.")
+            }
+        }
+        wait(for: [initializeExpectation], timeout: 1.0)
+        return sut
+    }
+
+    private func tokenizeExpectingFailure(
+        _ sut: PSVenmoContext?,
+        using options: PSVenmoTokenizeOptions,
+        expectedError: PSError
+    ) {
+        sut?.tokenize(
+            using: options,
             completion: { result in
                 switch result {
-                case .success(_):
+                case .success:
                     XCTFail("Expected failure, received success.")
                 case .failure(let receivedError):
-                    // Then
-                    let expectedError = PSError.genericAPIError(PaysafeSDK.shared.correlationId)
                     XCTAssertEqual(receivedError.errorCode, expectedError.errorCode)
                     XCTAssertEqual(receivedError.code, expectedError.code)
                     XCTAssertEqual(receivedError.detailedMessage, expectedError.detailedMessage)
@@ -493,23 +533,7 @@ final class PSVenmoContextIntegrationTests: XCTestCase {
             }
         )
     }
-    
-    func test_PSVenmoContext_setURLScheme() {
-        // Given
-        let scheme = "SchemeText"
-        PSVenmoContext.setURLScheme(scheme: scheme)
-        guard let url = URL(string: "SchemeText://someurl.com") else {
-            return
-        }
 
-        XCTAssertEqual(BTAppContextSwitcher.sharedInstance.returnURLScheme, scheme)
-        XCTAssertEqual(PSVenmoContext.returnURLScheme, scheme)
-        XCTAssertTrue(PSVenmoContext.canOpenURL(url: url))
-        PSVenmoContext.openURL(url: url)
-    }
-}
-
-private extension PSVenmoContextIntegrationTests {
     private func setupNetworkServiceAndAPIClient() {
         mockNetworkingService = PSNetworkingService(
             session: mockSession,
@@ -542,11 +566,27 @@ private extension PSVenmoContextIntegrationTests {
         try setupNetwokLayerForSuccessfulBraintreeDetailsRequest()
         try setupNetworkLayerForRefreshTokenPayable()
     }
-    
-    
-    private func setupNetworkLayerForSuccessfulTokenization_noBraintreeTokens() throws {
-        try setupNetworkLayerForSuccessfulPaymentHandleCreation_noBraintreeTokens()
+
+    private func setupNetworkLayerForSuccessfulTokenization_noBraintreeTokens(status: String = "INITIATED") throws {
+        try setupNetworkLayerForSuccessfulPaymentHandleCreation_noBraintreeTokens(status: status)
         try setupNetwokLayerForSuccessfulBraintreeDetailsRequest()
+        try setupNetworkLayerForRefreshTokenPayable()
+    }
+
+    private func setupNetworkLayerForSuccessfulTokenization_existingBraintreeCustomer() throws {
+        try setupNetworkLayerForSuccessfulPaymentHandleCreation_existingBraintreeCustomer()
+        try setupNetwokLayerForSuccessfulBraintreeDetailsRequestNoNonce()
+        try setupNetworkLayerForRefreshTokenPayable()
+    }
+
+    private func setupNetworkLayerForFailedTokenization_existingBraintreeCustomer_braintreeDetailsFalse() throws {
+        try setupNetworkLayerForSuccessfulPaymentHandleCreation_existingBraintreeCustomer()
+        try setupNetworkLayerForBraintreeDetailsRequestNoNonceReturningFalse()
+        try setupNetworkLayerForRefreshTokenPayable()
+    }
+
+    private func setupNetworkLayerForSuccessfulTokenization_existingBraintreeCustomer_noClientToken() throws {
+        try setupNetworkLayerForSuccessfulPaymentHandleCreation_existingBraintreeCustomer_noClientToken()
         try setupNetworkLayerForRefreshTokenPayable()
     }
     
@@ -569,10 +609,50 @@ private extension PSVenmoContextIntegrationTests {
             error: nil
         )
     }
-    
+
+    private func setupNetwokLayerForSuccessfulBraintreeDetailsRequestNoNonce() throws {
+        let braintreeDetailsURL = try XCTUnwrap(
+            URL(string: "https://api.test.paysafe.com/alternatepayments/venmo/v1/hostedSession/braintreeDetails?payment_method_nonce=&payment_method_payerInfo=&payment_method_jwtToken=session-token&payment_method_deviceData=%7B%22correlation_id%22:%20%22123-123-123%22%7D&errorCode=")
+        )
+        let mockResponse = try XCTUnwrap(
+            HTTPURLResponse(
+                url: braintreeDetailsURL,
+                statusCode: 307,
+                httpVersion: nil,
+                headerFields: nil
+            )
+        )
+        mockSession.stubRequest(
+            url: braintreeDetailsURL,
+            data: nil,
+            response: mockResponse,
+            error: nil
+        )
+    }
+
+    private func setupNetworkLayerForBraintreeDetailsRequestNoNonceReturningFalse() throws {
+        let braintreeDetailsURL = try XCTUnwrap(
+            URL(string: "https://api.test.paysafe.com/alternatepayments/venmo/v1/hostedSession/braintreeDetails?payment_method_nonce=&payment_method_payerInfo=&payment_method_jwtToken=session-token&payment_method_deviceData=%7B%22correlation_id%22:%20%22123-123-123%22%7D&errorCode=")
+        )
+        let mockResponse = try XCTUnwrap(
+            HTTPURLResponse(
+                url: braintreeDetailsURL,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )
+        )
+        mockSession.stubRequest(
+            url: braintreeDetailsURL,
+            data: Data("false".utf8),
+            response: mockResponse,
+            error: nil
+        )
+    }
+
     private func setupNetworkLayerForSuccessfulContextInitialization() throws {
         let getAvailablePaymentsURL = try XCTUnwrap(
-            URL(string: "https://api.test.paysafe.com/paymenthub/v1/paymentmethods?currencyCode=USD")
+            URL(string: "https://api.test.paysafe.com/paymenthub/v1/configuration?currencyCode=USD")
         )
         let mockResponse = try XCTUnwrap(
             HTTPURLResponse(
@@ -592,10 +672,10 @@ private extension PSVenmoContextIntegrationTests {
             error: nil
         )
     }
-    
+
     private func setupNetworkLayerForFailedContextInitialization_badRequest() throws {
         let getAvailablePaymentsURL = try XCTUnwrap(
-            URL(string: "https://api.test.paysafe.com/paymenthub/v1/paymentmethods?currencyCode=USD")
+            URL(string: "https://api.test.paysafe.com/paymenthub/v1/configuration?currencyCode=USD")
         )
         let mockResponse = try XCTUnwrap(
             HTTPURLResponse(
@@ -618,7 +698,7 @@ private extension PSVenmoContextIntegrationTests {
     
     private func setupNetworkLayerForFailedContextInitialization_methodNotSupported() throws {
         let getAvailablePaymentsURL = try XCTUnwrap(
-            URL(string: "https://api.test.paysafe.com/paymenthub/v1/paymentmethods?currencyCode=USD")
+            URL(string: "https://api.test.paysafe.com/paymenthub/v1/configuration?currencyCode=USD")
         )
         let mockResponse = try XCTUnwrap(
             HTTPURLResponse(
@@ -660,7 +740,7 @@ private extension PSVenmoContextIntegrationTests {
         )
     }
     
-    private func setupNetworkLayerForSuccessfulPaymentHandleCreation_noBraintreeTokens() throws {
+    private func setupNetworkLayerForSuccessfulPaymentHandleCreation_noBraintreeTokens(status: String = "INITIATED") throws {
         let tokenizeURL = try XCTUnwrap(
             URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles")
         )
@@ -671,7 +751,54 @@ private extension PSVenmoContextIntegrationTests {
             headerFields: nil
         )
         let tokenizeMockData = try XCTUnwrap(
-            PaymentResponse.jsonMockWithVenmo_noGatewayResponse(paymentHandleToken: "paymentHandleId").data(using: .utf8)
+            PaymentResponse.jsonMockWithVenmo_noGatewayResponse(
+                paymentHandleToken: "paymentHandleId",
+                status: status
+            ).data(using: .utf8)
+        )
+        mockSession.stubRequest(
+            url: tokenizeURL,
+            data: tokenizeMockData,
+            response: tokenizeMockResponse,
+            error: nil
+        )
+    }
+
+    private func setupNetworkLayerForSuccessfulPaymentHandleCreation_existingBraintreeCustomer() throws {
+        let tokenizeURL = try XCTUnwrap(
+            URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles")
+        )
+        let tokenizeMockResponse = HTTPURLResponse(
+            url: tokenizeURL,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )
+        let tokenizeMockData = try XCTUnwrap(
+            PaymentResponse.jsonMockWithVenmo_existingBraintreeCustomer(
+                paymentHandleToken: "paymentHandleId"
+            ).data(using: .utf8)
+        )
+        mockSession.stubRequest(
+            url: tokenizeURL,
+            data: tokenizeMockData,
+            response: tokenizeMockResponse,
+            error: nil
+        )
+    }
+
+    private func setupNetworkLayerForSuccessfulPaymentHandleCreation_existingBraintreeCustomer_noClientToken() throws {
+        let tokenizeURL = try XCTUnwrap(
+            URL(string: "https://api.test.paysafe.com/paymenthub/v1/singleusepaymenthandles")
+        )
+        let tokenizeMockResponse = HTTPURLResponse(
+            url: tokenizeURL,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )
+        let tokenizeMockData = try XCTUnwrap(
+            PaymentResponse.jsonMockWithVenmo_existingBraintreeCustomer_noClientToken(paymentHandleToken: "paymentHandleId").data(using: .utf8)
         )
         mockSession.stubRequest(
             url: tokenizeURL,

@@ -6,75 +6,115 @@
 //
 
 import Combine
+import Foundation
 #if canImport(PaysafeCommon)
 import PaysafeCommon
 #endif
 #if canImport(BraintreeCore)
 import BraintreeVenmo
 import BraintreeCore
+import BraintreeDataCollector
 #else
 import Braintree
 #endif
 
 
-/// PSVenmo
+/// Braintree Venmo client used by ``PSVenmoContext`` to run the app-switch payment flow.
 public class PSVenmo {
     private let initiateVenmoFlowSubject = PassthroughSubject<PSVenmoBraintreeResult, PSError>()
     var venmoClient : BTVenmoClient?
     var apiClient : BTAPIClient?
-    
+    var dataCollector: BTDataCollector?
+
+    /// Creates an unconfigured Venmo client. Call ``configureClient(clientToken:universalLink:)`` before starting a flow.
     public init() {
         // Empty init, because we want to configure PSVenmo clients at a later stage.
     }
     
+    /// Configures the Braintree API and Venmo clients used for app switch.
+    ///
+    /// If `clientToken` is not a valid Braintree authorization string, the clients are left unset.
+    ///
     /// - Parameters:
-    ///   - clientId: Client id
-    public func configureClient(clientId: String) {
-        guard let newApiClient = BTAPIClient(authorization: clientId) else {
+    ///   - clientToken: Braintree client token from the payment handle gateway response.
+    ///   - universalLink: HTTPS URL Venmo uses to redirect back after authentication. Must be dedicated
+    ///     to Braintree app-switch returns and registered as an associated domain for this app.
+    public func configureClient(clientToken: String, universalLink: URL) {
+        let newApiClient = BTAPIClient(authorization: clientToken)
+        guard newApiClient.authorization.type != .invalidAuthorization else {
             return
         }
         apiClient = newApiClient
-        venmoClient = BTVenmoClient(apiClient: newApiClient)
+        venmoClient = BTVenmoClient(authorization: clientToken, universalLink: universalLink)
+        dataCollector = BTDataCollector(authorization: clientToken)
     }
     
-    /// Method used to initiate the Venmo flow based on render type.
+    /// Starts the Venmo authorization flow and publishes the Braintree result.
+    ///
+    /// Call ``configureClient(clientToken:universalLink:)`` first. The publisher emits success with a
+    /// ``VenmoAccount``, cancel, or failed.
     ///
     /// - Parameters:
-    ///   - orderId: Venmo order id
+    ///   - profileId: Optional Venmo profile id for the merchant account.
+    ///   - amount: Payment amount already converted to a major-unit string for Braintree.
     public func initiateVenmoFlow(
         profileId: String?,
         amount: String
     ) -> AnyPublisher<PSVenmoBraintreeResult, PSError> {
-        guard venmoClient?.isVenmoAppInstalled() ?? false else {
-            venmoClient?.openVenmoAppPageInAppStore()
-            initiateVenmoFlowSubject.send(completion: .failure(PSError.venmoAppNotFound()))
-            return initiateVenmoFlowSubject.eraseToAnyPublisher()
-        }
-
-        return tokenizeVenmoAccount(profileId: profileId, amount: amount)
+        tokenizeVenmoAccount(profileId: profileId, amount: amount)
     }
     
-    func tokenizeVenmoAccount(profileId: String?, amount: String, request: BTVenmoRequest = BTVenmoRequest(paymentMethodUsage: .multiUse)) -> AnyPublisher<PSVenmoBraintreeResult, PSError> {
-        request.profileID = profileId
-        request.totalAmount = amount
-        request.collectCustomerBillingAddress = true
-        request.collectCustomerShippingAddress = true
-        
+    func tokenizeVenmoAccount(profileId: String?, amount: String) -> AnyPublisher<PSVenmoBraintreeResult, PSError> {
+        let request = BTVenmoRequest(
+            paymentMethodUsage: .multiUse,
+            profileID: profileId,
+            collectCustomerBillingAddress: true,
+            collectCustomerShippingAddress: true,
+            totalAmount: amount
+        )
+
         venmoClient?.tokenize(request) { [weak self] (venmoAccount, error) in
-            
-            if error != nil {
-                self?.initiateVenmoFlowSubject.send(.cancel)
-                return
-            }
-            guard let venmoAccount = venmoAccount else {
-                self?.initiateVenmoFlowSubject.send(.failed)
-                return
-            }
-            
-            let account = VenmoAccount(email: venmoAccount.email, externalID: venmoAccount.externalID,firstName: venmoAccount.firstName, lastName: venmoAccount.lastName, phoneNumber: venmoAccount.phoneNumber, username: venmoAccount.username, nonce: venmoAccount.nonce, type: venmoAccount.type, isDefault: venmoAccount.isDefault)
-            self?.initiateVenmoFlowSubject.send(.success(venmoAccount: account))
+            self?.handleTokenizeResult(venmoAccount: venmoAccount, error: error)
         }
         
         return initiateVenmoFlowSubject.eraseToAnyPublisher()
+    }
+
+    func handleTokenizeResult(venmoAccount: BTVenmoAccountNonce?, error: Error?) {
+        if error != nil {
+            initiateVenmoFlowSubject.send(.cancel)
+            return
+        }
+        guard let venmoAccount else {
+            initiateVenmoFlowSubject.send(.failed)
+            return
+        }
+
+        let account = VenmoAccount(
+            email: venmoAccount.email,
+            externalID: venmoAccount.externalID,
+            firstName: venmoAccount.firstName,
+            lastName: venmoAccount.lastName,
+            phoneNumber: venmoAccount.phoneNumber,
+            username: venmoAccount.username,
+            nonce: venmoAccount.nonce,
+            type: venmoAccount.type,
+            isDefault: venmoAccount.isDefault
+        )
+        initiateVenmoFlowSubject.send(.success(venmoAccount: account))
+    }
+
+    /// Collects Braintree device data for fraud tools. Returns an empty string if collection is unavailable.
+    func collectDeviceData(clientMetadataId: String?) -> AnyPublisher<String, Never> {
+        Future { [weak self] promise in
+            guard let dataCollector = self?.dataCollector else {
+                promise(.success(""))
+                return
+            }
+            dataCollector.collectDeviceDataOnSuccess(riskCorrelationID: clientMetadataId,  { deviceData, _ in
+                promise(.success(deviceData ?? ""))
+            })
+        }
+        .eraseToAnyPublisher()
     }
 }

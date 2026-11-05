@@ -1,5 +1,25 @@
 # Change Log
 
+## [3.0.0] - 2026-10-27
+
+_Venmo app switch on Braintree 7, with device-data collection._
+
+### API notes (may require code updates)
+
+- Minimum iOS version is **15.0**.
+- Braintree iOS is **7.13.0** or later and below **8.0.0**. Swift Package Manager also links **BraintreeDataCollector**.
+- **`PSVenmoContext.setURLScheme(scheme:)`** is removed. Call **`PSVenmoContext.configureAppSwitchReturn(universalLink:returnURLScheme:)`** at launch with an HTTPS Universal Link (path contains `braintree-payments`) and the custom URL scheme.
+- Forward Universal Links to **`PSVenmoContext.openURL(url:)`**. Keep **`setURLContexts(contexts:)`** for the custom scheme.
+- **`PSError.venmoAppNotFound`** / **`PSErrorCode.venmoAppIsNotInstalled`** are removed. A missing or invalid Universal Link fails with **`PSError.venmoInvalidUniversalLinkPassed`** (**9292**, **`venmoInvalidUniversalLink`**).
+- The Venmo app is optional. Braintree uses the web fallback when the app cannot be presented.
+
+### Venmo
+
+- Device data is collected during **`tokenize`** and sent as `payment_method_deviceData`. Empty collection sends `{"correlation_id":"<correlation id>"}`.
+- When the payment-handle gateway response includes **`brainTreeCustomerId`**, the SDK skips the Venmo app switch and sends device data only. **`clientMetadataId`** is the Braintree risk correlation id.
+- Venmo payment-handle requests include **`mobileSdk: true`**.
+- Available payment methods load from **`GET /paymenthub/v1/configuration`**. 
+
 ## [1.4.0] - 2026-10-12
 
 _Optional CVV for saved-card tokenization._

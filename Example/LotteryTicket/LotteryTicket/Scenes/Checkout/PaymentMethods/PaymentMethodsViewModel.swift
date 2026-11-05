@@ -190,7 +190,7 @@ final class PaymentMethodsViewModel: ObservableObject {
             accountId: paymentManager.venmoAccountId,
             dupCheck: false,
             venmo: VenmoAdditionalData(
-                consumerId: "consumerId+\(UUID().uuidString)",
+                consumerId: DemoConfig.venmoConsumerId,
                 profileId: DemoConfig.venmoProfileId
             )
         )

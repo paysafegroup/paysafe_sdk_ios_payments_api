@@ -50,7 +50,7 @@ public enum PSErrorCode {
     /// Predefined Venmo error codes
     case venmoFailedAuthorization
     case venmoUserCancelled
-    case venmoAppIsNotInstalled
+    case venmoInvalidUniversalLink
 
     /// Predefined PSCardForm error codes
     case invalidCardFields
@@ -83,7 +83,7 @@ public enum PSErrorCode {
         case .invalidCardFields, .invalidAccountIdFormat, .noAvailablePayments, .unsuportedCardBrand, .invalidAmount,
                 .invalidDynamicDescriptor, .invalidPhone, .invalidFirstName, .invalidLastName, .invalidEmail:
             return .cardFormError
-        case .venmoFailedAuthorization, .venmoUserCancelled, .venmoAppIsNotInstalled:
+        case .venmoFailedAuthorization, .venmoUserCancelled, .venmoInvalidUniversalLink:
             return .venmoError
         }
     }

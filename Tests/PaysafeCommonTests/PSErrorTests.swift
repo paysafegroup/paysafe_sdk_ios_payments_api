@@ -413,19 +413,19 @@ final class PSErrorTests: XCTestCase {
         XCTAssertEqual(error.correlationId, correlationId)
     }
     
-    func test_venmoAppNotFound() {
+    func test_venmoInvalidUniversalLinkPassed() {
         // Given
-        let error = PSError.venmoAppNotFound()
-        let expectedCode = 9197
+        let error = PSError.venmoInvalidUniversalLinkPassed("correlationId")
+        let expectedCode = 9292
 
         // Then
-        XCTAssertEqual(error.errorCode, .venmoAppIsNotInstalled)
+        XCTAssertEqual(error.errorCode, .venmoInvalidUniversalLink)
         XCTAssertEqual(error.errorCode.type, .venmoError)
         XCTAssertEqual(error.errorCode.type.rawValue, "VenmoError")
         XCTAssertEqual(error.code, expectedCode)
         XCTAssertEqual(error.displayMessage, "There was an error (\(expectedCode)), please contact our support.")
-        XCTAssertEqual(error.detailedMessage, "Venmo App Doesn't exist.")
-        XCTAssertEqual(error.correlationId, "N/A")
+        XCTAssertEqual(error.detailedMessage, "Invalid universal link for Venmo flow.")
+        XCTAssertEqual(error.correlationId, "correlationId")
     }
 
     func test_venmoUserCancelled() {

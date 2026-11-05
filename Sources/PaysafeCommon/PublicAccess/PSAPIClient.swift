@@ -199,7 +199,7 @@ private extension PSAPIClient {
     func getAvailablePaymentMethods(
         for currencyCode: String
     ) -> AnyPublisher<PaymentMethodsResponse, PSError> {
-        let getAvailablePaymentMethodsUrl = environment.baseURL + "/paymenthub/v1/paymentmethods?currencyCode=\(currencyCode)"
+        let getAvailablePaymentMethodsUrl = environment.baseURL + "/paymenthub/v1/configuration?currencyCode=\(currencyCode)"
         return networkingService.request(
             url: getAvailablePaymentMethodsUrl,
             httpMethod: .get,
@@ -302,7 +302,8 @@ private extension PSAPIClient {
             singleUseCustomerToken: savedCardTokens?.singleUseCustomerToken,
             paymentHandleTokenFrom: savedCardTokens?.paymentToken,
             applePay: nil,
-            venmo: nil
+            venmo: nil,
+            mobileSdk: nil
         )
     }
     
@@ -324,7 +325,8 @@ private extension PSAPIClient {
             singleUseCustomerToken: nil,
             paymentHandleTokenFrom: nil,
             applePay: applePayOptions.applePay?.request,
-            venmo: nil
+            venmo: nil,
+            mobileSdk: nil
         )
     }
     
@@ -346,7 +348,8 @@ private extension PSAPIClient {
             singleUseCustomerToken: nil,
             paymentHandleTokenFrom: nil,
             applePay: nil,
-            venmo: venmoOptions.venmo?.request
+            venmo: venmoOptions.venmo?.request,
+            mobileSdk: true
         )
     }
     
