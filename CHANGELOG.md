@@ -1,5 +1,13 @@
 # Change Log
 
+## [3.0.1] - 2026-11-09
+
+_CocoaPods Venmo alignment with Braintree DataCollector._
+
+### Venmo
+
+- CocoaPods **`PaysafeVenmo`** now also depends on **`Braintree/DataCollector`** (`>= 7.13.0`, `< 8.0.0`), matching Swift Package Manager.
+
 ## [3.0.0] - 2026-10-27
 
 _Venmo app switch on Braintree 7, with device-data collection._

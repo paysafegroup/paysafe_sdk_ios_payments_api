@@ -3,5 +3,5 @@ serverUrl=https://sonar.neterra.paysafe.com
 serverVersion=2025.1.2.108896
 branch=master
 dashboardUrl=https://sonar.neterra.paysafe.com/dashboard?id=com.paysafe.psp%3Apaysafe-ph-mobile-sdk-ios&branch=master
-ceTaskId=23fd5d36-c851-4471-ae17-50eea5770fa8
-ceTaskUrl=https://sonar.neterra.paysafe.com/api/ce/task?id=23fd5d36-c851-4471-ae17-50eea5770fa8
+ceTaskId=6c4de600-9871-4a40-92ab-6a49f9d657af
+ceTaskUrl=https://sonar.neterra.paysafe.com/api/ce/task?id=6c4de600-9871-4a40-92ab-6a49f9d657af
